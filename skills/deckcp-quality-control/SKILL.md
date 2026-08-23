@@ -59,7 +59,7 @@ catches, by dimension:
 | Brand accuracy | hex literals outside the kit palette; `text-emerald-500`-style colour classes; >2 `Card accent` hues (rainbow cards); gradients the kit didn't ask for; **chrome inconsistency** — content slides missing the shared master while others have it, split across >2 masters, or an uneven eyebrow |
 | Alignment | `style={{}}` (stripped on write → unpositioned), `items={[…]}` (dropped) — everything else is pixels |
 | Spacing consistency | more than ~5 distinct gap tokens or ~8 padding tokens deck-wide; raw `gap-7`/`p-9` used once; >4 type sizes on one slide |
-| Visual polish | raw `text-xs…xl` (under the 22px floor); emoji; >130 words or <4 words on a content slide; **no imagery** on a ≥5-slide deck (unless the kit says mark-driven) |
+| Visual polish | raw `text-xs…xl` (under the 22px floor); emoji; >130 words or <4 words on a content slide; **no imagery** on a ≥5-slide deck (unless the kit says mark-driven); **non-Latin script present with no matching Noto font applied** (would render as boxes/blanks) |
 | Repetitive layouts | runs of ≥3 identical layout skeletons; one skeleton on >50% of slides; single variant + no imagery; the server's `deck_variety` score |
 | Generic-AI look | icon-card grids on ≥40% of slides; dark-with-gradient on ≥50%; buzzwords (seamless, unlock, leverage, next-generation…); >6 icons per slide; topic-label titles |
 
@@ -78,7 +78,12 @@ A clean scan is **necessary, not sufficient**. Go look.
 render_slides { deck_slug, format:'image' }     # every slide, your eyes only
 ```
 
-Open every image. Not a sample — every one. Then score. The rubric below is
+Open every image. Not a sample — every one. **If any slide holds non-Latin
+text, this render is where you confirm it — every Korean/Japanese/Chinese/
+Thai/Arabic character shows a real glyph, not a box (□), a blank gap, or a
+Latin-looking fallback.** A gap means the matching Noto font isn't loaded
+(a `deck_theme` slot must name it as primary) or the text node doesn't apply
+it — fix per the table below, never by deleting the language. Then score. The rubric below is
 what "4" means; write a one-line justification per dimension naming the
 worst slide.
 
@@ -136,8 +141,8 @@ findings at once), then per slide. Map each to its tool:
 | Repeated skeleton run | rebuild the *middle* slide(s) of the run as a different archetype — one big stat, a photo band (`deck-photo-band`), a `<Table variant="rules">`, a single-line statement at `deck-text-9xl`+; `rewrite_slide` with an explicit archetype instruction if the copy can move |
 | Icon-card grids | keep the one that earns it; convert others to a hairline list (`<Prose>` bullets), a table, or a numbered `ProcessSteps` |
 | Buzzword titles / label titles | `rewrite_slide` with the specific claim — or hand to `deck-critique` if the problem is the story, not the words |
-| CJK tofu (□) in a title/body | remove it — DeckCP has no CJK font; make the slide English-only (romanize names). Fixable via `rewrite_slide` "set the frontmatter title to English only" (the copilot edits frontmatter.title when told explicitly), or `upsert_slides` with a corrected title |
-| The ₩/¥ currency glyph shows as tofu | replace with "KRW"/"JPY" text |
+| Non-Latin text renders as boxes/blanks (Korean/JP/Chinese/Thai/Arabic/…) | LOAD the matching Noto font, don't romanize: `update_deck { deck_theme: { fontHeading: "'Noto Sans KR', 'Open Sans', sans-serif" } }` (loader slot; or make it the deck's body/display font), then set `fontFamily: "'Noto Sans KR', <brand>, sans-serif"` on the script's text nodes; `render_slides refresh:true` and confirm glyphs. Full map in brand-kit references/multilingual-fonts.md |
+| The ₩/฿/¥/₹ currency glyph shows as tofu | it's the same fix — apply the matching Noto face (it carries the symbol); no need to spell out the currency |
 | Off-palette **chart** segments, or a **hero/shell** accent that's the wrong color | `rewrite_slide` often WON'T fix these — chart segment colors are component props it leaves alone, and a hero wordmark/accent is frequently shell- or theme-driven or a hardcoded hex. Hand-author the slide with `upsert_slides` (slide_tree) using accent-aware components, or fix the source (deck_theme / a brand record / a master). If the whole deck renders a wrong accent, suspect `defaultMood` overriding `deck_theme.accent` (clear the mood) or a borrowed brand injecting its own — a deck-theme tweak fixes all slides at once, a per-slide rewrite fixes one |
 | Overflow / collapsed content (`balance.issues`) | follow `get_authoring_guide topic='contract'` → FILL THE CANVAS / DO NOT OVERFLOW rules |
 

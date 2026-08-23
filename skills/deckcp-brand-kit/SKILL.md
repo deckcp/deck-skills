@@ -162,11 +162,22 @@ the brand's hex.
 pick the closest curated face and record it as
 `"fontDisplay": { "brand": "Söhne", "mapped": "Inter", "why": "grotesk, similar x-height" }`
 — the kit tells the truth about the substitution instead of silently
-switching. **The catalog has NO Chinese/Japanese/Korean face** — CJK text
-renders as tofu boxes (□). If the brand is bilingual, record that as a gap in
-the `korean`/`fonts` note and make the deck **English-only** (romanize names —
-"Anshim Tonkatsu", not 안심 돈카츠); the `dont` list should forbid CJK titles.
-Same for the ₩/¥/元 currency glyphs (no glyph → tofu): write "KRW"/"JPY"/"CNY".
+switching. The 35-face *picker* is Latin-only, but the renderer loads **any**
+Google font named as the primary family of a `deck_theme` slot — so
+**non-Latin scripts render; you don't romanize.** If the brand or its content
+carries Korean, Japanese, Chinese, Thai, Arabic, Hebrew, Devanagari, etc.:
+
+- Record it in the kit as `fonts.scripts`, e.g.
+  `"scripts": [{ "script": "Korean", "sans": "Noto Sans KR", "serif": "Noto Serif KR" }]`
+  (the full script→Noto map is in
+  [`references/multilingual-fonts.md`](references/multilingual-fonts.md)).
+- Choose the mode: a **mostly-non-Latin** deck sets the Noto family as the
+  deck's display+body font (everything inherits it, consistent); a **mostly-
+  English + accents** deck keeps the brand fonts and loads the Noto face on a
+  `fontHeading` loader slot, applied per-node to the script's text.
+- The ₩/฿/¥/₹ currency glyphs render in the matching Noto face — keep them.
+- Do not add "no CJK / romanize" to `dont`. Only romanize if the user asks.
+  `deckcp-quality-control` verifies each script's font is loaded and renders.
 
 **Logos.** Keep the SVG if you have one (it scales; rasters blur on a
 1920×1080 hero). Note which variants exist: full-color, white/knockout,
@@ -338,7 +349,8 @@ in that list, it isn't tight enough yet.
   "extra_colors": { "Sand": { "hex": "", "source": "" } },
   "fonts": {
     "display": { "brand": "Söhne", "mapped": "Inter", "why": "" },
-    "body":    { "brand": "Inter", "mapped": "Inter", "why": "in catalog" }
+    "body":    { "brand": "Inter", "mapped": "Inter", "why": "in catalog" },
+    "scripts": [{ "script": "Korean", "sans": "Noto Sans KR", "serif": "Noto Serif KR" }]
   },
   "logos": { "color": "./deck-assets/logo.svg", "white": null, "icon": null, "uploaded": {} },
   "surface": { "default_variant": "light | dark", "mood": "editorial", "page_margin": 96 },

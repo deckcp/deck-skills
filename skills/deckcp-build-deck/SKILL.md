@@ -101,13 +101,26 @@ archetype menu and the chrome-as-master pattern are in
 before you shape the outline, and let it drive each slide's `visual` choice so
 the deck gets template-grade variety, not one repeated skeleton.
 
-**English only unless a CJK font is in the catalog.** DeckCP's curated font
-set has **no** Chinese/Japanese/Korean face — any CJK text renders as tofu
-boxes (□). Do NOT ask the pipeline for bilingual/CJK titles or body: state
-"all copy in English (Latin script only); no Korean/Japanese/Chinese
-characters" in the context. Same for currency: write "KRW 17,000", never the
-₩ symbol (it has no glyph either). `deckcp-quality-control`'s scan flags any
-CJK/₩ that slips through, but it's far cheaper never to generate it.
+**Non-English text renders — load the right font, don't romanize.** DeckCP's
+renderer loads any Google font named as the **primary** family of a
+`deck_theme` slot (not just the 35-face picker), so Korean, Japanese, Chinese,
+Thai, Arabic, etc. all work once the matching **Noto** font is loaded. If the
+brief/brand contains any non-Latin script:
+
+1. From the brand kit's `fonts.scripts` (or by detecting the script in the
+   content), pick the Noto face — Korean → Noto Sans KR, Japanese → Noto Sans
+   JP, Chinese → Noto Sans SC/TC, Thai → Noto Sans Thai, Arabic → Noto Sans
+   Arabic (full table in `deckcp-brand-kit` references/multilingual-fonts.md).
+2. **Before generating**, load it: `update_deck { deck_theme: { fontHeading:
+   "'Noto Sans KR', 'Open Sans', sans-serif" } }` (a loader slot), or make it
+   the deck's body/display font for a mostly-non-Latin deck.
+3. Tell the pipeline, in the context: the non-Latin text stays (bilingual is
+   fine), and text containing that script must use `fontFamily: "'Noto Sans
+   KR', <brand>, sans-serif"`. The ₩/฿/₹ currency glyphs render in the Noto
+   face, so keep them.
+
+Only romanize if the user *asks* for it. `deckcp-quality-control` verifies each
+script has its font loaded and shows real glyphs on the render.
 
 **Two platform limits worth knowing before you build** (both learned the hard
 way on a real run):

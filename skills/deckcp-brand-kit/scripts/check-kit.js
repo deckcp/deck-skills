@@ -136,6 +136,9 @@ if (bg && HEX.test(bg)) {
 }
 
 // ---- fonts ----
+// Non-Latin faces: not in the Latin picker, but the renderer loads any family
+// named as a deck_theme slot's primary, so these are valid multilingual fonts.
+const NOTO_OK = /^Noto\s+(Sans|Serif|Naskh)\b/i;
 function resolveFont(slot) {
   const f = kit.fonts && kit.fonts[slot];
   if (!f) { fails.push(`fonts.${slot} is missing`); return null; }
@@ -143,11 +146,19 @@ function resolveFont(slot) {
   if (!name) { fails.push(`fonts.${slot} has neither mapped nor brand`); return null; }
   const key = Object.keys(CATALOG).find((k) => k.toLowerCase() === String(name).toLowerCase());
   if (!key) {
-    fails.push(`fonts.${slot} "${name}" is not in DeckCP's curated catalog — map it to the closest of: ${Object.keys(CATALOG).join(", ")}`);
+    if (NOTO_OK.test(String(name))) return String(name);   // loadable multilingual face (Noto)
+    fails.push(`fonts.${slot} "${name}" is not in DeckCP's curated catalog — map it to the closest of: ${Object.keys(CATALOG).join(", ")} (or a Noto face for a non-Latin script)`);
     return null;
   }
   if (typeof f === "object" && f.brand && f.brand.toLowerCase() !== key.toLowerCase() && !f.why) warns.push(`fonts.${slot}: "${f.brand}" → "${key}" substitution has no \`why\``);
   return key;
+}
+// Validate declared non-Latin scripts (optional) carry a Noto face.
+if (Array.isArray(kit.fonts && kit.fonts.scripts)) {
+  for (const s of kit.fonts.scripts) {
+    const fonts = [s.sans, s.serif].filter(Boolean);
+    if (!fonts.length || !fonts.every((n) => NOTO_OK.test(String(n)))) fails.push(`fonts.scripts "${s.script || "?"}" must name a Noto face (e.g. Noto Sans KR / Noto Serif KR) so it renders — see references/multilingual-fonts.md`);
+  }
 }
 const display = resolveFont("display");
 const body = resolveFont("body");

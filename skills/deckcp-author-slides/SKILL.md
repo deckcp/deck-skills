@@ -159,6 +159,17 @@ Rules that make this work (each one cost a render to learn):
   `'Open Sans', system-ui, sans-serif` from the catalog) — the server collects
   fonts from node styles and loads them; don't rely on the theme cascading
   into absolutely placed text.
+- **Non-Latin text (Korean/JP/Chinese/Thai/Arabic/…) needs its font LOADED via
+  a `deck_theme` slot, then APPLIED on the node.** A node `fontFamily` alone
+  does NOT load a non-catalog family (that path is filtered to the 35-face
+  picker); the theme slots (`fontDisplay`/`fontHeading`/`fontBody`) load *any*
+  Google family named as their primary. So: `update_deck { deck_theme: {
+  fontHeading: "'Noto Sans KR', 'Open Sans', sans-serif" } }` to load it, then
+  set `style.fontFamily: "'Noto Sans KR', 'Open Sans', sans-serif"` on the
+  script's text nodes. A stack cascades **per character**, so one node can hold
+  `OJEJE — 정통 돈카츠 house.` and both scripts render. Full map + modes in
+  `deckcp-brand-kit` references/multilingual-fonts.md. Never romanize to dodge
+  this — verified working.
 - Generate, don't hand-type: a 40-line script with `chrome()`, `panel()`,
   `steps()`, `statRow()` helpers emits all twelve trees from one token table,
   so a rule change is one edit + regenerate. Batch the upserts (2–4 slides per

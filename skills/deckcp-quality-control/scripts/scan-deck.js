@@ -65,10 +65,20 @@ const COLOR_CLASS = /\b(bg|text|border|from|to|via|ring|fill|stroke)-(red|orange
 const GRADIENT = /\b(bg-gradient-to-[a-z]+|from-[a-z]+-\d+|to-[a-z]+-\d+)\b/g;
 const COMPONENT = /<([A-Z][A-Za-z0-9]*)\b/g;
 const RATIO = /\bdeck-ratio-[a-z0-9-]+\b|\bgrid-cols-\d\b/g;
-// CJK (Han/Hiragana/Katakana/Hangul) — DeckCP's curated font catalog has NO CJK
-// face, so these render as tofu boxes (□). Flag any that reach a slide.
-const CJK = /[぀-ヿ㐀-䶿一-鿿가-힯豈-﫿]/;
-const WON = /₩/; // ₩ also has no glyph → tofu; use "KRW" instead
+// Non-Latin scripts render ONLY if a matching Noto font is loaded via a
+// deck_theme slot and applied to the node (see brand-kit references/
+// multilingual-fonts.md). Detect each script + the Noto face it needs.
+const SCRIPTS = [
+  { name: "Korean (Hangul)", re: /[가-힣ᄀ-ᇿ㄰-㆏]/, font: "Noto Sans KR" },
+  { name: "Japanese kana", re: /[぀-ヿ]/, font: "Noto Sans JP" },
+  { name: "Han (Chinese/Japanese)", re: /[㐀-鿿豈-﫿]/, font: "Noto Sans SC (or JP/TC per language)" },
+  { name: "Thai", re: /[฀-๿]/, font: "Noto Sans Thai" },
+  { name: "Arabic", re: /[؀-ۿﭐ-﷿ﹰ-﻿]/, font: "Noto Sans Arabic" },
+  { name: "Hebrew", re: /[֐-׿יִ-ﭏ]/, font: "Noto Sans Hebrew" },
+  { name: "Devanagari", re: /[ऀ-ॿ]/, font: "Noto Sans Devanagari" },
+];
+const NOTO_REF = /Noto\s+(Sans|Serif|Naskh)/i;   // a Noto face named in the slide's fontFamily
+const WON = /[₩฿₹]/;   // ₩/฿/₹ currency glyphs Latin catalog faces often lack; a matching Noto face carries them
 
 function textOf(mdx, fm) {
   const parts = [];
@@ -120,7 +130,8 @@ for (const s of slides) {
   per.push({
     slide_order: s.slide_order, id: s.id, title, variant: fm.variant || "light", master: fm.master || null,
     section_label: fm.sectionLabel || fm.sectionlabel || null, is_chrome_slide: !chromeVariant,
-    cjk: CJK.test(titleAndText), won: WON.test(titleAndText),
+    scripts: SCRIPTS.filter((sc) => sc.re.test(titleAndText)).map((sc) => ({ name: sc.name, font: sc.font })),
+    noto_applied: NOTO_REF.test(mdx), won: WON.test(titleAndText),
     words: wc, components: compCount, cards, icons, hexes, off_palette: offPalette, color_classes: colorClasses,
     card_accents: cardAccents, gradients, tiny_text: tiny, sizes, gaps, pads, buzzwords: buzz,
     emoji: EMOJI.test(text), label_title: LABEL_TITLES.test(title.trim()), has_image: hasImg,
@@ -189,8 +200,11 @@ for (const p of per) {
   if (p.words > 130 && p.variant !== "close") F("polish", "warn", p.slide_order, `${p.words} words — dense for a slide; a link-deck tolerates ~80, a live deck ~40`);
   if (p.words < 4 && !["hero", "close"].includes(p.variant)) F("polish", "warn", p.slide_order, `only ${p.words} words — is this slide carrying anything?`);
   if (p.emoji) F("polish", "fail", p.slide_order, "emoji in slide text — reads as chat, not a deck");
-  if (p.cjk) F("polish", "fail", p.slide_order, "CJK characters (Korean/Japanese/Chinese) — DeckCP's font catalog has NO CJK face, so these render as tofu boxes (□). Remove them (English only) or the slide looks broken. This is a platform limit, not a style choice.");
-  if (p.won) F("polish", "fail", p.slide_order, "the ₩ won symbol has no glyph → renders as tofu; write 'KRW' instead");
+  for (const sc of p.scripts) {
+    if (p.noto_applied) F("polish", "info", p.slide_order, `${sc.name} text present with a Noto font applied — CONFIRM on the render that it shows glyphs, not boxes (□) or blanks. The font must also be loaded via a deck_theme slot (fontDisplay/fontHeading/fontBody naming it as PRIMARY).`);
+    else F("polish", "fail", p.slide_order, `${sc.name} text present but NO Noto font applied on this slide — it will render as boxes/blanks. Load ${sc.font} via a deck_theme slot (e.g. fontHeading:"'${sc.font}', 'Open Sans', sans-serif") and set fontFamily:"'${sc.font}', <brand>, sans-serif" on the text nodes. See brand-kit references/multilingual-fonts.md. Do NOT romanize as a workaround — the font path works.`);
+  }
+  if (p.won && !p.noto_applied) F("polish", "fail", p.slide_order, "a ₩/฿/₹ currency glyph is present but the slide uses no Noto font — Latin catalog faces often lack it, so it renders as tofu. Apply the matching Noto font (it carries the symbol) rather than spelling out the currency.");
 }
 // imagery coverage — a premium deck carries real photos on a good share of
 // slides (the reference: food photography on most); a wireframe carries none.
