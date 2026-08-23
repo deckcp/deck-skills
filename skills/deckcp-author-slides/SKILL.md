@@ -118,6 +118,52 @@ balance score and your own eyes both count. Then show the user with plain
 New slides: pick an order in the gaps (between 20 and 30 → 25). Overwrites
 at an existing order save a version snapshot first — revertible.
 
+## Absolute slide-space trees — when the chrome must be pixel-exact
+
+When every slide has to share an identical frame (eyebrow at y=110,
+headline at y=172, footer at y=1022 — the "one design team" look) or you're
+reproducing a measured reference, stop fighting the shell and place things
+yourself:
+
+```json
+{ "frontmatter": { "variant": "light", "title": "…", "coordinateSpace": "slide", "showPageNumber": false },
+  "slide_tree": { "version": 1, "nodes": [
+    { "id": "bg", "type": "div", "props": { "className": "flex flex-col", "style": { "width": "100%", "height": "100%", "backgroundColor": "#F4F4F2" }, "data-name": "Background" }, "children": [], "placement": { "x": 0, "y": 0, "w": 1920, "h": 1080, "z": 0 } },
+    { "id": "eyebrow", "type": "div", "props": { "className": "flex flex-col", "style": { "width": "100%", "height": "100%" }, "data-name": "Eyebrow" },
+      "children": [ { "id": "t1", "type": "Prose", "props": { "md": "The offering", "style": { "height": "auto", "flex": "0 0 auto", "fontFamily": "'Open Sans', system-ui, sans-serif", "fontSize": "22px", "letterSpacing": "0.3em", "textTransform": "uppercase", "color": "#A08162", "margin": "0" } }, "children": [] } ],
+      "placement": { "x": 120, "y": 110, "w": 1200, "h": 30 } }
+  ] } }
+```
+
+Rules that make this work (each one cost a render to learn):
+
+- `coordinateSpace: "slide"` → placements are on the full 1920×1080 frame and
+  the shell renders **no** title/subtitle/padding — you own everything,
+  including a full-frame `Background` rect and the page number
+  (`showPageNumber: false` so the shell's doesn't double up). Keep
+  `frontmatter.title` set anyway (rail, search, exports).
+- A **placed root** is absolutely positioned at `placement` and its children
+  flow inside it normally. Give the root `width/height: 100%` in `style` or
+  flex centering inside it has nothing to center against.
+- **Prose is `w-full h-full`.** Inside a flex column, every Prose claims the
+  whole column height — siblings stretch apart (or, with `flex: 0`, collapse
+  and overlap). Always set `style.height: "auto"` and `flex: "0 0 auto"` on
+  text nodes. For a numeral in a circle, set `width/height/lineHeight` all to
+  the circle's diameter to center it.
+- **Editor-grade class allowlist is stricter than MDX.** `deck-gap-*`,
+  `deck-ratio-*`, `h-[…]`, `grid-cols-2`, `rounded-2xl`, `tracking-[…]` are
+  MDX-only; in a tree put layout in `style` (`gap`, `gridTemplateColumns`,
+  `height`, `borderRadius`, `letterSpacing`). Style objects accept any key
+  (≤40 keys, values ≤200 chars) — brand hexes, fonts, borders all live there.
+- Put `fontFamily` on text nodes explicitly (`Lora, Georgia, serif` /
+  `'Open Sans', system-ui, sans-serif` from the catalog) — the server collects
+  fonts from node styles and loads them; don't rely on the theme cascading
+  into absolutely placed text.
+- Generate, don't hand-type: a 40-line script with `chrome()`, `panel()`,
+  `steps()`, `statRow()` helpers emits all twelve trees from one token table,
+  so a rule change is one edit + regenerate. Batch the upserts (2–4 slides per
+  call) and render after each batch.
+
 ## Masters — layout once, not per slide
 
 If several slides share a layout (background, logo slot, footer), don't

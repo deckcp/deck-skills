@@ -1,6 +1,6 @@
 {
   "name": "deckcp-deck-making-skills",
-  "version": "0.6.3",
+  "version": "0.6.4",
   "title": "DeckCP deck-making skill pack",
   "description": "Interview, outline, critique, brand, build, quality-check, edit, analyze, and share great decks from Claude Code. Two tiers: provider-agnostic deck craft that works with no DeckCP account, plus DeckCP-powered skills that drive the DeckCP MCP. Every deck is built on a real design system and gated by a quality check before it is called done.",
   "target_runtime": "claude-code",
@@ -35,7 +35,7 @@
       "tier": 2,
       "status": "ready",
       "model_step": "main-loop",
-      "summary": "Manual slide authoring against the rendering contract: classes-only vocabulary, typed chart props vs pipe-string primitives, frontmatter shape, presets, masters, and the check_slide → upsert → render-and-look loop."
+      "summary": "Manual slide authoring against the rendering contract: classes-only vocabulary, typed chart props vs pipe-string primitives, frontmatter shape, presets, masters, and the check_slide → upsert → render-and-look loop. Absolute slide-space trees (coordinateSpace slide + placements) for pixel-exact chrome, with the Prose h-full / editor-class-allowlist / style-object gotchas."
     },
     {
       "name": "deck-interview",
@@ -105,7 +105,7 @@
       "tier": 2,
       "status": "ready",
       "model_step": "mixed",
-      "summary": "The design system a deck is built on. EXTRACT (script-first, scripts/extract-brand.js) captures the WHOLE system — not just colour/type but imagery treatment, layout style, graphic elements, and the repeating per-slide chrome (eyebrow + headline + footer), rendering an existing deck/guide to images and matching what it sees: literal hex from SVG fills/strokes, :root CSS vars + fonts + logo from a website, dk1/lt1/accent slots + typefaces from a PPTX theme, transcribed brand-guide lines — every token cited, never shifted. SYNTHESIZE (main-loop): one surface pair, one accent, one type pairing, one signature device, one structural language, benchmarked on deckcp.com/templates. scripts/check-kit.js validates hex, WCAG contrast, and the curated font catalog, then emits the update_deck.deck_theme payload. Writes theme (deck scope), logos (upload_asset), house style (set_masters scope brand, owned brands only, confirmed). Supersedes the planned deckcp-brand."
+      "summary": "The design system a deck is built on. EXTRACT (script-first, scripts/extract-brand.js) captures the WHOLE system — not just colour/type but imagery treatment, layout style, graphic elements, and the repeating per-slide chrome (eyebrow + headline + footer), rendering an existing deck/guide to images and matching what it sees: literal hex from SVG fills/strokes, :root CSS vars + fonts + logo from a website, dk1/lt1/accent slots + typefaces from a PPTX theme, transcribed brand-guide lines — every token cited, never shifted. SYNTHESIZE (main-loop): one surface pair, one accent, one type pairing, one signature device, one structural language, benchmarked on deckcp.com/templates. scripts/check-kit.js validates hex, WCAG contrast, and the curated font catalog, then emits the update_deck.deck_theme payload. Writes theme (deck scope), logos (upload_asset), house style (set_masters scope brand, owned brands only, confirmed). Supersedes the planned deckcp-brand. references/match-a-reference-deck.md: reverse-engineer a finished deck by MEASUREMENT (pdf.js text-run dump, embedded font names incl. the Caladea/Carlito = Cambria/Calibri clones, 960x540pt -> 2x canvas), write the rules, then generate."
     },
     {
       "name": "deckcp-build-deck",

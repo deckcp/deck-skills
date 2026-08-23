@@ -113,6 +113,16 @@ asked you to match all of it.
 - **PPTX** → the `pptx` skill reads slide text and shapes; render to images
   for the actual look.
 
+**If the source is a finished deck the user wants to match, measure it —
+don't eyeball it.** Dump every text run (font, size, baseline, x) from the
+PDF with pdf.js, read the embedded font names (watch for the Cambria/Calibri
+clones Caladea/Carlito), and map the 960×540 pt page 2× onto the 1920×1080
+canvas. Full method in
+[`references/match-a-reference-deck.md`](references/match-a-reference-deck.md).
+That turns "it looks kind of like this" into a system doc with exact chrome
+positions, a type scale, and container specs — which is what "designed by the
+same team" actually requires.
+
 Then write down, in the kit, what you *saw* — the four fields in A2.5. The
 OJEJE reference, for instance: every page is a gold tracked-caps eyebrow +
 a large serif headline on a fixed left margin + a bottom footer rule, with a
