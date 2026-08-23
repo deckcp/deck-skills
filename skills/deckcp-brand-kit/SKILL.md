@@ -152,7 +152,11 @@ the brand's hex.
 pick the closest curated face and record it as
 `"fontDisplay": { "brand": "Söhne", "mapped": "Inter", "why": "grotesk, similar x-height" }`
 — the kit tells the truth about the substitution instead of silently
-switching.
+switching. **The catalog has NO Chinese/Japanese/Korean face** — CJK text
+renders as tofu boxes (□). If the brand is bilingual, record that as a gap in
+the `korean`/`fonts` note and make the deck **English-only** (romanize names —
+"Anshim Tonkatsu", not 안심 돈카츠); the `dont` list should forbid CJK titles.
+Same for the ₩/¥/元 currency glyphs (no glyph → tofu): write "KRW"/"JPY"/"CNY".
 
 **Logos.** Keep the SVG if you have one (it scales; rasters blur on a
 1920×1080 hero). Note which variants exist: full-color, white/knockout,
@@ -256,7 +260,11 @@ the dominant one. Tell the user which you chose and the one-line reason.
   enough to author from — "a 1px `border-slate-300` rule under every title
   and above every footer; stats sit on the rule, not in cards".
 - **Mood:** map to a DeckCP `defaultMood` (`editorial`, `keynote`, …) and a
-  default `variant` (`light`/`dark`).
+  default `variant` (`light`/`dark`). **Caution:** a `defaultMood`'s accent can
+  *override* `deck_theme.accent` at render time — so setting a mood can quietly
+  swap your extracted gold for the mood's default color. If the deck renders
+  the wrong accent, drop `defaultMood` (leave it null) so `deck_theme.accent`
+  wins, and re-render to confirm.
 - **Page margin:** 96px for editorial/paper, 64px for dense/institutional.
 - **Logo:** none exists — say so in the kit (`logos: {}`) and give the hero a
   wordmark rule instead: the company name set in the display face at
@@ -334,6 +342,16 @@ later anyway.
 
 There is no brand-write MCP tool; the brand record's palette/logos/guidelines
 are edited in the web UI. So "write it in" is three moves:
+
+**One hard limit to state up front:** `deck_theme` (move 4a) carries color +
+fonts, but a deck built on a **borrowed brand** (its `brand_slug` is a shared
+house brand, not this brand's own record) can't get full fidelity — the
+generator still reasons about the *deck's* brand lockdown and can inject that
+brand's accent per slide, and you cannot install this kit's chrome/section
+masters onto a brand you don't own. For a deck that must truly look like the
+brand, it needs its **own brand record** (create it in the web UI, then
+`update_deck { brand_slug }` to move the deck onto it). On a borrowed brand,
+set the deck theme and be honest that the accent/chrome may not fully take.
 
 **4a — deck theme (deck scope, always available once a deck exists):**
 

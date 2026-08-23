@@ -65,6 +65,10 @@ const COLOR_CLASS = /\b(bg|text|border|from|to|via|ring|fill|stroke)-(red|orange
 const GRADIENT = /\b(bg-gradient-to-[a-z]+|from-[a-z]+-\d+|to-[a-z]+-\d+)\b/g;
 const COMPONENT = /<([A-Z][A-Za-z0-9]*)\b/g;
 const RATIO = /\bdeck-ratio-[a-z0-9-]+\b|\bgrid-cols-\d\b/g;
+// CJK (Han/Hiragana/Katakana/Hangul) — DeckCP's curated font catalog has NO CJK
+// face, so these render as tofu boxes (□). Flag any that reach a slide.
+const CJK = /[぀-ヿ㐀-䶿一-鿿가-힯豈-﫿]/;
+const WON = /₩/; // ₩ also has no glyph → tofu; use "KRW" instead
 
 function textOf(mdx, fm) {
   const parts = [];
@@ -112,9 +116,11 @@ for (const s of slides) {
   const fingerprint = [fm.variant || "light", ratio || "flow", topComps.join(","), "cards" + bucket(cards), hasImg ? "img" : "noimg"].join("|");
 
   const chromeVariant = ["hero", "close"].includes(fm.variant || "");
+  const titleAndText = `${fm.title || ""}\n${fm.subtitle || ""}\n${text}`;
   per.push({
     slide_order: s.slide_order, id: s.id, title, variant: fm.variant || "light", master: fm.master || null,
     section_label: fm.sectionLabel || fm.sectionlabel || null, is_chrome_slide: !chromeVariant,
+    cjk: CJK.test(titleAndText), won: WON.test(titleAndText),
     words: wc, components: compCount, cards, icons, hexes, off_palette: offPalette, color_classes: colorClasses,
     card_accents: cardAccents, gradients, tiny_text: tiny, sizes, gaps, pads, buzzwords: buzz,
     emoji: EMOJI.test(text), label_title: LABEL_TITLES.test(title.trim()), has_image: hasImg,
@@ -183,6 +189,8 @@ for (const p of per) {
   if (p.words > 130 && p.variant !== "close") F("polish", "warn", p.slide_order, `${p.words} words — dense for a slide; a link-deck tolerates ~80, a live deck ~40`);
   if (p.words < 4 && !["hero", "close"].includes(p.variant)) F("polish", "warn", p.slide_order, `only ${p.words} words — is this slide carrying anything?`);
   if (p.emoji) F("polish", "fail", p.slide_order, "emoji in slide text — reads as chat, not a deck");
+  if (p.cjk) F("polish", "fail", p.slide_order, "CJK characters (Korean/Japanese/Chinese) — DeckCP's font catalog has NO CJK face, so these render as tofu boxes (□). Remove them (English only) or the slide looks broken. This is a platform limit, not a style choice.");
+  if (p.won) F("polish", "fail", p.slide_order, "the ₩ won symbol has no glyph → renders as tofu; write 'KRW' instead");
 }
 // imagery coverage — a premium deck carries real photos on a good share of
 // slides (the reference: food photography on most); a wireframe carries none.

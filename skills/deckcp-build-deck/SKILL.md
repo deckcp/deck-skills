@@ -101,6 +101,35 @@ archetype menu and the chrome-as-master pattern are in
 before you shape the outline, and let it drive each slide's `visual` choice so
 the deck gets template-grade variety, not one repeated skeleton.
 
+**English only unless a CJK font is in the catalog.** DeckCP's curated font
+set has **no** Chinese/Japanese/Korean face — any CJK text renders as tofu
+boxes (□). Do NOT ask the pipeline for bilingual/CJK titles or body: state
+"all copy in English (Latin script only); no Korean/Japanese/Chinese
+characters" in the context. Same for currency: write "KRW 17,000", never the
+₩ symbol (it has no glyph either). `deckcp-quality-control`'s scan flags any
+CJK/₩ that slips through, but it's far cheaper never to generate it.
+
+**Two platform limits worth knowing before you build** (both learned the hard
+way on a real run):
+
+- **`deck_theme.accent` is not absolute.** The generator can bake an explicit
+  accent hex into a slide's MDX, and a `defaultMood` can make the *mood's*
+  accent win over `deck_theme.accent` — so a themed deck can still render the
+  wrong accent color. If the render shows the framework amber (`#ffb020`) or
+  any color that isn't the kit's, that's this. Mitigations: prefer components
+  that read the accent token over hardcoded colors; consider omitting
+  `defaultMood`; and see the next point.
+- **Full brand fidelity needs a brand record, not just `deck_theme`.** When
+  the deck's `brand_slug` is a *different* brand than the one the kit
+  describes (e.g. building an OJEJE deck on a shared house brand), `deck_theme`
+  carries color + fonts but the generator still reasons about the deck's brand
+  lockdown, may inject that brand's accent per slide, and you cannot install
+  the kit's chrome/section masters. For a deck that must truly look like the
+  brand, it needs its **own brand record** (palette + fonts + logos +
+  masters) — created in the web UI, since no MCP tool writes a brand. On a
+  borrowed brand, treat perfect color/chrome fidelity as out of reach and say
+  so.
+
 ## Step 2 — create or reuse the deck
 
 If building into a new deck:

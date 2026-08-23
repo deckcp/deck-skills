@@ -136,10 +136,20 @@ findings at once), then per slide. Map each to its tool:
 | Repeated skeleton run | rebuild the *middle* slide(s) of the run as a different archetype — one big stat, a photo band (`deck-photo-band`), a `<Table variant="rules">`, a single-line statement at `deck-text-9xl`+; `rewrite_slide` with an explicit archetype instruction if the copy can move |
 | Icon-card grids | keep the one that earns it; convert others to a hairline list (`<Prose>` bullets), a table, or a numbered `ProcessSteps` |
 | Buzzword titles / label titles | `rewrite_slide` with the specific claim — or hand to `deck-critique` if the problem is the story, not the words |
+| CJK tofu (□) in a title/body | remove it — DeckCP has no CJK font; make the slide English-only (romanize names). Fixable via `rewrite_slide` "set the frontmatter title to English only" (the copilot edits frontmatter.title when told explicitly), or `upsert_slides` with a corrected title |
+| The ₩/¥ currency glyph shows as tofu | replace with "KRW"/"JPY" text |
+| Off-palette **chart** segments, or a **hero/shell** accent that's the wrong color | `rewrite_slide` often WON'T fix these — chart segment colors are component props it leaves alone, and a hero wordmark/accent is frequently shell- or theme-driven or a hardcoded hex. Hand-author the slide with `upsert_slides` (slide_tree) using accent-aware components, or fix the source (deck_theme / a brand record / a master). If the whole deck renders a wrong accent, suspect `defaultMood` overriding `deck_theme.accent` (clear the mood) or a borrowed brand injecting its own — a deck-theme tweak fixes all slides at once, a per-slide rewrite fixes one |
 | Overflow / collapsed content (`balance.issues`) | follow `get_authoring_guide topic='contract'` → FILL THE CANVAS / DO NOT OVERFLOW rules |
 
 After every write: `check_slide` → `render_slides { slide_orders:[N], format:'image' }` → look.
 After deck-wide writes: `render_slides { refresh:true }` and re-run the scan.
+
+**Fix deck-wide before per-slide, and rewrite serially.** A single
+`update_deck { deck_theme }` (accent, fonts, clearing `defaultMood`) corrects
+every slide at once — always try that before touching slides one by one. When
+you do run `rewrite_slide`, issue the calls **sequentially, not in a parallel
+burst**: the server-side copilot is rate-limited and a burst returns 429s that
+silently drop your fixes.
 
 **Three passes max.** If the deck still fails after three, the problem is
 upstream — the kit is wrong (re-run `deckcp-brand-kit`) or the story is
