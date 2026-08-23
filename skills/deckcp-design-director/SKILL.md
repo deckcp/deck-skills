@@ -28,6 +28,36 @@ Before accepting a direction, ask:
 
 If yes, it is still too generic. Tighten the design thesis until the answer is no.
 
+## The Visual Translation Principle
+
+For every slide, ask:
+
+> Can any important idea on this slide be understood faster, more clearly, or more
+> memorably through a visual representation instead of being explained only with words?
+
+When the answer is yes, **translate the concept visually.**
+
+Visual translation is not decoration. Its purpose is to:
+
+- improve comprehension
+- reveal structure
+- show relationships
+- make comparisons faster
+- create memory
+- reduce unnecessary text
+- make abstract ideas tangible
+- increase visual rhythm across the deck
+
+A slide should remain **typography-led when typography is genuinely the strongest
+communication method** — a single decisive claim, a hero number, a quiet turn. Never
+force a graphic merely to satisfy a visual quota. The objective is not "add more
+graphics"; it is "use the strongest communication medium for each idea."
+
+The full decision tree — which representation fits physical, sequential, comparative,
+geographic, categorical, quantitative, emotional, and abstract content — is in
+[`references/visual-storytelling.md`](references/visual-storytelling.md). Read it before
+Step 4.5.
+
 ## Step 0 — load the truth
 
 Read:
@@ -49,6 +79,7 @@ Read these references before deciding:
 - `references/slide-art-direction-schema.md`
 - `references/anti-ai-aesthetics.md`
 - `references/reference-fidelity.md`
+- `references/visual-storytelling.md`
 - `../deckcp-build-deck/references/layout-archetypes.md`
 
 ## Step 1 — classify the build mode
@@ -129,6 +160,22 @@ Translate it into deck-level decisions:
 
 **Chrome is not mandatory.** If the source has no repeating eyebrow/footer/frame, do not invent one. The invariant is consistency with the active design system, not a universal house style.
 
+Also decide two deck-level visual-language calls now (both optional, both additive):
+
+- **`visual_media_mix`** — directional ranges for how much of the deck is typography-led
+  vs. photography vs. diagrammatic vs. data-viz vs. illustration/pictogram. These are
+  **ranges to prevent accidental monotony, not quotas**. Choose the mix from the subject,
+  audience, brand, reference, available assets, narrative, and deck type: a financial
+  report leans data-viz, a fashion deck leans photography, a strategy deck leans diagrams,
+  a hospitality deck may combine photography + spatial diagrams + menu visuals + type. Do
+  not mechanically force every category into every deck.
+- **`iconography_direction`** — if the deck uses icons/pictograms at all, define ONE
+  consistent style (stroke, geometry, fill, color usage, container, corner language,
+  detail level) plus an avoid-list. If icons are not appropriate, set `enabled:false`.
+  Icons are never required. See the "Icons are semantic, not decorative" rule below.
+
+Both objects are defined in [`references/slide-art-direction-schema.md`](references/slide-art-direction-schema.md).
+
 ## Step 4 — plan deck rhythm before individual layouts
 
 Read the headline spine in `outline.json`.
@@ -137,6 +184,7 @@ Assign each slide a `rhythm_role`:
 
 - `open` — establishes the visual world
 - `build` — moves the argument forward
+- `explain` — makes a mechanism, format, or relationship understandable (often a visual translation)
 - `proof` — evidence-heavy
 - `pause` — low-density visual breathing room
 - `turn` — section or argument shift
@@ -160,9 +208,55 @@ Never repeat a layout accidentally. Repeat it intentionally when the repetition
 creates comparison, sequence, recognition, or rhythm.
 ```
 
+## Step 4.5 — plan the visual translation for every slide
+
+Before you pick a layout, decide **what each slide's key idea should become**. Walk the
+decision tree in [`references/visual-storytelling.md`](references/visual-storytelling.md)
+and, for every slide, fill a `visual_translation` object in the slide plan:
+
+```json
+"visual_translation": {
+  "needed": true,
+  "type": "spatial-plan",
+  "concept": "counter seating arranged around a central charcoal grill",
+  "communication_job": "make the restaurant operating format understandable instantly",
+  "source": "spatial",
+  "priority": "primary"
+}
+```
+
+- `type` — `photography | pictogram | iconography | diagram | process | timeline | map | spatial-plan | data-viz | illustration | annotated-image | product-visual | symbol | none`
+- `source` — `concept | data | process | geography | product | people | spatial | comparison | sequence | brand | none`
+- `priority` — `primary | supporting | optional`
+
+Be **concrete about the visual idea**. Not "use icons", "add diagram", "make visual" —
+instead: *"show four counter seats surrounding a central grill as a simple top-down spatial
+diagram"* or *"show expansion from one flagship to four city clusters to twelve locations as
+progressively multiplying site markers."*
+
+When typography genuinely is the strongest medium, set `needed:false` and move on — a
+statement, a hero number, or a quiet close does not owe anyone a graphic:
+
+```json
+"visual_translation": {
+  "needed": false, "type": "none", "concept": null,
+  "communication_job": null, "source": "none", "priority": "optional"
+}
+```
+
+Then sanity-check the whole set against `visual_media_mix`: if nearly every slide came out
+`needed:false` on a subject that is full of processes, places, and comparisons, you are
+letting the deck drift text-led by accident — revisit the ones where a visual would
+genuinely help. If you find yourself adding `needed:true` to slides just to hit a ratio,
+you are forcing decoration — stop.
+
 ## Step 5 — assign semantic archetypes
 
 Use the archetype menu in `../deckcp-build-deck/references/layout-archetypes.md`.
+The archetype should **realize the visual translation** from Step 4.5: a `spatial-plan`
+translation → `spatial-explainer` / `annotated-visual`; a `process`/`sequence` → `media-steps`
+/ `timeline` / `visual-sequence`; a `comparison` → `comparison` / `proportion-graphic`; a
+`map` → `map / footprint` / `cluster-map`; a `data` translation → `chart / data insight`.
 
 Pick the archetype based on the communication job, not because the deck "needs variety."
 
@@ -214,9 +308,32 @@ Minimum shape:
     "intentional_repetition": "",
     "reference_fidelity": []
   },
+  "visual_media_mix": {
+    "typography_led": "30-45%",
+    "photography": "10-25%",
+    "diagrammatic": "15-30%",
+    "data_visualization": "10-20%",
+    "illustration_or_pictogram": "5-20%"
+  },
+  "iconography_direction": {
+    "enabled": true,
+    "style": "minimal custom pictogram",
+    "stroke": "medium",
+    "geometry": "angular and architectural",
+    "fill": "mostly outline with occasional solid accent",
+    "color_usage": "primary foreground plus accent only for emphasis",
+    "container": "none",
+    "corner_language": "sharp",
+    "detail_level": "low",
+    "avoid": ["icons inside circles", "generic corporate icon libraries", "mixed icon styles", "emoji", "3D icons", "decorative icons with no semantic job"]
+  },
   "anti_patterns": []
 }
 ```
+
+`visual_media_mix` and `iconography_direction` are **optional and additive** — omit them for
+a purely typographic deck, or set `iconography_direction.enabled: false` when icons are not
+appropriate. They exist to prevent accidental monotony, never to force categories.
 
 ## Step 8 — write `slide-plan.json`
 
@@ -230,22 +347,38 @@ Minimum packet:
   "purpose": "proof",
   "headline": "Dinner economics create unusually strong unit margins",
   "visual": "photo",
+  "visual_translation": {
+    "needed": true,
+    "type": "data-viz",
+    "concept": "kitchen footprint is a small share of floor area vs. the industry norm",
+    "communication_job": "make the margin advantage visible, not just stated",
+    "source": "data",
+    "priority": "primary"
+  },
   "art_direction": {
-    "archetype": "stat-row-plus-media",
+    "archetype": "big-stat",
     "density": "low",
     "rhythm_role": "peak",
-    "focal_point": "three unit-economics numbers",
-    "composition": "numbers occupy the upper third; image anchors the lower-right; no cards",
-    "hierarchy": ["headline", "numbers", "labels", "supporting note"],
-    "imagery_treatment": "tight crop, edge-aligned panel, no decorative border",
-    "data_treatment": "large numbers; labels below; no chart axes",
-    "accent_job": "numbers only",
+    "focal_point": "the decisive footprint number",
+    "composition": "hero number left; a simplified floor-plan proportion graphic right; no cards",
+    "hierarchy": ["headline", "hero number", "proportion graphic", "supporting note"],
+    "imagery_treatment": "none",
+    "data_treatment": "one hero number + a proportion graphic that IS the proof, not decoration",
+    "accent_job": "the highlighted proportion only",
     "master": "content-editorial",
     "repetition_intent": null,
-    "avoid": ["three equal cards", "generic icon row"]
+    "avoid": ["three equal cards", "generic icon row", "a chart with axes the point doesn't need"]
   }
 }
 ```
+
+`visual_translation` is optional and additive — a slide plan that omits it stays valid, and
+`needed:false` is a first-class choice for typography-led slides.
+
+**`art_direction` decides how meaning is represented, not just how the page is laid out.**
+Describe the visual idea concretely (as in Step 4.5); a `composition` that says
+"large time metric left; sequential visual journey across the remaining canvas" is buildable,
+while "make it visual" is not.
 
 The packet must be concrete enough that another capable designer could build the page without inventing its core composition.
 
@@ -261,6 +394,13 @@ Review the planned deck in headline order and ask:
 6. Are any slides overstuffed before generation even starts?
 7. Did any generic AI pattern sneak in because it was easy?
 8. For `reference-exact`, are measured reference rules explicitly represented?
+9. **Visual opportunity:** is any slide explaining in words something that would be
+   materially clearer, faster, or more memorable as a visual? If so, set its
+   `visual_translation.needed:true` with a concrete concept. Conversely, did any slide get a
+   graphic it doesn't need? Remove it.
+10. **Visual rhythm:** viewed as thumbnails, is the deck accidentally one medium (all type,
+   all cards)? Does each major section offer a different visual experience? Adjust the plan,
+   not by quota, but where a medium genuinely serves the content better.
 
 Fix the plan now. This is cheaper than fixing rendered slides.
 
@@ -270,6 +410,63 @@ Next: `deckcp-build-deck`.
 
 The build skill must treat `design-direction.json` and `slide-plan.json` as **binding inputs**, not optional suggestions.
 
+## Icons are semantic, not decorative
+
+Never add an icon merely because text looks lonely. Use iconography when it:
+
+- improves scanning
+- represents a concept
+- distinguishes categories
+- clarifies a process
+- creates a reusable symbolic language
+- helps comparison
+- improves navigation
+
+Do **not** default to: icon-in-a-colored-circle; icon above heading above paragraph;
+icon-card grids; repeated generic line icons; unrelated decorative symbols; emoji;
+illustrations that compete with the message. If an icon does not improve meaning, remove it.
+When the deck does use icons, they follow one `iconography_direction` — not a mix of styles.
+
+## Text disguised as design
+
+A slide is not visually rich merely because it contains a large number, a colored rule, a
+table, a divider, a box, or a large headline. Those can all be excellent design elements —
+but they are **typographic composition**, not **visual representation**. A strong deck uses
+both, deliberately. Distinguish the two when planning:
+
+- **Typographic composition** — scale, weight, spacing, alignment, one accent, whitespace.
+  Correct for statements, hero numbers, quotes, quiet turns.
+- **Visual representation** — a diagram, spatial plan, process, map, proportion graphic,
+  annotated image, or photograph that carries meaning the words would otherwise have to.
+
+Do not penalize an intentionally typographic slide. But do not let the **whole deck** become
+typography-led by accident: that is exactly what `visual_media_mix` and the Step 4.5 pass
+guard against.
+
+## Visual translation in practice (examples)
+
+**A — Hospitality concept.** Weak: headline "The counter is the restaurant" over three body
+lines (60–80 seats / open kitchen / premium casual). Stronger: keep the headline, add a
+top-down schematic of a central grill surrounded by counter seating, and cut the body to the
+essential operational facts. The format becomes *understood*, not *described*.
+
+**B — Operating system.** Weak: `01 Training / 02 Sourcing / 03 Fit-out / 04 Playbook` as a
+numbered list. Stronger — *only if it improves scanning and stays one consistent style* — a
+small pictogram system (person/flame · crate/ingredient · room module · manual) under one
+`iconography_direction`. If a consistent symbol set isn't worth it, the typographic list is
+the right answer; do not force icons.
+
+**C — Expansion.** Weak: `1 → 4 → 12` as text. Stronger: show the multiplication —
+one location → four city clusters → twelve sites — as progressively multiplying site markers
+or a cluster diagram, so growth is seen, not read.
+
+**D — Unit economics.** Weak: `18%` with "of floor area is kitchen." Stronger: a simplified
+floor plan with 18% of the footprint visibly highlighted. The metric becomes *proof*, not
+decoration.
+
+In every case the test is comprehension, not ornament: if the visual doesn't make the idea
+land faster or stick harder, keep the typographic treatment.
+
 ## Guardrails
 
 - Do not change the story merely to make a prettier deck. Route narrative problems back to `deck-outline` / `deck-critique`.
@@ -278,3 +475,5 @@ The build skill must treat `design-direction.json` and `slide-plan.json` as **bi
 - Do not use novelty as a substitute for coherence.
 - Do not let text density determine font size below legibility standards; restructure instead.
 - Do not add imagery quotas when the brand is intentionally typographic, diagrammatic, or product-led.
+- Do not force a visual translation, an icon, or a diagram onto a slide where typography is the strongest medium. `visual_translation.needed:false` is a valid, common answer.
+- Do not turn visual translation into clutter: one clear visual idea per slide, built in the brand's language, beats several competing graphics.

@@ -49,7 +49,13 @@ called done until it passes a quality gate.
    the actual art direction for this deck: one visual thesis, build mode
    (`fast` / `brand` / `reference-exact`), deck rhythm, and a binding
    composition packet for every slide. This is the step that prevents the
-   generator from interpreting brand prose however it wants.
+   generator from interpreting brand prose however it wants. It also decides
+   the **visual translation** of each idea — should this be a diagram, a
+   spatial plan, a map, a proportion graphic, a photo, or is typography the
+   strongest medium here? — so the deck communicates visually, not just in text,
+   without forcing graphics where words are stronger. The full path:
+   *brand system → design direction → visual translation → per-slide art
+   direction → build → visual QC.*
 5. **`/deckcp-build-deck`** — drives the [DeckCP](https://deckcp.com)
    pipeline from the brand kit + design plan. It uses constrained server
    generation for fast/brand work and can route geometry-sensitive reference

@@ -71,6 +71,30 @@ Each archetype names a communication job. Exact typography, surfaces, radii, col
 
 19. **Custom** — use only when none of the semantic archetypes fits. Describe the communication job and composition explicitly in `slide-plan.json`.
 
+## Visual-storytelling variants (v0.8.1 — guidance, not new top-level archetypes)
+
+These are **named ways of using the archetypes above** so a `visual_translation` becomes a
+concrete layout. They keep the taxonomy small: each maps onto an existing archetype.
+
+- **spatial-explainer** — a top-down/side schematic or floor plan that makes a physical or
+  operational format understandable (grill + counter seating; store footprint; line layout).
+  Realizes a `spatial-plan` translation; a form of *Split feature* / *Custom*.
+- **annotated-visual** — a real image or product view with a few precise callouts doing the
+  explaining. A form of *Product / interface* or *Image story*; realizes `annotated-image`.
+- **visual-sequence** — an ordered visual journey (storyboard / progressive states) rather than
+  a bullet list. A form of *Media + steps* / *Timeline*; realizes a `process`/`sequence`.
+- **cluster-map** — geographic markers, site clusters, or expansion multiplication. A form of
+  *Map / footprint*; realizes a `map` translation.
+- **proportion-graphic** — a shape whose area/segment IS the number (footprint share, mix,
+  ratio). A form of *Big stat* / *Chart / data insight*; realizes a `data-viz` translation.
+- **pictogram-system** — a small set of consistent custom pictograms distinguishing categories
+  or steps, under one `iconography_direction`. A restrained form of *Statement* / *Stat row* —
+  use ONLY when a consistent symbol set genuinely improves scanning, never as icon-cards.
+
+Visuals inherit the brand's stroke, geometry, spacing, corners, type, and color. Prefer simple
+grammar (fewer elements, one direction, intentional whitespace) and avoid the diagram clichés
+listed in `deckcp-design-director/references/visual-storytelling.md`.
+
 ## Density budget
 
 Every slide should be planned as:

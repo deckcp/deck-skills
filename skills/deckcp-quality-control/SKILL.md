@@ -21,6 +21,11 @@ This gate is mandatory.
 6. Intentional rhythm / repetition
 7. Generic-AI look
 
+Plus a named `visual_opportunity_check` inside dimension 2 (design-intent / reference
+fidelity) and a visual-rhythm read in the contact-sheet pass — both added in v0.8.1 to catch
+decks that drift accidentally text-led. Neither is an eighth score, and neither may fail a
+deliberately typographic slide.
+
 ## Why this is mixed-tier
 
 - **Script for mechanical scans.** Off-palette colors, tiny text, spacing-token sprawl,
@@ -118,6 +123,19 @@ Look for deck-level problems that are easy to miss one slide at a time:
 - the deck begins with one design language and ends with another
 - `reference-exact` geometry drifts over the sequence
 
+**Visual rhythm (v0.8.1).** Also read the deck as a mix of media, judged against
+`design-direction.json.visual_media_mix` (when present):
+
+- Is the deck dominated by one medium — every slide typography-only, or every slide a chart?
+- Are diagrams / pictograms / data visuals / photography used where they genuinely help?
+- Does each major narrative section offer a different visual experience?
+- Is there purposeful alternation between typography, imagery, diagrams, data, whitespace,
+  dense information, and visual pause?
+
+Do **not** enforce numerical quotas mechanically, and do **not** flag a deck that is
+intentionally typographic per its direction. Judge against `design-direction.json`: the failure
+mode is *accidental* monotony, not a deliberate one.
+
 Write 2–4 deck-level observations before scoring individual dimensions.
 
 ## Step 3 — score seven dimensions
@@ -165,6 +183,28 @@ Read `design-direction.json` + the corresponding `slide-plan.json` packet for ev
 
 This dimension is the main defense against "the brand kit was correct but the deck still
 looks nothing like the company."
+
+#### `visual_opportunity_check` (v0.8.1 — a named check inside this dimension, not an 8th score)
+
+For each slide, ask: *is this slide using text to explain something that would be materially
+clearer, faster, or more memorable as a visual?* Record one of:
+
+- **PASS** — no meaningful missed visual opportunity (typography is genuinely the strongest
+  medium here, or the planned visual is present and working).
+- **ADVISORY** — a visual might improve the slide, but the current approach is acceptable.
+  Note it; do not lower the score for it.
+- **FAIL** — the slide's `slide-plan.json` explicitly required a meaningful `visual_translation`
+  (`needed:true`) and the rendered slide **ignored it** (fell back to text), OR the textual
+  treatment materially damages comprehension. A FAIL here caps this dimension at **≤3**.
+
+**Hard guardrails for this check:**
+
+- Never FAIL a typography-led slide merely for lacking graphics. If `visual_translation.needed`
+  is `false` or absent, "no graphic" is correct by default.
+- Only FAIL when (1) the plan explicitly required a visual translation and the build ignored it,
+  or (2) comprehension is genuinely hurt by the text-only treatment.
+- A slide that dropped its required visual is fixed by executing the visual (author it), not by
+  adding decoration. See the fix table.
 
 ### 3. Alignment — do edges and baselines resolve cleanly?
 
@@ -302,6 +342,8 @@ Work deck-wide first, then per-slide.
 | Accidental repeated skeleton | change the weakest slide to the semantic archetype in its art-direction packet |
 | Intentional repeated series looks inconsistent | make the series **more** consistent, not more varied |
 | Generic icon cards | convert to semantic list/table/process/media composition, using real assets where relevant |
+| Required `visual_translation` dropped to text | build the planned visual (spatial-plan / process / proportion-graphic / map / annotated-image) in the brand's language via `deckcp-author-slides` / `upsert_slides`; do not "fix" it by adding decoration |
+| Graphic/icon added to a `needed:false` slide | remove it; restore the intended typographic composition |
 | No imagery but direction requires it | use user/approved imagery via `deckcp-gather-assets` / `search_assets` |
 | Imagery added but direction is intentionally typographic/UI-led | remove decorative photography |
 | Buzzword/topic-label title | rewrite to the specific conclusion; route story weakness to `deck-critique` |

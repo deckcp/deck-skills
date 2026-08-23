@@ -121,11 +121,13 @@ DESIGN DIRECTION (binding)
 - composition + typography + imagery + data strategy
 - signature moves + restraint rules
 - rhythm and intentional-repetition rule
+- visual_media_mix (directional, if present) + iconography_direction (if present)
 - anti-patterns
 
 SLIDE PLAN (binding)
 For each slide: archetype, density, rhythm role, focal point, composition, hierarchy,
-imagery/data treatment, accent job, master intent, repetition intent, avoid list.
+imagery/data treatment, accent job, master intent, repetition intent, avoid list,
+and — when present — visual_translation (needed, type, concept, communication_job, priority).
 ```
 
 Prefer `brand-kit.json.design_system` over prose when present. Do **not** dump the
@@ -250,6 +252,39 @@ This path intentionally spends more judgment on fidelity.
 Prefer an outline the user has seen. It is still cheaper to fix story before slides.
 The new design layer does not change that.
 
+## Step 3.5 — execute the visual translation (don't silently fall back to text)
+
+The slide plan may carry, per slide, a `visual_translation` object (v0.8.1). When
+`needed:true`, the builder must **attempt the described visual representation**, not quietly
+emit a paragraph or bullet list instead.
+
+- If `type` is `spatial-plan`, build a spatial diagram; `process`/`timeline`, a sequence;
+  `data-viz`/`proportion-graphic`, a graphic where the shape IS the number; `map`/`cluster-map`,
+  markers; `annotated-image`/`product-visual`, a framed image with callouts. The archetype
+  variants in [`references/layout-archetypes.md`](references/layout-archetypes.md) map each one.
+- The visual **inherits the brand language** — stroke, geometry, spacing, corners, type, color
+  from `brand-kit.json.design_system` + `design-direction.json`. Prefer simple grammar; avoid
+  the diagram clichés listed in `deckcp-design-director/references/visual-storytelling.md`.
+- If `iconography_direction.enabled` is true and a slide legitimately uses icons, use that ONE
+  style. If it is false or absent, do not introduce icons. **Icons are semantic, not
+  decorative** — never an icon-in-a-circle grid to fill space.
+- When `needed:false`, keep the slide typographic. Do **not** add a graphic to satisfy a mix
+  ratio. `visual_media_mix` is a deck-level guard against accidental monotony, not a per-slide
+  quota.
+
+**Escalation when the server can't execute the visual accurately:**
+
+1. do **not** silently replace the visual with a paragraph;
+2. flag the visual requirement (note which slide + which `visual_translation`);
+3. use precise authoring / `deckcp-author-slides` (`upsert_slides` with a slide tree) to build
+   the diagram/spatial-plan/proportion-graphic directly;
+4. do this especially in `brand` and `reference-exact` modes, where a dropped visual reads as
+   drift.
+
+Do **not** require manual authoring for every diagram — many will generate fine. Escalate only
+when the server cannot achieve the intended visual communication. In `fast` mode, a simpler
+visual (or an honest typographic fallback with the requirement flagged) is acceptable.
+
 ## Step 4 — validate every slide (free, deterministic)
 
 Get the deck and run `check_slide` on each slide's MDX:
@@ -317,3 +352,6 @@ Then point onward:
 - Never force layout variety for its own sake. Repetition is valid when the slide
   plan marks it as intentional.
 - Never impose a universal DeckCP chrome. Masters come from the active brand/reference.
+- Never drop a required `visual_translation` to a paragraph without flagging it and
+  attempting precise authoring. And never force a graphic, icon, or diagram onto a
+  `needed:false` slide — typography-led is a valid outcome.

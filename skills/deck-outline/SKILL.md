@@ -58,13 +58,18 @@ not the topic. "Market" → "The wedge is a $4B niche nobody serves well." A rea
 who skims only the headlines should get the whole argument.
 
 For each slide capture: `purpose`, `headline` (the conclusion), `key_points`
-(2–4 max), `evidence` (which proof from the brief, if any), and a **coarse**
-`visual` role (chart, diagram, photo, product, table, none).
+(2–4 max), `evidence` (which proof from the brief, if any), a **coarse**
+`visual` role (chart, diagram, photo, product, table, none), and — optionally —
+a one-line `visual_intent` describing the *communication need* ("show how the
+central counter format works spatially", "make the expansion multiplication
+visible"). `visual_intent` is a hint for the Design Director, not a styling
+instruction, and is entirely optional — omit it and the plan is still valid.
 
 Keep this step narrative-first. Do **not** invent exact compositions here; the
 new `deckcp-design-director` step does that after the brand/reference has been
-understood. The outline only answers: *what kind of evidence or visual object
-should carry the claim?*
+understood — including the actual visual translation. The outline only answers:
+*what kind of evidence or visual object should carry the claim, and what does the
+audience need to understand?*
 
 Plan enough pacing to avoid an all-text deck, but do not force artificial
 variety. Two consecutive charts or three repeated case-study layouts can be
@@ -95,7 +100,8 @@ Then fill `./deck-brief/outline.json`:
       "headline": "conclusion, not topic",
       "key_points": ["", ""],
       "evidence": "which proof, or null",
-      "visual": "chart | diagram | photo | product | table | none"
+      "visual": "chart | diagram | photo | product | table | none",
+      "visual_intent": "optional one-line communication need, or omit"
     }
   ],
   "cut": ["what you removed and why"]
