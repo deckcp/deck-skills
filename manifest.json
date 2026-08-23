@@ -70,7 +70,7 @@
       "tier": 1,
       "status": "absorbed",
       "model_step": "main-loop",
-      "summary": "Render each slide and look at it — balance, hierarchy, contrast, density, the 5-second test. ABSORBED into deckcp-quality-control (render every slide, score six dimensions)."
+      "summary": "Render each slide and look at it — balance, hierarchy, contrast, density, the 5-second test. ABSORBED into deckcp-quality-control (render every slide, score seven dimensions)."
     },
     {
       "name": "deck-analyze-multi",
