@@ -173,6 +173,34 @@ Same for the ₩/¥/元 currency glyphs (no glyph → tofu): write "KRW"/"JPY"/"
 icon-only. Missing a knockout variant is a finding — dark slides will need
 one.
 
+**Logo, images and textures from a brand PDF (zero tokens).** A brand guide
+or an old deck usually *contains* the assets — the vector mark on its "main
+logo" page, the embossed paper textures, product photos, application
+mockups. Pull them out instead of asking the user to hunt for files:
+
+```bash
+node scripts/extract-assets.js ./brand-guide.pdf --out ./deck-assets/extracted \
+  --images --logo-page 6 --colors "#<Primary>,#<dark-ink>" --pages 5,6 --deps <dir-with-node_modules>
+```
+
+- `--images` → every embedded raster ≥200px into `extracted/images/`, each
+  tagged `texture` (near-uniform, e.g. embossed paper) or `photo`, with its
+  dominant hex — textures tend to land exactly on the kit's palette, which is
+  a nice cross-check.
+- `--logo-page N` → renders the page at 8×, **masks every text run** (so
+  "A.1 MAIN LOGO" labels don't pollute the crop), finds the largest ink blob
+  (merging the wordmark beneath a mark, ignoring stray rules), knocks white
+  out to alpha → `logo-black.png`, `logo-white.png`, plus one per `--colors`.
+  It's a high-res raster cut from the vector page — plenty for the 1920
+  canvas; still ask for the SVG for print.
+- `--pages` → 2× renders to *look at* (pair with A1.5).
+- Needs `pdfjs-dist`, `@napi-rs/canvas`, `sharp` — resolved from the cwd or
+  `--deps <dir>` (DeckCP's own repo has all three). Pages with foil/knockout
+  effects skip with a note rather than failing the run.
+
+Record what came out under `logos` (black/white/gold files) and
+`extra_assets` in the kit, then `upload_asset` each one you'll place.
+
 **Brand guide PDF.** Transcribe, don't interpret: the guide's own hex/RGB
 values, named typefaces, logo clear-space and minimum-size rules, the
 do/don't list. Pantone → hex only via the guide's own conversion table if it
