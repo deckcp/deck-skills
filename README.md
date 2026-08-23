@@ -52,10 +52,13 @@ called done until it passes a quality gate.
    generator from interpreting brand prose however it wants. It also decides
    the **visual translation** of each idea — should this be a diagram, a
    spatial plan, a map, a proportion graphic, a photo, or is typography the
-   strongest medium here? — so the deck communicates visually, not just in text,
-   without forcing graphics where words are stronger. The full path:
-   *brand system → design direction → visual translation → per-slide art
-   direction → build → visual QC.*
+   strongest medium here? — and how *selectively* to use it: a per-deck
+   **visual strategy** picks the few slides that earn a visual peak and keeps
+   the rest as typographic pauses, so the deck communicates visually where it
+   helps and stays restrained everywhere else (never all-text, never
+   all-infographic). The full path: *brand system → design direction → visual
+   strategy → selective visual translation → per-slide art direction → build →
+   visual-opportunity + visual-restraint QC.*
 5. **`/deckcp-build-deck`** — drives the [DeckCP](https://deckcp.com)
    pipeline from the brand kit + design plan. It uses constrained server
    generation for fast/brand work and can route geometry-sensitive reference

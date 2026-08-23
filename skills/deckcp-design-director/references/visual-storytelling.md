@@ -95,3 +95,106 @@ Always state the visual idea concretely in `visual_translation.concept` and `art
 - Strong: `highlight 18% of a simplified floor-plan footprint so the metric reads as proof`
 
 If the visual idea can't be described in one concrete sentence, it isn't ready to build.
+
+---
+
+# Visual Restraint & Rhythm (v0.8.2)
+
+The counterweight to everything above. v0.8.1 taught DeckCP to *add* visuals; v0.8.2 teaches
+it *when not to*. Over-visualization — every slide forced into an infographic — is as much a
+generic-AI presentation smell as wall-of-text. The goal is **maximum communication with
+minimum unnecessary design.** The strongest visual decision is sometimes to add a diagram;
+sometimes it is to remove it.
+
+## Don't visualize statements. Visualize structures.
+
+A pure **statement** is usually strongest as typography and should NOT trigger a graphic:
+
+- `The counter is the restaurant.` → typography-led, `needed:false`, confidence `low`
+- `Take the counter seat.` → typography-led close
+- `Luxury without ceremony.` → typography-led positioning
+
+Reach for visual translation when the content carries a real **structure, relationship,
+sequence, comparison, proportion, system, geography, process, evidence, physical arrangement,
+or quantitative pattern**:
+
+- `18% kitchen / 82% dining` → proportion graphic (`visual-led`, confidence `high`)
+- `1 → 4 → 12 locations` → expansion / cluster visual (`visual-led`, high)
+- `seat → fire → first skewer → rhythm` → process / sequence (`visual-led`, high — inherently sequential)
+- `training / sourcing / fit-out / playbook` → *optional* semantic icon system (`supported`, confidence `medium`)
+
+## The restraint gate
+
+Before setting `visual_translation.needed: true`, weigh three things (conceptual, not literal math):
+
+```text
+communication gain   (faster to understand / compare / remember / believe)
++ brand gain         (strengthens brand language / a real signature / emotional impact)
+> complexity cost    (clutter / competes with headline / too many labels / feels like an
+                      infographic / reduces elegance and focus)
+```
+
+Execute the visual only when gain clearly beats cost. Record the verdict as `confidence`:
+
+- **high** — the visual clearly improves the slide → execute it.
+- **medium** — a visual may help, but a typographic version may be as good → compare both;
+  if the visual adds substantial complexity, prefer typography unless it's genuinely important.
+- **low** — technically visualizable, small gain → default to typography-led.
+
+## The intervention hierarchy — least complex first
+
+When strengthening a slide, climb only as far as needed:
+
+```text
+1. typography + whitespace
+2. typography + one graphic device
+3. simple semantic visual
+4. diagram / pictogram system
+5. complex visualization
+```
+
+Stop at the lowest level that does the job. Most slides live at 1–2.
+
+## Remove before adding
+
+Before finalizing a slide, ask: **would removing one visual element make this stronger?**
+Hunt for redundant icons, unnecessary lines/containers, repeated labels, icons that merely
+duplicate adjacent text, over-detailed diagrams, competing focal points, decorative devices.
+Prefer subtraction.
+
+## Plan peaks, not coverage
+
+Decide which few slides are the deck's **visual peaks**, which carry **light support**, and
+which are **typography-led pauses** — don't decide "what visual each slide gets." A strong
+10-slide deck might be: type · type · data-viz · light pictograms · sequence · type/table ·
+proportion · light symbols · expansion · type. *That is only an example — never hard-code it.*
+The lesson: some slides explain, some prove, some breathe. Watch for an exhausting
+`diagram / icons / diagram / icons …` cadence; if too many consecutive slides are
+`visual-led`, thin them unless the content truly requires the density.
+
+## `visual_strategy` beats `visual_media_mix`
+
+The mix ranges only guard against accidental monotony. The *strategy* (mode + peaks +
+pauses) decides where visuals go. Never add a chart, diagram, icon set, or photo merely to
+satisfy a media-mix category. Default mode is `selective`; `visual-rich` is only for content
+that genuinely needs heavy explanation (architecture, engineering, technical systems,
+science, complex workflows).
+
+## Worked examples (restraint-first)
+
+| Content | visual_intensity | needed / confidence | Why |
+| --- | --- | --- | --- |
+| "The counter is the restaurant." (positioning) | typography-led | false / low | A statement. Only draw a floor plan if the slide's *job* is to explain operating geometry. |
+| "seat → fire → first skewer → rhythm" | visual-led | true / high | Inherently sequential — a process visual materially helps. |
+| "18% kitchen / 82% dining" | visual-led | true / high | A proportion graphic makes the footprint advantage instantly visible. |
+| Menu: skewers / fish / veg / rice / seasonal / drinks | typography-led *or* supported | — | A readable ledger is often best; add restrained glyphs only if they speed scanning. Don't auto-generate six pictograms. |
+| Operating system: training / sourcing / fit-out / playbook | supported | true / medium | Small semantic symbols are acceptable; do not turn the whole slide into an icon infographic. |
+
+## Two checks, not one — they must not contradict
+
+QC now evaluates both directions: *did we miss a meaningful visual opportunity?* (v0.8.1
+`visual_opportunity_check`) **and** *did we over-design the slide?* (v0.8.2
+`visual_restraint_check`). A slide deliberately marked `typography-led` / `needed:false`
+must **never** fail the opportunity check for lacking graphics, and a genuinely-earned
+`visual-led` peak must not fail the restraint check for being visual. The two checks are
+opposite guardrails on the same judgment, not a contradiction.

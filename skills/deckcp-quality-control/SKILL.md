@@ -1,6 +1,6 @@
 ---
 name: deckcp-quality-control
-description: The mandatory final gate before any DeckCP deck is called done — render every slide, review the whole deck as a sequence, score brand accuracy, design-intent/reference fidelity, alignment, spacing consistency, visual polish, intentional rhythm/repetition, and generic AI-looking design, then fix what fails and re-score. Use automatically at the end of deckcp-build-deck and after any multi-slide edit. Requires the DeckCP MCP connected.
+description: The mandatory final gate before any DeckCP deck is called done — render every slide, review the whole deck as a sequence, score brand accuracy, design-intent/reference fidelity (including a visual-opportunity and a visual-restraint check), alignment, spacing consistency, visual polish, intentional rhythm/repetition, and generic AI-looking design, then fix what fails and re-score. Catches both under-designed (text-heavy) and over-designed (infographic) slides. Use automatically at the end of deckcp-build-deck and after any multi-slide edit. Requires the DeckCP MCP connected.
 argument-hint: "[--deck <slug>] [--kit ./deck-brief/brand-kit.json] [--direction ./deck-brief/design-direction.json] [--plan ./deck-brief/slide-plan.json] [--max-passes 3]"
 ---
 # Quality Control (the gate — pixels + intent, not generation success)
@@ -21,10 +21,12 @@ This gate is mandatory.
 6. Intentional rhythm / repetition
 7. Generic-AI look
 
-Plus a named `visual_opportunity_check` inside dimension 2 (design-intent / reference
-fidelity) and a visual-rhythm read in the contact-sheet pass — both added in v0.8.1 to catch
-decks that drift accidentally text-led. Neither is an eighth score, and neither may fail a
-deliberately typographic slide.
+Plus two named checks inside dimension 2 (design-intent / reference fidelity) and a
+visual-rhythm read in the contact-sheet pass: `visual_opportunity_check` (v0.8.1 — catches
+decks that drift accidentally text-led) and `visual_restraint_check` (v0.8.2 — catches
+over-designed / infographic slides). Neither is an eighth score; they are opposite guardrails
+that must not contradict — a deliberately typographic slide is never failed for lacking
+graphics, and an earned visual peak is never failed for being visual.
 
 ## Why this is mixed-tier
 
@@ -136,6 +138,14 @@ Do **not** enforce numerical quotas mechanically, and do **not** flag a deck tha
 intentionally typographic per its direction. Judge against `design-direction.json`: the failure
 mode is *accidental* monotony, not a deliberate one.
 
+**Peaks and pauses (v0.8.2).** The opposite deck-level failure is over-visualization. Read the
+contact sheet against `visual_strategy` (mode + peaks/pauses): does the deck **breathe** — a
+few visual peaks among typographic pauses — or does it exhaust the eye with a
+`diagram / icons / diagram / icons …` cadence? If too many *consecutive* slides are
+`visual-led`, raise it as an **advisory** unless the content genuinely requires that density.
+Do not enforce a fixed alternation pattern; judge whether the sequence has rhythm. A deck that
+is all-infographic is as much a generic-AI smell as a deck that is all-text.
+
 Write 2–4 deck-level observations before scoring individual dimensions.
 
 ## Step 3 — score seven dimensions
@@ -205,6 +215,29 @@ clearer, faster, or more memorable as a visual?* Record one of:
   or (2) comprehension is genuinely hurt by the text-only treatment.
 - A slide that dropped its required visual is fixed by executing the visual (author it), not by
   adding decoration. See the fix table.
+
+#### `visual_restraint_check` (v0.8.2 — the opposite check, also inside this dimension)
+
+For each slide, ask: *is this slide more visually complex than its communication task
+requires?* Record one of:
+
+- **PASS** — visual complexity is justified (a genuine peak, or a clean typography-led slide).
+- **ADVISORY** — the visual helps, but simplifying it would improve elegance. Note it; do not
+  lower the score.
+- **FAIL** — the slide uses unnecessary diagrams, pictograms, icons, containers, or graphic
+  systems that reduce clarity versus a simpler composition: a pure statement given a diagram it
+  didn't earn; three or four items forced into a bespoke icon set; icons duplicating adjacent
+  text; competing focal points; decorative devices. A FAIL here caps this dimension at **≤3**.
+
+Judge against `visual_strategy`, `visual_intensity`, and `visual_translation.confidence`:
+a slide marked `typography-led` that sprouted graphics, or a `low`-confidence visual that
+added clutter, is a restraint FAIL. Ask the remove-before-adding question — would removing an
+element make it stronger?
+
+**The two checks are opposite guardrails on one judgment and must not contradict:** never
+FAIL a deliberately `typography-led` / `needed:false` slide on the *opportunity* check for
+lacking graphics, and never FAIL a genuinely-earned `visual-led` peak on the *restraint* check
+for being visual. Opportunity catches under-design; restraint catches over-design.
 
 ### 3. Alignment — do edges and baselines resolve cleanly?
 
@@ -344,6 +377,8 @@ Work deck-wide first, then per-slide.
 | Generic icon cards | convert to semantic list/table/process/media composition, using real assets where relevant |
 | Required `visual_translation` dropped to text | build the planned visual (spatial-plan / process / proportion-graphic / map / annotated-image) in the brand's language via `deckcp-author-slides` / `upsert_slides`; do not "fix" it by adding decoration |
 | Graphic/icon added to a `needed:false` slide | remove it; restore the intended typographic composition |
+| Over-designed slide (bespoke icons for 3–4 items, diagram on a pure statement, duplicate/decorative devices, competing focal points) | apply the least-complex intervention: downgrade to `supported` or `typography-led`, remove the redundant element(s); simplify rather than restyle |
+| Deck reads as all-infographic (too many consecutive `visual-led`) | convert the weakest peaks to typography-led pauses per `visual_strategy`; restore peaks-and-pauses rhythm |
 | No imagery but direction requires it | use user/approved imagery via `deckcp-gather-assets` / `search_assets` |
 | Imagery added but direction is intentionally typographic/UI-led | remove decorative photography |
 | Buzzword/topic-label title | rewrite to the specific conclusion; route story weakness to `deck-critique` |

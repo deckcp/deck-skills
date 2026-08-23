@@ -53,10 +53,35 @@ communication method** — a single decisive claim, a hero number, a quiet turn.
 force a graphic merely to satisfy a visual quota. The objective is not "add more
 graphics"; it is "use the strongest communication medium for each idea."
 
+## The Visual Restraint Principle (v0.8.2)
+
+Visual translation has an equal and opposite duty: **restraint.** Before adding any
+diagram, pictogram, icon system, process, map, spatial plan, illustration, or graphic
+device, ask:
+
+> Will this visual materially improve understanding, comparison, memory, evidence, or
+> brand expression compared with a strong typography-led composition?
+
+If not, **prefer typography.** Whitespace is not an unfinished area that needs filling — a
+slide can be fully designed with only typography, hierarchy, color, composition, and space.
+Do not add graphics because there is room.
+
+**Don't visualize statements. Visualize structures.** A pure positioning line —
+*"The counter is the restaurant.", "Take the counter seat.", "Luxury without ceremony."* —
+is usually strongest as typography; it should not automatically trigger a diagram. Reach
+for visual translation when the content carries a real **structure, relationship, sequence,
+comparison, proportion, system, geography, process, piece of evidence, physical arrangement,
+or quantitative pattern** — e.g. `18% kitchen / 82% dining` → proportion graphic;
+`1 → 4 → 12 locations` → expansion visual; `seat → fire → first skewer → rhythm` → sequence.
+
+Over-visualization is a generic-AI smell just as much as wall-of-text is. A professional
+designer knows when **not** to add something. The full restraint gate (communication gain +
+brand gain vs. complexity cost), the intervention hierarchy, and worked examples are in
+[`references/visual-storytelling.md`](references/visual-storytelling.md).
+
 The full decision tree — which representation fits physical, sequential, comparative,
-geographic, categorical, quantitative, emotional, and abstract content — is in
-[`references/visual-storytelling.md`](references/visual-storytelling.md). Read it before
-Step 4.5.
+geographic, categorical, quantitative, emotional, and abstract content — is in the same
+reference. Read it before Step 4.5.
 
 ## Step 0 — load the truth
 
@@ -172,9 +197,18 @@ Also decide two deck-level visual-language calls now (both optional, both additi
 - **`iconography_direction`** — if the deck uses icons/pictograms at all, define ONE
   consistent style (stroke, geometry, fill, color usage, container, corner language,
   detail level) plus an avoid-list. If icons are not appropriate, set `enabled:false`.
-  Icons are never required. See the "Icons are semantic, not decorative" rule below.
+  Icons are never required, and iconography is normally a **supporting** medium, not a
+  slide's default concept. See the "Icons are semantic, not decorative" rule below.
+- **`visual_strategy`** (v0.8.2, the most important of the three) — pick a deck `mode`
+  (`minimal` / `selective` / `visual-rich`; **default `selective`**, never default to
+  `visual-rich`) and name the slides that are the deck's **visual_peaks**, its light
+  **supporting_visuals**, and its **typography_led** pauses. Plan visual *peaks*, not visual
+  *coverage*: decide which few slides earn a visual, and let the rest breathe. This object
+  outranks `visual_media_mix` — the mix prevents accidental monotony, but the strategy
+  decides where visuals actually go. Do not chase mix percentages by adding a chart/diagram/
+  icon/photo just to hit a category.
 
-Both objects are defined in [`references/slide-art-direction-schema.md`](references/slide-art-direction-schema.md).
+All three objects are defined in [`references/slide-art-direction-schema.md`](references/slide-art-direction-schema.md).
 
 ## Step 4 — plan deck rhythm before individual layouts
 
@@ -215,8 +249,10 @@ decision tree in [`references/visual-storytelling.md`](references/visual-storyte
 and, for every slide, fill a `visual_translation` object in the slide plan:
 
 ```json
+"visual_intensity": "visual-led",
 "visual_translation": {
   "needed": true,
+  "confidence": "high",
   "type": "spatial-plan",
   "concept": "counter seating arranged around a central charcoal grill",
   "communication_job": "make the restaurant operating format understandable instantly",
@@ -225,21 +261,32 @@ and, for every slide, fill a `visual_translation` object in the slide plan:
 }
 ```
 
-- `type` — `photography | pictogram | iconography | diagram | process | timeline | map | spatial-plan | data-viz | illustration | annotated-image | product-visual | symbol | none`
-- `source` — `concept | data | process | geography | product | people | spatial | comparison | sequence | brand | none`
+- `visual_intensity` (per slide) — `typography-led` (type/space/hierarchy do the work; at most one subtle device) · `supported` (typography dominates, one pictogram/small diagram/symbol/micro-chart aids comprehension) · `visual-led` (the visual carries the core message). **Do not let every slide become `visual-led`.**
+- `type` — `photography | pictogram | iconography | diagram | process | timeline | map | spatial-plan | data-viz | proportion-graphic | illustration | annotated-image | product-visual | symbol | none`
+- `confidence` (v0.8.2) — `high` (visual clearly improves the slide → execute it) · `medium` (a visual *may* help but a typographic version may be equally good → compare both, and if the visual adds real complexity, prefer typography unless it's marked important) · `low` (technically visualizable, small gain → default to typography-led).
+- `source` — `concept | data | process | geography | product | people | spatial | comparison | sequence | categorical | brand | none`
 - `priority` — `primary | supporting | optional`
+
+**Run the restraint gate before setting `needed:true`** (full version in
+[`references/visual-storytelling.md`](references/visual-storytelling.md)): execute the visual
+only when *communication gain + brand gain > complexity cost*. Then set `visual_intensity`
+and `confidence` to record that judgment. Use the least-complex intervention that works
+(typography → +one device → simple semantic visual → diagram/pictogram → complex viz), and
+before finalizing ask *"would removing a visual element make this slide stronger?"*
 
 Be **concrete about the visual idea**. Not "use icons", "add diagram", "make visual" —
 instead: *"show four counter seats surrounding a central grill as a simple top-down spatial
 diagram"* or *"show expansion from one flagship to four city clusters to twelve locations as
 progressively multiplying site markers."*
 
-When typography genuinely is the strongest medium, set `needed:false` and move on — a
-statement, a hero number, or a quiet close does not owe anyone a graphic:
+When typography genuinely is the strongest medium, set `visual_intensity:"typography-led"`
+and `needed:false` and move on — a statement, a hero number, or a quiet close does not owe
+anyone a graphic:
 
 ```json
+"visual_intensity": "typography-led",
 "visual_translation": {
-  "needed": false, "type": "none", "concept": null,
+  "needed": false, "confidence": "low", "type": "none", "concept": null,
   "communication_job": null, "source": "none", "priority": "optional"
 }
 ```
@@ -308,6 +355,13 @@ Minimum shape:
     "intentional_repetition": "",
     "reference_fidelity": []
   },
+  "visual_strategy": {
+    "mode": "selective",
+    "visual_peaks": [],
+    "supporting_visuals": [],
+    "typography_led": [],
+    "rationale": ""
+  },
   "visual_media_mix": {
     "typography_led": "30-45%",
     "photography": "10-25%",
@@ -331,9 +385,10 @@ Minimum shape:
 }
 ```
 
-`visual_media_mix` and `iconography_direction` are **optional and additive** — omit them for
-a purely typographic deck, or set `iconography_direction.enabled: false` when icons are not
-appropriate. They exist to prevent accidental monotony, never to force categories.
+`visual_strategy`, `visual_media_mix` and `iconography_direction` are **optional and
+additive** — omit them for a purely typographic deck, or set `iconography_direction.enabled:
+false` when icons are not appropriate. When absent, assume `visual_strategy.mode: selective`.
+They exist to plan visual peaks and prevent accidental monotony, never to force categories.
 
 ## Step 8 — write `slide-plan.json`
 
@@ -347,8 +402,10 @@ Minimum packet:
   "purpose": "proof",
   "headline": "Dinner economics create unusually strong unit margins",
   "visual": "photo",
+  "visual_intensity": "visual-led",
   "visual_translation": {
     "needed": true,
+    "confidence": "high",
     "type": "data-viz",
     "concept": "kitchen footprint is a small share of floor area vs. the industry norm",
     "communication_job": "make the margin advantage visible, not just stated",
@@ -372,8 +429,10 @@ Minimum packet:
 }
 ```
 
-`visual_translation` is optional and additive — a slide plan that omits it stays valid, and
-`needed:false` is a first-class choice for typography-led slides.
+`visual_translation`, `visual_intensity` and `visual_translation.confidence` are optional and
+additive — a slide plan that omits them stays valid; `needed:false` / `typography-led` is a
+first-class choice, and an absent `visual_intensity` is read as `supported` at most, never
+forced to `visual-led`.
 
 **`art_direction` decides how meaning is represented, not just how the page is laid out.**
 Describe the visual idea concretely (as in Step 4.5); a `composition` that says
@@ -401,6 +460,12 @@ Review the planned deck in headline order and ask:
 10. **Visual rhythm:** viewed as thumbnails, is the deck accidentally one medium (all type,
    all cards)? Does each major section offer a different visual experience? Adjust the plan,
    not by quota, but where a medium genuinely serves the content better.
+11. **Visual restraint (v0.8.2):** the opposite check — is any slide *more visually complex
+   than its communication task requires*? Did a pure statement get a diagram it didn't earn?
+   Are three or four list items forced into a bespoke icon system? Would **removing** a
+   visual element make the slide stronger? Downgrade those to `supported` or `typography-led`.
+   The deck should have visual **peaks and pauses**; too many consecutive `visual-led` slides
+   read as an infographic — thin them unless the content genuinely requires the density.
 
 Fix the plan now. This is cheaper than fixing rendered slides.
 
@@ -426,6 +491,12 @@ Do **not** default to: icon-in-a-colored-circle; icon above heading above paragr
 icon-card grids; repeated generic line icons; unrelated decorative symbols; emoji;
 illustrations that compete with the message. If an icon does not improve meaning, remove it.
 When the deck does use icons, they follow one `iconography_direction` — not a mix of styles.
+
+**Iconography is normally a *supporting* medium, not a slide's default concept.** Use icons
+only when they improve scanning, several categories genuinely need distinction, and the
+symbol set can be coherent. When simple text is clearer, use text. Do not build a bespoke
+icon system just because a slide happens to contain three or four items — that is the
+over-visualization the restraint gate exists to catch.
 
 ## Text disguised as design
 

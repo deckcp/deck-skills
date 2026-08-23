@@ -45,6 +45,13 @@ These schemas are intentionally plain JSON. Extra fields are allowed when useful
     "detail_level": "low",
     "avoid": ["icons inside circles", "generic corporate icon libraries", "mixed icon styles", "emoji", "3D icons", "decorative icons with no semantic job"]
   },
+  "visual_strategy": {
+    "mode": "minimal | selective | visual-rich",
+    "visual_peaks": [3, 5, 7, 9],
+    "supporting_visuals": [4, 8],
+    "typography_led": [1, 2, 6, 10],
+    "rationale": ""
+  },
   "rhythm": {
     "opening": "",
     "density_arc": "",
@@ -71,12 +78,14 @@ These schemas are intentionally plain JSON. Extra fields are allowed when useful
       "key_points": [""],
       "evidence": null,
       "visual": "photo | chart | diagram | product | table | none",
+      "visual_intensity": "typography-led | supported | visual-led",
       "visual_translation": {
         "needed": true,
-        "type": "photography | pictogram | iconography | diagram | process | timeline | map | spatial-plan | data-viz | illustration | annotated-image | product-visual | symbol | none",
+        "confidence": "high | medium | low",
+        "type": "photography | pictogram | iconography | diagram | process | timeline | map | spatial-plan | data-viz | proportion-graphic | illustration | annotated-image | product-visual | symbol | none",
         "concept": "concrete description of the visual idea, or null",
         "communication_job": "what the audience should understand faster/better, or null",
-        "source": "concept | data | process | geography | product | people | spatial | comparison | sequence | brand | none",
+        "source": "concept | data | process | geography | product | people | spatial | comparison | sequence | categorical | brand | none",
         "priority": "primary | supporting | optional"
       },
       "art_direction": {
@@ -125,3 +134,21 @@ These schemas are intentionally plain JSON. Extra fields are allowed when useful
   `annotated-visual`, `cluster-map`, `proportion-graphic`) are documented in
   `../../deckcp-build-deck/references/layout-archetypes.md` as guidance on existing archetypes,
   not a larger taxonomy.
+
+### Visual restraint fields (v0.8.2 — additive, all optional)
+
+- **`visual_strategy`** (deck level) — `mode` is `minimal | selective | visual-rich`
+  (**default `selective`**; `visual-rich` only for content that genuinely needs heavy
+  explanation — architecture, engineering, technical systems, science, complex workflows).
+  `visual_peaks` / `supporting_visuals` / `typography_led` are slide-number lists that plan
+  **where** visuals go. This object **outranks `visual_media_mix`**. Absent → assume `selective`.
+- **`visual_intensity`** (per slide) — `typography-led | supported | visual-led`. Slide-level
+  intent **wins over the deck media mix**: a `typography-led` slide must not be embellished
+  just because the deck contains diagrams/icons elsewhere. Absent → treat as at most
+  `supported`, never `visual-led`.
+- **`visual_translation.confidence`** — `high | medium | low`. `high` → execute the visual;
+  `medium` → compare against a typographic version, and prefer typography if the visual adds
+  real complexity unless it's marked important; `low` → default to typography-led. Absent →
+  treat as `medium`.
+- Old v0.8.0 plans (no `visual_translation`) and v0.8.1 plans (no `confidence` /
+  `visual_intensity` / `visual_strategy`) remain valid; the defaults above apply.

@@ -121,13 +121,15 @@ DESIGN DIRECTION (binding)
 - composition + typography + imagery + data strategy
 - signature moves + restraint rules
 - rhythm and intentional-repetition rule
+- visual_strategy (mode + peaks/supporting/typography_led; outranks the mix, if present)
 - visual_media_mix (directional, if present) + iconography_direction (if present)
 - anti-patterns
 
 SLIDE PLAN (binding)
 For each slide: archetype, density, rhythm role, focal point, composition, hierarchy,
 imagery/data treatment, accent job, master intent, repetition intent, avoid list,
-and — when present — visual_translation (needed, type, concept, communication_job, priority).
+and — when present — visual_intensity, plus visual_translation (needed, confidence, type,
+concept, communication_job, priority).
 ```
 
 Prefer `brand-kit.json.design_system` over prose when present. Do **not** dump the
@@ -272,6 +274,23 @@ emit a paragraph or bullet list instead.
   ratio. `visual_media_mix` is a deck-level guard against accidental monotony, not a per-slide
   quota.
 
+**Restraint — slide intent wins (v0.8.2).** Honor `visual_intensity` and
+`visual_translation.confidence`, and let slide-level intent override the deck media mix:
+
+- `visual_intensity: "typography-led"` → do **not** embellish the slide just because the deck
+  contains diagrams/icons elsewhere. At most one subtle device. Slide intent beats the mix.
+- `confidence: "high"` → execute the visual. `confidence: "medium"` → if the visual would add
+  substantial complexity, prefer the simpler typography-led solution unless the plan marks the
+  visual important (a `visual_peak` or `priority:"primary"`). `confidence: "low"` → default to
+  restraint (typography-led). Absent confidence → treat as medium.
+- Respect `visual_strategy`: build the planned **visual_peaks** as their intent specifies,
+  keep **supporting_visuals** light (one pictogram/symbol/micro-chart, typography still
+  dominant), and leave **typography_led** slides alone. `visual_strategy` outranks the mix.
+- **Remove before adding:** before finalizing a slide, ask whether removing a visual element
+  (a redundant icon, a duplicate label, an unnecessary container/line, a competing focal
+  point) would make it stronger. Prefer subtraction. Use the least-complex intervention that
+  communicates (typography → +one device → simple semantic visual → diagram → complex viz).
+
 **Escalation when the server can't execute the visual accurately:**
 
 1. do **not** silently replace the visual with a paragraph;
@@ -354,4 +373,6 @@ Then point onward:
 - Never impose a universal DeckCP chrome. Masters come from the active brand/reference.
 - Never drop a required `visual_translation` to a paragraph without flagging it and
   attempting precise authoring. And never force a graphic, icon, or diagram onto a
-  `needed:false` slide — typography-led is a valid outcome.
+  `needed:false` / `typography-led` slide — typography-led is a valid outcome, and slide
+  intent + `visual_strategy` outrank the deck media mix. When in doubt at `confidence:"low"`
+  or `"medium"`, prefer the simpler composition and remove before adding.
