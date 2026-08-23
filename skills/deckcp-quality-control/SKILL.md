@@ -1,191 +1,365 @@
 ---
 name: deckcp-quality-control
-description: The mandatory final gate before any DeckCP deck is called done — render every slide, score the deck on brand accuracy, alignment, spacing consistency, visual polish, repetitive layouts, and generic AI-looking design, then fix what fails and re-score. Use when the user says "is this deck done", "QC the deck", "does it look right", "check the design", or automatically at the end of deckcp-build-deck and after any multi-slide edit. Requires the DeckCP MCP connected.
-argument-hint: "[--deck <slug>] [--kit ./deck-brief/brand-kit.json] [--max-passes 3]"
+description: The mandatory final gate before any DeckCP deck is called done — render every slide, review the whole deck as a sequence, score brand accuracy, design-intent/reference fidelity, alignment, spacing consistency, visual polish, intentional rhythm/repetition, and generic AI-looking design, then fix what fails and re-score. Use automatically at the end of deckcp-build-deck and after any multi-slide edit. Requires the DeckCP MCP connected.
+argument-hint: "[--deck <slug>] [--kit ./deck-brief/brand-kit.json] [--direction ./deck-brief/design-direction.json] [--plan ./deck-brief/slide-plan.json] [--max-passes 3]"
 ---
+# Quality Control (the gate — pixels + intent, not generation success)
 
-# Quality Control (the gate — nothing ships without a score)
+A deck is not done when generation returns. It is done when it has been rendered,
+looked at, compared with the system it was supposed to follow, fixed, and rendered
+again.
 
-A deck is not done when generation finishes. It's done when it has been
-rendered, looked at, scored against the brand kit it was built on, and the
-failures have been fixed. This skill is that gate, and it is **not optional**:
-`deckcp-build-deck` calls it last, `deckcp-onboard` promises it, and "done"
-means *passed QC*.
+This gate is mandatory.
 
-Six dimensions, each scored 1–5. **Pass = every dimension ≥ 4 and zero
-blockers.** Anything less goes back through the fix loop.
+**Seven dimensions, each scored 1–5. Pass = every dimension ≥4 and zero blockers.**
+
+1. Brand accuracy
+2. Design-intent / reference fidelity
+3. Alignment
+4. Spacing consistency
+5. Visual polish
+6. Intentional rhythm / repetition
+7. Generic-AI look
 
 ## Why this is mixed-tier
 
-- **The scan is a script.** Off-palette hexes, Tailwind colour classes that
-  smuggle in a hue, `text-sm` below the 22px floor, a gap scale with nine
-  values, three identical skeletons in a row, "seamless" — a script finds all
-  of that for free and never gets bored on slide 11.
-  (`scripts/scan-deck.js`.)
-- **The look is main-loop.** Whether the title baseline wanders, whether a
-  chart reads, whether the deck looks *designed* or *generated* — that's
-  eyes and taste. Render and look. Don't delegate the judgment to a cheaper
-  model; this is the last thing between the user and an embarrassing deck.
-- **The fixes are recipes** from `deckcp-edit` / `deckcp-author-slides`:
-  theme writes, class swaps, one `rewrite_slide` where copy must change.
+- **Script for mechanical scans.** Off-palette colors, tiny text, spacing-token sprawl,
+  suspicious repeated skeletons, and common generic patterns are cheap to detect.
+- **Main-loop judgment for pixels.** Whether a page feels composed, whether a reference
+  was actually matched, whether repetition is intentional, and whether the deck has
+  rhythm require visual judgment.
+- **Recipes for fixes.** Use deck-wide theme/master fixes before per-slide rewrites.
 
-## Step 0 — load the reference
+## Step 0 — load all references, not just the palette
 
 ```bash
-cat ./deck-brief/brand-kit.json 2>/dev/null    # the system the deck was built on
+cat ./deck-brief/brand-kit.json 2>/dev/null
+cat ./deck-brief/design-direction.json 2>/dev/null
+cat ./deck-brief/slide-plan.json 2>/dev/null
 ```
 
-```
-get_deck { slug }          # structure, ids, orders — AND the server's deck_variety score
-get_brand { brand_slug }   # if there's no kit: the brand lockdown is the fallback reference
+Then:
+
+```text
+get_deck { slug }
+get_brand { brand_slug }
 ```
 
-Save the `get_deck` JSON to `./deck-brief/deck.json` (write the tool result
-to the file — the scanner reads it). If there is **no brand kit and the
-brand has no palette**, stop: the deck has no reference to be accurate *to*.
-Run `deckcp-brand-kit` first, apply it, then come back.
+Save `get_deck` JSON to `./deck-brief/deck.json` for the scanner.
 
-## Step 1 — scan (zero tokens)
+Reference precedence for QC:
+
+1. `slide-plan.json` — what this slide was supposed to communicate/compositionally do
+2. `design-direction.json` — the deck-level visual thesis and build mode
+3. `brand-kit.json.design_system` — structured brand/reference rules
+4. legacy brand-kit prose fields
+5. DeckCP brand lockdown only as a fallback
+
+If no brand kit exists and the brand has no usable system, stop and run
+`deckcp-brand-kit`. If the deck was built without `design-direction.json`, run
+`deckcp-design-director` before calling the deck finished; otherwise there is no design
+intent to evaluate.
+
+## Step 1 — mechanical scan
 
 ```bash
 node scripts/scan-deck.js ./deck-brief/deck.json --kit ./deck-brief/brand-kit.json --out ./deck-brief
 ```
 
-Prints PASS/WARN/FAIL per dimension and writes `qc-scan.json`. What it
-catches, by dimension:
+The scanner remains useful, but some signals are **advisory rather than automatic
+failures** now:
 
-| Dimension | Mechanical signals |
+| Signal | How to interpret it |
 | --- | --- |
-| Brand accuracy | hex literals outside the kit palette; `text-emerald-500`-style colour classes; >2 `Card accent` hues (rainbow cards); gradients the kit didn't ask for; **chrome inconsistency** — content slides missing the shared master while others have it, split across >2 masters, or an uneven eyebrow |
-| Alignment | `style={{}}` (stripped on write → unpositioned), `items={[…]}` (dropped) — everything else is pixels |
-| Spacing consistency | more than ~5 distinct gap tokens or ~8 padding tokens deck-wide; raw `gap-7`/`p-9` used once; >4 type sizes on one slide |
-| Visual polish | raw `text-xs…xl` (under the 22px floor); emoji; >130 words or <4 words on a content slide; **no imagery** on a ≥5-slide deck (unless the kit says mark-driven); **non-Latin script present with no matching Noto font applied** (would render as boxes/blanks) |
-| Repetitive layouts | runs of ≥3 identical layout skeletons; one skeleton on >50% of slides; single variant + no imagery; the server's `deck_variety` score |
-| Generic-AI look | icon-card grids on ≥40% of slides; dark-with-gradient on ≥50%; buzzwords (seamless, unlock, leverage, next-generation…); >6 icons per slide; topic-label titles |
+| Off-palette colors / foreign color classes | Usually a real brand failure unless the kit explicitly allows the neutral |
+| Missing / inconsistent master | Failure only when the design system says that master/chrome should repeat |
+| Tiny text / overflow / dropped style props | Real technical / polish failure |
+| Many gap/padding tokens | Likely spacing inconsistency |
+| Repeated layout skeletons | Investigate against `slide-plan.json.repetition_intent`; repeated case studies may be correct |
+| No photography | Failure only when imagery strategy calls for photography; not for intentionally type/UI/diagram-led systems |
+| Icon-card / gradient patterns | Generic-AI warning unless explicitly supported by the active design system |
 
-Also run `check_slide` on every slide — it's free and its `balance.issues`
-feed the alignment/polish scores:
+Also run `check_slide` on every slide:
 
-```
-check_slide { mdx_content, frontmatter }   # per slide; note valid:false and balance.issues
-```
-
-A clean scan is **necessary, not sufficient**. Go look.
-
-## Step 2 — render the whole deck and look at every slide
-
-```
-render_slides { deck_slug, format:'image' }     # every slide, your eyes only
+```text
+check_slide { mdx_content, frontmatter }
 ```
 
-Open every image. Not a sample — every one. **If any slide holds non-Latin
-text, this render is where you confirm it — every Korean/Japanese/Chinese/
-Thai/Arabic character shows a real glyph, not a box (□), a blank gap, or a
-Latin-looking fallback.** A gap means the matching Noto font isn't loaded
-(a `deck_theme` slot must name it as primary) or the text node doesn't apply
-it — fix per the table below, never by deleting the language. Then score. The rubric below is
-what "4" means; write a one-line justification per dimension naming the
-worst slide.
+Record `valid:false`, structure errors, and `balance.issues`.
 
-### Brand accuracy — does it look like *their* brand, as one family?
-- **5** every colour is a kit colour in its kit role (accent on numbers, not on body); logos are the real files at a deliberate size; type is the kit pairing; **the chrome is identical on every content slide** — same eyebrow, same headline treatment, same footer rule, same left margin — because they share a master; the signature device is present throughout.
-- **4** one slide leans on a neutral the kit didn't name, or the accent does two jobs, or one slide's chrome sits slightly off the others.
-- **≤3** a colour not in the kit, a wrong logo variant (colour logo on a dark slide), a font that isn't the kit's, the device missing for stretches, or **the chrome visibly differs slide to slide** (eyebrow present here and gone there, headlines at different sizes/positions) — the tell that each slide was built alone instead of on a system.
+A clean scan is necessary, not sufficient.
 
-### Alignment — do edges line up?
-- **5** titles share a baseline across slides; left edges of title, body, and grid agree; grids have equal gutters; nothing kisses the canvas edge; charts sit on the same grid as text.
-- **4** one slide's content sits visibly lower/higher than its neighbours.
-- **≤3** optical centring on some slides and top-aligned on others; a card grid with one short card; text overlapping; anything `check_slide` balance flags as overflow.
+## Step 2 — render every slide
 
-### Spacing consistency — is there a rhythm?
-- **5** one gap scale (`deck-gap-sm/md/lg`) used consistently by role; card padding identical deck-wide; the page margin respected on every slide.
-- **4** one outlier slide.
-- **≤3** cards with different padding on different slides; gaps that change per slide; content crowding the margin on some slides and floating on others.
-
-### Visual polish — would a designer sign it?
-- **5** clear hierarchy (2–3 sizes per slide); charts legible at a glance with the kit's colours; **real imagery, cropped with intent, carrying a good share of slides** (per the kit's imagery direction); no orphan words, no widows in titles; nothing under 22px; no empty bottom third.
-- **4** one chart with a default colour, one awkward crop, or imagery a little sparse.
-- **≤3** collapsed content in the middle of the canvas; thin cards with empty bottoms; a table that clips; tiny text; emoji; or a ≥5-slide deck with **no photography at all** (a wireframe), unless the brand is deliberately mark-driven.
-
-### Repetitive layouts — does the deck have pacing?
-- **5** no two consecutive slides share a skeleton; at least one full-bleed or single-statement moment; a tonal shift (section page, photo band, stat slide) every 3–4 slides.
-- **4** two consecutive similar slides, once.
-- **≤3** three-in-a-row identical grids; a deck that is all cards or all bullets; `deck_variety` under 70.
-
-### Generic-AI look — would anyone guess a model made this?
-- **5** it could sit on deckcp.com/templates: one device, one structural language, restraint, specific copy.
-- **4** one icon-card grid, defensible.
-- **≤3** icon-card grids everywhere; purple-on-dark gradients; three-column "features"; stock-metaphor icons (rocket, lightbulb, handshake); buzzword titles; centred-everything; every slide the same dark slab.
-
-Record the scorecard in `./deck-brief/qc-report.md`:
-
+```text
+render_slides { deck_slug, format:'image' }
 ```
+
+Open **every** slide image.
+
+For non-Latin text, confirm every glyph renders correctly. Never "fix" missing glyphs
+by deleting or romanizing the user's language; load/apply the correct Noto face.
+
+## Step 2.5 — deck-level thumbnail / contact-sheet pass
+
+Before grading individual pages, inspect the deck **as a sequence**. If the runtime can
+show the renders together, use that thumbnail/contact-sheet view; otherwise mentally
+scan the rendered slide set in order.
+
+Look for deck-level problems that are easy to miss one slide at a time:
+
+- every page has the same weight / density
+- six generic card grids cluster together
+- image rhythm disappears midway
+- section turns are too weak or too frequent
+- dark/light shifts feel random
+- one slide is dramatically denser than its neighbors without narrative reason
+- a repeated series fails to look like a deliberate series
+- the deck begins with one design language and ends with another
+- `reference-exact` geometry drifts over the sequence
+
+Write 2–4 deck-level observations before scoring individual dimensions.
+
+## Step 3 — score seven dimensions
+
+### 1. Brand accuracy — does it belong to this company?
+
+**5**
+- palette colors are used in their intended jobs
+- real logos/assets are used correctly
+- mapped typography is consistent
+- source-derived signature devices appear with restraint
+- if chrome is enabled, its repeated geometry is consistent via masters
+- if chrome is disabled, the deck does not invent one
+
+**4**
+- one minor neutral / accent-role inconsistency or one slightly off brand asset treatment
+
+**≤3**
+- wrong colors/fonts/logo variant
+- generic replacement assets when real ones exist
+- invented visual language conflicting with the brand/reference
+- repeated chrome differs materially where it should be invariant
+
+### 2. Design-intent / reference fidelity — did we build the deck we planned?
+
+Read `design-direction.json` + the corresponding `slide-plan.json` packet for every slide.
+
+**5**
+- deck-level visual thesis is obvious
+- planned focal point is obvious on every slide
+- planned archetype/density/composition are respected or improved without changing intent
+- typography, imagery, data, and accent behavior match the direction
+- for `reference-exact`, measured hard rules are visibly honored: margins, headline geometry,
+  spacing, image ratios, container behavior, chrome, and scale relationships
+
+**4**
+- one or two slides drift slightly but still clearly belong to the intended direction
+
+**≤3**
+- generator ignored the art-direction packets
+- reference match is mostly colors/fonts while geometry is wrong
+- planned low-density slides became card grids
+- image-led slides became icon-led
+- slide focal points are ambiguous
+
+This dimension is the main defense against "the brand kit was correct but the deck still
+looks nothing like the company."
+
+### 3. Alignment — do edges and baselines resolve cleanly?
+
+**5**
+- alignment follows the active grid/reference
+- repeated elements share exact baselines/edges
+- panels and charts align with text
+- no clipping/overlap/edge kissing
+
+**4**
+- one minor optical or baseline outlier
+
+**≤3**
+- wandering title positions
+- inconsistent grid edges
+- accidental centering/top alignment switches
+- any overflow / collision
+
+### 4. Spacing consistency — is there a deliberate rhythm?
+
+**5**
+- spacing follows the kit's structured spacing scale or measured reference
+- same roles use same gaps/padding
+- margins are consistent unless a deliberate full-bleed composition overrides them
+
+**4**
+- one spacing outlier
+
+**≤3**
+- arbitrary per-slide gaps
+- inconsistent container padding
+- crowded margins on some slides and floating content on others
+
+### 5. Visual polish — would a senior designer sign it?
+
+**5**
+- clear hierarchy
+- deliberate crops / product framing
+- charts/tables legible at a glance
+- no orphan/widow problems that visibly hurt composition
+- no tiny text or accidental empty zones
+- density feels intentional
+- imagery presence follows the direction rather than a generic quota
+
+**4**
+- one awkward crop, wrap, or chart detail
+
+**≤3**
+- thin pseudo-cards with empty bottoms
+- collapsed content in the center
+- clipped table/chart
+- tiny text
+- emoji as design elements
+- decorative icons substituting for real evidence/assets
+
+### 6. Intentional rhythm / repetition — does the sequence feel composed?
+
+Do **not** score by a simplistic "no two consecutive layouts" rule.
+
+**5**
+- density rises/falls intentionally
+- strongest claims receive strongest visual emphasis
+- repeated layouts clearly serve comparison/series/rhythm
+- chapter turns and pauses occur when the story needs them
+- no skeleton dominates merely because it is the generator's favorite
+
+**4**
+- one stretch feels slightly repetitive or one transition is weak
+
+**≤3**
+- accidental three-in-a-row generic skeletons
+- all cards / all bullets / all same-dark-panel
+- random novelty where repeated structure would be clearer
+- a repeated case-study series changes layout for no reason
+
+The server `deck_variety` score is a clue, not the verdict.
+
+### 7. Generic-AI look — could this have been made for any company?
+
+**5**
+- visual choices are source/content-specific
+- restraint is evident
+- composition does more work than decoration
+- no obvious generic motif dominates
+
+**4**
+- one defensible generic pattern that does not overwhelm the system
+
+**≤3**
+- repeated equal rounded cards
+- purple/dark glows without brand evidence
+- generic three-column feature slides
+- stock-metaphor icons
+- arbitrary pills / title underlines / stripes
+- centered-everything
+- vague buzzword headlines
+- "premium" expressed mainly as beige + serif with no brand reason
+
+## Step 4 — write the scorecard
+
+`./deck-brief/qc-report.md`:
+
+```markdown
+# Deck QC
+
+## Deck-level observations
+- ...
+
 | Dimension | Score | Worst slide | Why |
+| --- | ---: | --- | --- |
+| Brand accuracy |  |  |  |
+| Design-intent / reference fidelity |  |  |  |
+| Alignment |  |  |  |
+| Spacing consistency |  |  |  |
+| Visual polish |  |  |  |
+| Intentional rhythm / repetition |  |  |  |
+| Generic-AI look |  |  |  |
 ```
 
-## Step 3 — fix what fails (cheapest correct tool, then re-check)
+## Step 5 — fix failures with the cheapest correct tool
 
-Work the failures top-down: deck-wide fixes first (they clear many slide
-findings at once), then per slide. Map each to its tool:
+Work deck-wide first, then per-slide.
 
 | Failure | Fix |
 | --- | --- |
-| Wrong accent/fonts/mood deck-wide | `update_deck { deck_theme: {…} }` from the kit's payload (`check-kit.js` prints it), then `render_slides { refresh:true }` |
-| Chrome differs slide to slide (eyebrow/headline/footer not shared) | build ONE content master carrying the eyebrow + headline + footer rule (`deckcp-brand-kit` Step 4c), `set_masters`, then set `frontmatter.master` on every content slide + `frontmatter.sectionLabel` for the eyebrow; `render_slides refresh:true` |
-| Device missing / chrome inconsistent | put it in a master (`get_masters` → edit → `set_masters`), opt slides in via `frontmatter.master` |
-| No imagery / wireframe look | pull the user's real photos with `deckcp-gather-assets` (or `search_assets` for approved brand imagery), place them per the kit's imagery treatment (full-bleed, framed-in-panel, cutout-on-dark); never substitute decorative icons |
-| Off-palette hex or colour class on a slide | mechanical MDX edit: swap to the kit colour or a slate neutral; `upsert_slides` at the same `slide_order` |
-| Rainbow `Card accent`s | pick one accent, replace on every Card (`upsert_slides`) |
-| `text-sm` etc. | replace with `deck-text-*`; re-budget the slide's height |
-| Gap/padding sprawl | normalise to `deck-gap-md` (grids) / `deck-gap-sm` (inside cards) / `deck-gap-lg` (sections) |
-| Repeated skeleton run | rebuild the *middle* slide(s) of the run as a different archetype — one big stat, a photo band (`deck-photo-band`), a `<Table variant="rules">`, a single-line statement at `deck-text-9xl`+; `rewrite_slide` with an explicit archetype instruction if the copy can move |
-| Icon-card grids | keep the one that earns it; convert others to a hairline list (`<Prose>` bullets), a table, or a numbered `ProcessSteps` |
-| Buzzword titles / label titles | `rewrite_slide` with the specific claim — or hand to `deck-critique` if the problem is the story, not the words |
-| Non-Latin text renders as boxes/blanks (Korean/JP/Chinese/Thai/Arabic/…) | LOAD the matching Noto font, don't romanize: `update_deck { deck_theme: { fontHeading: "'Noto Sans KR', 'Open Sans', sans-serif" } }` (loader slot; or make it the deck's body/display font), then set `fontFamily: "'Noto Sans KR', <brand>, sans-serif"` on the script's text nodes; `render_slides refresh:true` and confirm glyphs. Full map in brand-kit references/multilingual-fonts.md |
-| The ₩/฿/¥/₹ currency glyph shows as tofu | it's the same fix — apply the matching Noto face (it carries the symbol); no need to spell out the currency |
-| Off-palette **chart** segments, or a **hero/shell** accent that's the wrong color | `rewrite_slide` often WON'T fix these — chart segment colors are component props it leaves alone, and a hero wordmark/accent is frequently shell- or theme-driven or a hardcoded hex. Hand-author the slide with `upsert_slides` (slide_tree) using accent-aware components, or fix the source (deck_theme / a brand record / a master). If the whole deck renders a wrong accent, suspect `defaultMood` overriding `deck_theme.accent` (clear the mood) or a borrowed brand injecting its own — a deck-theme tweak fixes all slides at once, a per-slide rewrite fixes one |
-| Overflow / collapsed content (`balance.issues`) | follow `get_authoring_guide topic='contract'` → FILL THE CANVAS / DO NOT OVERFLOW rules |
+| Wrong accent/fonts/mood deck-wide | `update_deck { deck_theme:{…} }`, then full refresh render |
+| Source-derived chrome should repeat but drifts | build/fix the appropriate master, opt intended slides into it |
+| Chrome was invented but kit says none | remove the unnecessary master/decor rather than normalizing it |
+| Reference geometry drifts | use measured rules; author geometry-sensitive slides via `deckcp-author-slides` / `upsert_slides` |
+| Generator ignored slide archetype/composition | rewrite with the exact `slide-plan.json.art_direction`; if it ignores again, hand-author the slide |
+| Off-palette slide color | mechanical MDX/class swap to kit role |
+| Rainbow card accents | reduce to the kit's explicit color jobs |
+| Tiny text | restructure density; do not merely shrink more |
+| Spacing sprawl | normalize to the kit spacing scale / allowed deck gap tokens |
+| Accidental repeated skeleton | change the weakest slide to the semantic archetype in its art-direction packet |
+| Intentional repeated series looks inconsistent | make the series **more** consistent, not more varied |
+| Generic icon cards | convert to semantic list/table/process/media composition, using real assets where relevant |
+| No imagery but direction requires it | use user/approved imagery via `deckcp-gather-assets` / `search_assets` |
+| Imagery added but direction is intentionally typographic/UI-led | remove decorative photography |
+| Buzzword/topic-label title | rewrite to the specific conclusion; route story weakness to `deck-critique` |
+| Non-Latin glyphs fail | load/apply matching Noto font; never romanize unless requested |
+| Chart/shell accent hardcoded wrong | hand-author or fix source theme/master rather than trusting `rewrite_slide` |
+| Overflow/collision | follow authoring contract; re-budget content or split it |
 
-After every write: `check_slide` → `render_slides { slide_orders:[N], format:'image' }` → look.
-After deck-wide writes: `render_slides { refresh:true }` and re-run the scan.
+After every per-slide write:
 
-**Fix deck-wide before per-slide, and rewrite serially.** A single
-`update_deck { deck_theme }` (accent, fonts, clearing `defaultMood`) corrects
-every slide at once — always try that before touching slides one by one. When
-you do run `rewrite_slide`, issue the calls **sequentially, not in a parallel
-burst**: the server-side copilot is rate-limited and a burst returns 429s that
-silently drop your fixes.
-
-**Three passes max.** If the deck still fails after three, the problem is
-upstream — the kit is wrong (re-run `deckcp-brand-kit`) or the story is
-wrong (`deck-critique`) — say which, and hand off instead of grinding.
-
-## Step 4 — re-score, then report
-
-Re-render **every** slide after the last fix (not just the ones you touched —
-a theme write changes all of them) and re-score all six dimensions. Finish
-`./deck-brief/qc-report.md` with before/after scores, what was changed, and
-anything still open with the reason it was left.
-
-Then show the user:
-
-```
-render_slides { deck_slug }     # the user-visible viewer
+```text
+check_slide → render that slide → look
 ```
 
-and say, in one paragraph: the scorecard, the three most visible changes,
-and the verdict — **PASSED** (every dimension ≥ 4) or **NOT PASSED** with
-the blocking dimension and the recommended upstream skill.
+After deck-wide writes:
+
+```text
+render_slides { refresh:true }
+```
+
+Then re-run the mechanical scan.
+
+**Rewrite serially, not in a parallel burst** if the server-side copilot is rate-limited.
+
+## Step 6 — max three passes
+
+Three QC passes maximum.
+
+If the deck still fails, diagnose upstream:
+
+- wrong / incomplete brand system → `deckcp-brand-kit`
+- weak / generic art direction → `deckcp-design-director`
+- wrong story / too much content → `deck-outline` or `deck-critique`
+- server cannot hold a reference-exact system → `deckcp-author-slides` for the affected pages
+
+Do not grind endlessly on local symptoms.
+
+## Step 7 — final render + report
+
+After the last write, render **every slide again**. Re-score all seven dimensions.
+
+Then show the user-visible deck:
+
+```text
+render_slides { deck_slug }
+```
+
+Report:
+
+- PASS / NOT PASSED
+- seven scores
+- three most visible improvements
+- any remaining blocker and the upstream skill that owns it
 
 ## Guardrails
 
-- **Never report "done" without a render after the last write.** Scores come
-  from pixels you looked at, not from a clean scan.
-- Every slide, every pass. Sampling is how the bad slide 9 ships.
-- Don't fix the story here. A weak argument with perfect alignment is
-  `deck-critique`'s problem; flag it and route.
-- Don't widen scope: no new slides, no reordering for taste, no copy changes
-  beyond what a failure requires. One failure → one fix → one check.
-- Keep tokens low: report by slide number and finding, never paste MDX back.
-- The bar is the templates page, not "better than before." If it wouldn't
-  sit in that gallery, say so — even when the user is in a hurry.
+- Never report done without a render after the last write.
+- Every slide, every pass. Sampling is how one broken slide ships.
+- The scanner is evidence, not taste. Do not turn its repetition heuristics into universal design law.
+- Do not fix story problems with decorative design.
+- Do not widen scope with new slides/reordering unless the upstream narrative step explicitly calls for it.
+- The bar is: does this look deliberately designed for **this** brand/story/reference, not merely "better than before"?

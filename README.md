@@ -25,10 +25,10 @@ called done until it passes a quality gate.
 ## The workflow
 
 ```
-/deck-interview → /deck-outline → /deckcp-brand-kit → /deckcp-build-deck → /deckcp-share → /deckcp-analyze
-   brief.json       outline.json    brand-kit.json       generate → QC gate     out the door     who viewed, who to
-                    ↓ /deck-critique  (extract or          ↓ /deckcp-quality-control                 follow up with
-                      pressure-test    synthesize)           scored + fixed before "done"
+/deck-interview → /deck-outline → /deckcp-brand-kit → /deckcp-design-director → /deckcp-build-deck → /deckcp-share → /deckcp-analyze
+   brief.json       outline.json    brand-kit.json          design-direction.json      generate/author → QC     out the door   who viewed / follow-up
+                    ↓ /deck-critique  extract/synthesize     + slide-plan.json            ↓ /deckcp-quality-control
+                      pressure-test                                                         scored + fixed before "done"
 ```
 
 1. **`/deck-interview`** — gets grilled *by* your agent: who is this deck for,
@@ -45,15 +45,21 @@ called done until it passes a quality gate.
    [deckcp.com/templates](https://deckcp.com/templates): one surface pair,
    one accent, one type pairing, one signature device. Then writes it into
    the DeckCP theme (and brand masters, when you own the brand).
-4. **`/deckcp-build-deck`** — drives the [DeckCP](https://deckcp.com)
-   pipeline: generate slides on that system, validate each one, render —
-   then runs **`/deckcp-quality-control`**, the mandatory gate: every slide
-   rendered and scored on brand accuracy, alignment, spacing consistency,
-   visual polish, repetitive layouts, and "does this look AI-made", and
-   fixed until it passes.
-5. **`/deckcp-share`** — invite people with roles, or set the gate: public
+4. **`/deckcp-design-director`** — turns the outline + brand/reference into
+   the actual art direction for this deck: one visual thesis, build mode
+   (`fast` / `brand` / `reference-exact`), deck rhythm, and a binding
+   composition packet for every slide. This is the step that prevents the
+   generator from interpreting brand prose however it wants.
+5. **`/deckcp-build-deck`** — drives the [DeckCP](https://deckcp.com)
+   pipeline from the brand kit + design plan. It uses constrained server
+   generation for fast/brand work and can route geometry-sensitive reference
+   matches to precise manual authoring. Then it runs **`/deckcp-quality-control`**:
+   every slide rendered and scored on brand accuracy, design/reference fidelity,
+   alignment, spacing, visual polish, intentional rhythm/repetition, and
+   "does this look AI-made", and fixed until it passes.
+6. **`/deckcp-share`** — invite people with roles, or set the gate: public
    link, email-gated (views become identified leads), or password.
-6. **`/deckcp-analyze`** — read the per-slide dwell curve like an editor: the
+7. **`/deckcp-analyze`** — read the per-slide dwell curve like an editor: the
    slide where viewers drop off is your next edit. Then `/github-lookup` +
    `/deckcp-email` to work the follow-up.
 
@@ -109,9 +115,10 @@ the full 34-tool surface is documented in [`MCP-TOOLS.md`](MCP-TOOLS.md).
 | `deck-critique` | 1 | Pressure-test the story: headline-only read, the skeptic, the 5-second test, proof audit, the ask. Seven findings max, prioritized, with the fix and the skill that makes it. |
 | `github-lookup` | 1 | Resolve a person from GitHub — username, commit SHA, or email — to a name, profile, and contact. Zero tokens (`gh` CLI). |
 | `deckcp-gather-assets` | 2 | Find your own images/videos on disk, dedupe by hash, upload to DeckCP — so slides use your real photos, not stock art. |
-| `deckcp-brand-kit` | 2 | The design system the deck is built on: extract the real brand (SVG hex, site CSS/fonts, brand guide, PPTX theme — every token cited) or synthesize one to the deckcp.com/templates standard. Validates contrast + fonts; writes theme/masters. |
-| `deckcp-build-deck` | 2 | Brief/outline → brand kit → generate → validate every slide → render → quality gate. Orchestration, minimal tokens. |
-| `deckcp-quality-control` | 2 | The mandatory final gate: script scan + render every slide, score six dimensions (brand, alignment, spacing, polish, repetition, generic-AI look), fix what fails, re-score. "Done" means passed. |
+| `deckcp-brand-kit` | 2 | The design system the deck is built on: extract the real brand/reference or synthesize one; now records a structured `design_system` (geometry, type scale, imagery, containers, color jobs, chrome, measured fidelity rules) in addition to legacy prose. |
+| `deckcp-design-director` | 2 | Outline + brand kit → `design-direction.json` + `slide-plan.json`: visual thesis, build mode, deck rhythm, semantic archetype, density, focal point, composition, hierarchy, image/data treatment, and avoid-list for every slide. |
+| `deckcp-build-deck` | 2 | Brief/outline → brand kit → design direction → constrained generate or reference-exact authoring → validate every slide → render → quality gate. |
+| `deckcp-quality-control` | 2 | Mandatory final gate: scan + render every slide + sequence review; score seven dimensions (brand, design/reference fidelity, alignment, spacing, polish, intentional rhythm, generic-AI look), fix and re-score. |
 | `deckcp-read-deck` | 2 | Orient on an existing deck: structure, rendered slides, and the story its headlines tell. The step before any edit. |
 | `deckcp-edit` | 2 | Deterministic edit recipes — theme (colors/fonts/margins), update a slide, reorder, duplicate, delete — validated and rendered after every change. |
 | `deckcp-author-slides` | 2 | Manual editing: hand-write slides against the rendering contract — exact words, exact layout, charts, presets, masters — when the pipelines shouldn't decide. |
@@ -141,8 +148,9 @@ Planned next (see [`manifest.json`](manifest.json) for the full inventory and st
   for mechanical classification; **your own model, not a downgraded one**, for
   the judgment steps — interview, outline, critique, the QC look — because
   that's where deck quality actually comes from.
-- **A real system, then a real gate.** Generation never starts on an empty
-  brand, and nothing is "done" until it has been rendered, scored, and fixed.
+- **A real system, a real art direction, then a real gate.** Generation never
+  starts on an empty brand or an unplanned visual language, and nothing is
+  "done" until it has been rendered, scored, and fixed.
 - **Useful before you sign up.** Tier 1 stands on its own. If it makes your
   story better, Tier 2 is waiting.
 

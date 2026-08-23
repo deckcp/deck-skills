@@ -54,7 +54,7 @@ order of how much they make a deck read as "the same team":
 4. **Containers** — panel/card fill, radius, border, padding, proportions
    (e.g. "dark panel = left 44% of the band").
 5. **Color jobs** — which hex does which job, and nothing else.
-6. **Pacing** — the sequence of body archetypes; no two consecutive alike.
+6. **Pacing** — the sequence of body archetypes, and where the reference repeats one on purpose (a series, a comparison) versus varies it.
 
 ## 5. Apply the rules with a generator, not by hand
 

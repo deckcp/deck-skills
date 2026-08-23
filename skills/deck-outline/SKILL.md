@@ -58,14 +58,18 @@ not the topic. "Market" → "The wedge is a $4B niche nobody serves well." A rea
 who skims only the headlines should get the whole argument.
 
 For each slide capture: `purpose`, `headline` (the conclusion), `key_points`
-(2–4 max), `evidence` (which proof from the brief, if any), and `visual` (what
-carries it — chart, diagram, photo, product shot).
+(2–4 max), `evidence` (which proof from the brief, if any), and a **coarse**
+`visual` role (chart, diagram, photo, product, table, none).
 
-Vary the `visual` on purpose. Three "chart" slides in a row, or eight slides
-whose visual is "none", is how a deck ends up as the same card grid eight
-times — the QC gate will flag it later, and it's cheaper to plan pacing here:
-a full-bleed statement or photo every 3–4 slides, one big-number slide, one
-table where the content is actually rows × columns.
+Keep this step narrative-first. Do **not** invent exact compositions here; the
+new `deckcp-design-director` step does that after the brand/reference has been
+understood. The outline only answers: *what kind of evidence or visual object
+should carry the claim?*
+
+Plan enough pacing to avoid an all-text deck, but do not force artificial
+variety. Two consecutive charts or three repeated case-study layouts can be
+excellent when the content benefits from comparison. Repetition becomes a
+problem only when it is accidental.
 
 ## Step 3 — cut
 
@@ -91,7 +95,7 @@ Then fill `./deck-brief/outline.json`:
       "headline": "conclusion, not topic",
       "key_points": ["", ""],
       "evidence": "which proof, or null",
-      "visual": "chart | diagram | photo | product | none"
+      "visual": "chart | diagram | photo | product | table | none"
     }
   ],
   "cut": ["what you removed and why"]
@@ -114,9 +118,13 @@ Then route, in this order:
    built on (extract the user's real brand, or synthesize one to the
    deckcp.com/templates standard). Do this *before* building; a generator
    with no system defaults to the generic look.
-2. **`deckcp-build-deck`** — generates from this outline, then runs the
-   `deckcp-quality-control` gate.
-3. **`deck-critique`** — again on the built deck, if the story shifted
+2. **`deckcp-design-director`** — combine this story with the brand kit and
+   create `design-direction.json` + `slide-plan.json`: deck-level art direction,
+   density/rhythm, semantic archetypes, and a concrete composition packet for
+   every slide. This is the bridge between "on-brand" and "actually designed."
+3. **`deckcp-build-deck`** — builds from the outline + brand kit + design plan,
+   then runs the `deckcp-quality-control` gate.
+4. **`deck-critique`** — again on the built deck, if the story shifted
    during generation.
 
 ## Guardrails

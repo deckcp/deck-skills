@@ -1,114 +1,133 @@
-# Layout Archetypes — the variety a premium deck needs
+# Layout Archetypes — semantic compositions, not template roulette
 
-A generated deck looks generated because every slide is the same skeleton —
-usually a title over a 3-icon-card row. A deck looks *designed* because it
-paces different layouts against a constant chrome, the way the templates at
-[deckcp.com/templates](https://deckcp.com/templates) do, and the way a real
-brand deck does (the OJEJE franchise reference: eyebrow + serif headline +
-footer rule on every page, but a different body layout each time — split
-panel, numbered steps beside a photo, a stat row over a data panel, an
-editorial timeline, an icon grid exactly once).
+A generated deck looks generated when every idea is forced into the same skeleton, usually a title over a row of equal cards. A polished deck uses a **small, coherent layout language chosen from the content and the active brand/reference**.
 
-This is the menu the build and author steps pull from. Two rules govern it:
+The goal is not maximum variety. The goal is **intentional rhythm**.
 
-- **Constant chrome, varied body.** Every content slide carries the same
-  master (see "The chrome" below). Only the body layout changes.
-- **No two consecutive slides share an archetype**, and one *tonal* moment
-  (a dark/accent full-bleed, a big-number statement, a photo band) lands
-  every 3–4 slides. `deckcp-quality-control` scores exactly this.
+## Two rules
 
-## The chrome (a master, built once, on every content slide)
+1. **Reference-derived invariants, content-derived bodies.** Keep whatever the active design system actually repeats — grid, margins, title behavior, logo, footer, section marker, or nothing at all. Then choose the body composition that best communicates the slide.
+2. **No accidental repetition.** Repeating an archetype is allowed when it creates comparison, sequence, recognition, or a deliberate series. Do not repeat the same skeleton simply because the generator defaults to it.
 
-The reference's strongest "real design team" signal is that every slide has
-the identical frame:
+## Chrome is optional and brand-derived
 
-- **Eyebrow** — a short tracked-out caps kicker in the accent, top-left,
-  naming the section (`BRAND IDENTITY`, `THE OFFERING`, `THE PATH FORWARD`).
-- **Headline** — a large display-serif H1 directly under it, left-aligned on
-  the same left margin, stating the slide's conclusion.
-- **Footer rule** — a thin line across the bottom with the deck signature in
-  tracked accent caps at left (`OJEJE · FRANCHISE PARTNERSHIP`) and the page
-  number at right.
-- Everything hangs off one **consistent left margin**; the eyebrow, headline,
-  and body all share that edge.
+There is no universal DeckCP chrome.
 
-Build this as a master (`set_masters`) so it renders identically on every
-opted-in slide — `frontmatter.sectionLabel` feeds the eyebrow,
-`title`/`subtitle` feed the headline, `footers` carries the signature. That
-one master does more for "designed, not generated" than any per-slide effort.
+A brand/reference may repeat:
 
-## The archetypes
+- an eyebrow / section label
+- a fixed headline position
+- a footer or running signature
+- a page number
+- a logo
+- a side rail
+- a hairline rule
+- a watermark
+- nothing beyond consistent margins and typography
 
-Each names a body layout, when to reach for it, and the components/tokens.
-Sizes assume the 1920×1080 canvas and the `deck-*` vocabulary.
+Build repeating elements as a master when the source supports them. Do **not** invent an eyebrow + serif headline + footer rule just because another reference deck used that system.
 
-1. **Cover / hero** — `variant:"hero"`. The wordmark as a statement
-   (`deck-logo-xl`+ or `deck-text-9xl` display type), a one-line promise
-   under it, optional tracked-caps pill. One per deck.
+The invariant is: **slides that belong to one system should visibly share that system.**
 
-2. **Section divider** — `variant:"close"` or a full-bleed dark panel in the
-   surface's dark ink (Espresso/Forest/navy) with the mark reversed in white
-   and a large serif section title. The deck's tonal punctuation — one before
-   each act. This is where a dark brand color earns its place.
+## Archetypes
 
-3. **Statement** — one number or one line filling the canvas
-   (`deck-text-12xl`+ for a number, `deck-text-7xl` for a line), accent on the
-   number only. Use for the single stat the whole slide is about.
+Each archetype names a communication job. Exact typography, surfaces, radii, colors, and spacing come from `brand-kit.json` + `design-direction.json`.
 
-4. **Stat row (numbers-as-hero)** — 2–4 huge display-serif numbers in the
-   accent across the top, a short label under each (`<Stat size="lg">` or a
-   flex row of `<Prose>` pairs). The reference's "6 / 2 / ₩11–24K". Often
-   paired below with a data panel or photo.
+1. **Cover / hero** — establish the visual world and promise. One dominant brand mark, title, image, product frame, or statement. Keep secondary information quiet.
 
-5. **Split feature** — a `deck-ratio-50-50`/`40-60` grid: a dark panel on one
-   side (the mark, a photo, or a pull-quote) and titled content on the other
-   (a labeled grid, a list, a definition). The reference's brand-color page.
+2. **Section divider** — punctuation between acts when the story genuinely has chapters. May be full-bleed, image-led, typographic, or minimal depending on the brand. Do not insert on a fixed cadence just to create variety.
 
-6. **Media + steps** — a framed photo on one side, a vertical numbered list on
-   the other: accent circle + serif term + sans description per step. The
-   reference's "how to eat". `ProcessSteps`, or a hand-built list — never an
-   icon-card grid.
+3. **Statement** — one decisive sentence or idea. Low density. Use scale and whitespace rather than containers.
 
-7. **Editorial timeline / process** — horizontal nodes (accent or dark
-   circles with numerals) joined by hairline/dashed connectors, a serif term
-   and centered description under each. `Timeline`, or built from primitives.
-   The reference's "first conversation to open doors".
+4. **Big stat** — one number is the argument. The number dominates; context and source are subordinate.
 
-8. **Data panel / table** — rows × columns as a real `<Table variant="rules">`
-   (hairline rules, right-aligned value column, one `accentRows` for the line
-   that matters), often on a dark panel. Never a stack of divs. Pricing,
-   terms, comparisons, a menu.
+5. **Stat row** — 2–4 directly comparable metrics. Shared baseline and equal visual weight unless one metric is intentionally dominant.
 
-9. **Icon-card grid** — a 2×3 of light cards, accent icon-in-circle, serif
-   title, sans description. Genuinely useful for an inventory of parallel
-   items (the reference uses it once, for "every touchpoint"). **At most one
-   per deck** — more than one and the deck reads as generated.
+6. **Split feature** — image/product/proof on one side and explanation on the other. Ratios may be 50/50, 40/60, 35/65, etc. Use the ratio supported by the active system.
 
-10. **Quote / proof** — a single large serif pull-quote with attribution, or a
-    logo/number wall of real evidence. Lots of air.
+7. **Media + steps** — a real image/product view paired with an ordered explanation. Use when the process is easier to understand with a visual anchor.
 
-11. **Comparison** — two columns (before/after, us/them, option A/B) as paired
-    panels or a two-column rules table. Distinct sibling names.
+8. **Timeline / process** — genuine temporal or sequential logic. Nodes, connectors, columns, or stacked stages are all valid if they match the brand grammar. Do not use a timeline for unordered bullets.
 
-12. **Closing / contact** — `variant:"close"`: the ask restated, one contact
-    block, the mark. Mirrors the cover.
+9. **Data panel / table** — actual rows × columns, pricing, terms, comparisons, menu, or detailed evidence. Use a real table treatment rather than a stack of pseudo-cards.
+
+10. **Chart / data insight** — a chart where the chart itself proves the headline. De-emphasize non-essential gridlines/legends; highlight the one series or point the conclusion depends on.
+
+11. **Image story** — photography or product imagery carries the emotional or explanatory load. Copy is sparse. Use the brand's crop and treatment rules.
+
+12. **Quote / proof** — one strong testimonial, sourced statement, logo wall, or evidence cluster. Lots of air; avoid decorative quote marks unless the system uses them.
+
+13. **Comparison** — before/after, us/them, option A/B, current/future. Sibling structures should align closely so differences are easy to see.
+
+14. **Case study** — repeatable proof format: situation → intervention → outcome, or logo → metric → quote. **Intentional repetition across several case studies is encouraged.**
+
+15. **Product / interface** — screenshot, device frame, workflow, or feature close-up with concise annotation. Prefer the real UI over symbolic icons.
+
+16. **Map / footprint** — geographic story, locations, expansion, market coverage. The map must communicate something; do not use as decoration.
+
+17. **Portfolio / gallery** — multiple real images, brands, locations, products, or campaign examples. Use a deliberate grid and crop logic.
+
+18. **Closing / ask** — resolve the argument into one next step. Mirrors the deck's opening energy without mechanically copying the cover.
+
+19. **Custom** — use only when none of the semantic archetypes fits. Describe the communication job and composition explicitly in `slide-plan.json`.
+
+## Density budget
+
+Every slide should be planned as:
+
+- **Low** — one idea / one focal point. Best for statements, big stats, images, chapter turns.
+- **Medium** — 2–4 content units or image + explanation. Default for most content slides.
+- **High** — evidence-heavy chart/table/dashboard. Requires strict hierarchy; never rescue it by shrinking text below legibility.
+
+A deck benefits from density contrast, but there is no fixed "tonal slide every 3–4 pages" rule. Let the narrative determine when the audience needs a pause or turn.
 
 ## Imagery
 
-The reference carries slides with real, tightly-cropped food photography on
-cutout/dark backgrounds, framed inside the dark panel. A premium deck uses
-the user's **own** photos (`deckcp-gather-assets`) or approved brand imagery
-on ≥ ~1/3 of content slides. A ≥5-slide deck with zero imagery reads as a
-wireframe — `deckcp-quality-control` flags it. Never scatter decorative
-stock-metaphor icons (rocket, lightbulb, handshake) as a substitute for a
-real image.
+Follow `brand-kit.json.design_system.imagery` and `design-direction.json`.
 
-## Pacing a ~12-slide deck (example spine)
+Good sources, in order:
 
-Cover → section divider → problem (split feature) → opportunity (stat row) →
-insight (statement) → solution (media + steps) → how it works (editorial
-timeline) → proof (data panel or quote) → offering (stat row + data panel) →
-system (icon-card grid, the one) → roadmap (timeline) → the ask (closing).
+1. the user's own photography / screenshots / product imagery
+2. approved brand assets
+3. purposeful sourced imagery when allowed
+4. illustration / diagrams when they fit the brand
 
-Twelve slides, twelve different bodies, one chrome. That is the difference
-between a deck and a template.
+Do not enforce a photography quota on brands that are intentionally typographic, diagrammatic, or UI-led. Equally, do not replace a photo-led brand with decorative icons because assets are inconvenient.
+
+## Pacing examples
+
+These are examples, not rules.
+
+### Narrative pitch
+
+Cover → statement → problem split → big stat → solution → product → proof → comparison → case study → ask
+
+### Evidence-led report
+
+Cover → executive statement → chart → chart → table → pause / quote → chart → comparison → recommendations → close
+
+### Repeated case-study sequence
+
+Cover → framing → case study A → case study B → case study C → synthesis → ask
+
+The three case studies should usually share a stable layout. That repetition is a feature, not a QC failure.
+
+## DeckCP vocabulary hints (implementation, not style)
+
+When a planned archetype is authored by hand (`deckcp-author-slides`) or named
+in a rewrite instruction, these are the DeckCP components/tokens that usually
+carry it. Sizes assume the 1920×1080 canvas and the `deck-*` vocabulary;
+confirm the current surface with `get_authoring_guide` — the brand kit and
+`design-direction.json` decide the actual faces, sizes, surfaces, and radii.
+
+| Archetype | Typical DeckCP carrier |
+| --- | --- |
+| Cover / hero, Closing | `variant:"hero"` / `variant:"close"`; wordmark via `deck-logo-xl`+ or display type (`deck-text-9xl`+) |
+| Section divider | full-bleed dark surface panel, mark reversed (`logo.which:"white"`), a section-divider master |
+| Statement / Big stat | one line at `deck-text-7xl`, one number at `deck-text-12xl`+; accent on the number only |
+| Stat row | `<Stat size="lg">` or a flex row of `<Prose>` pairs sharing a baseline |
+| Split feature | `deck-ratio-50-50` / `deck-ratio-40-60` grid |
+| Media + steps, Timeline | `ProcessSteps` / `Timeline`, or primitives with hairline/dashed connectors — not an icon-card grid |
+| Data panel / table | `<Table variant="rules">`, right-aligned value column, `accentRows` for the line that matters — never a stack of divs |
+| Image story | `deck-photo-band` or a framed panel per the kit's imagery treatment |
+| Spacing | `deck-gap-sm/md/lg` by role; the kit's `design_system.spacing` scale when present |
