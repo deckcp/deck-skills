@@ -1,23 +1,30 @@
 ---
 name: deckcp-build-deck
-description: Build a real DeckCP deck from a brief or outline — generate the outline, generate on-brand slides, validate each one, and render for review. Use when the user says "build the deck", "make the slides", "turn this into a DeckCP deck", or after deck-interview/deck-outline. Requires the DeckCP MCP connected.
+description: Build a real DeckCP deck from a brief or outline — establish the brand kit first, generate the outline, generate on-brand slides, validate each one, render, and run the quality-control gate before calling it done. Use when the user says "build the deck", "make the slides", "turn this into a DeckCP deck", or after deck-interview/deck-outline. Requires the DeckCP MCP connected.
 argument-hint: "[--brief ./deck-brief/brief.json] [--outline ./deck-brief/outline.json] [--brand <slug>] [--deck <slug>]"
 ---
 
 # Build Deck (DeckCP MCP orchestration — minimal tokens)
 
-Drive the DeckCP generate pipeline end to end: brief/outline → outline → slides →
-check → render. This skill is **orchestration**, not authoring — the MCP's AI
-pipeline writes the slides on-brand; your job is to feed it the right context, then
-validate and report.
+Drive the DeckCP generate pipeline end to end: brief/outline → **brand kit** →
+outline → slides → check → render → **quality gate**. This skill is
+**orchestration**, not authoring — the MCP's AI pipeline writes the slides
+on-brand; your job is to feed it the right context and the right design system,
+then validate, score, and report.
+
+Two steps are not skippable: `deckcp-brand-kit` **before** generating (so the
+pipeline builds on a real system, not its defaults) and
+`deckcp-quality-control` **after** (so "done" means scored and fixed, not
+"generation returned").
 
 ## Why this is mostly not a model step
 
 The heavy generation runs server-side inside DeckCP (`generate_outline`,
 `generate_slides_from_outline`). `check_slide` is a **deterministic validator** (no
 render, free). Model judgment is only needed to (a) turn a brief/outline into the
-`context` string, and (b) decide fixes when `check_slide` flags a slide. Keep token
-use low — don't re-narrate slide content the pipeline already produced.
+`context` string, (b) decide fixes when `check_slide` flags a slide, and (c) the
+quality gate's render-and-look scoring, which is deliberately main-loop. Keep token
+use low everywhere else — don't re-narrate slide content the pipeline already produced.
 
 ## Step 0 — identity & brand
 
@@ -30,11 +37,30 @@ Pick the brand: if the user has one brand, use it; otherwise ask. Fetch it so th
 outline respects the design lockdown:
 
 ```
-get_brand { slug: <brandSlug> }
+get_brand { brand_slug: <brandSlug> }
 ```
 
 If the token can't see the intended deck later, it's an access issue, not a retry —
 tell the user to share the deck with the `whoami` email (see MCP instructions).
+
+## Step 0.5 — brand kit (mandatory, before anything generates)
+
+```bash
+cat ./deck-brief/brand-kit.json 2>/dev/null
+```
+
+- **Kit exists** → use it. Its `guidelines`, `signature_device`,
+  `structural_language`, and `dont` go into the generation context (Step 1);
+  its theme payload is applied to the deck in Step 2.
+- **No kit, and `get_brand` shows a real palette + logos** → run
+  `deckcp-brand-kit` in extract mode against the brand (fast: it reads the
+  record, validates contrast, maps fonts). Still produces the kit the QC gate
+  scores against.
+- **No kit, and the brand is empty** ("No approved palette on file") → run
+  `deckcp-brand-kit` now. It will extract from whatever the user has (logo,
+  site, guide, old deck) or synthesize a system benchmarked on
+  deckcp.com/templates. **Do not generate on an empty brand** — that is
+  exactly how generic decks happen.
 
 ## Step 1 — assemble context from the brief/outline
 
@@ -53,6 +79,19 @@ cat ./deck-brief/brief.json 2>/dev/null; cat ./deck-brief/outline.json 2>/dev/nu
 - **If neither exists**: run `deck-interview` (and ideally `deck-outline`) first, or
   interview inline. Do not build blind.
 
+Then append the **design system** to the context, from `brand-kit.json` — a
+short block the pipeline can obey:
+
+```
+DESIGN SYSTEM (binding): <guidelines>. Signature device: <signature_device>.
+Structure: <structural_language>. Type: <display> for titles, <body> for
+everything else. Palette roles: Background <hex>, Text <hex>, Primary <hex>,
+Accent <hex> (used only for <job>), Secondary <hex>. Don't: <dont list>.
+```
+
+The brand lockdown the pipeline already sees covers the palette; this block
+is what stops it from defaulting to icon-card grids on a gradient.
+
 ## Step 2 — create or reuse the deck
 
 If building into a new deck:
@@ -62,6 +101,18 @@ create_deck { title, brand_slug, target_audience, description }
 ```
 
 It returns the `deck_slug`. If reusing, use the existing slug.
+
+Apply the kit's theme **before** generating, so the pipeline and every render
+see the same system (`check-kit.js` prints this exact object):
+
+```
+update_deck { deck_slug, deck_theme: { accent, secondary, fontDisplay, fontBody, defaultMood, pageMargin } }
+```
+
+If the kit installed brand masters (`set_masters scope:'brand'`), they're
+inherited automatically; for a deck-scope house style, `set_masters
+{ deck_slug, scope:'deck', masters }` now, and reference master ids in the
+outline notes so generated slides opt in.
 
 ## Step 3 — generate
 
@@ -122,10 +173,25 @@ For your own inspection while fixing a specific slide, use
 those — they're for your eyes). Present the deck to the user with the plain
 `render_slides { deck_slug }` call.
 
+## Step 5.5 — quality gate (mandatory — this is what "done" means)
+
+Run `deckcp-quality-control` on the finished deck. It scans the MDX for
+off-palette colours, tiny text, spacing sprawl, repeated skeletons, and
+generic-AI tells, then renders **every** slide and scores six dimensions
+(brand accuracy, alignment, spacing consistency, visual polish, repetitive
+layouts, generic-AI look) against the brand kit — and fixes what fails, up
+to three passes.
+
+Do not present the deck to the user as finished before it passes. If it
+can't pass in three passes, the gate tells you which upstream skill to go
+back to (`deckcp-brand-kit` or `deck-critique`) — do that instead of
+shipping a deck you'd be embarrassed by.
+
 ## Step 6 — hand off
 
-Summarize what you built (slide count, the spine, anything `check_slide` flagged and
-how you fixed it). Then point onward:
+Summarize what you built (slide count, the spine, the brand kit it's built on,
+the QC scorecard, anything `check_slide` or QC flagged and how you fixed it).
+Then point onward:
 
 > "Run `deck-critique` to pressure-test the narrative, `deckcp-gather-assets` to
 > swap in your real photos, or `deckcp-share` to send it out."
@@ -137,3 +203,6 @@ how you fixed it). Then point onward:
 - Fix the story before the slides. A clean render of a weak outline is still a weak
   deck.
 - Keep tokens low: don't paste full slide MDX back to the user; report by headline.
+- Never generate on an empty brand, and never call a deck done that hasn't
+  passed `deckcp-quality-control`. Those two rules are the difference between
+  a deck and a template.

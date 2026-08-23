@@ -5,15 +5,18 @@ actually work — built for **founders, salespeople, and BD** who need a deck to
 *make something happen*, not just look finished.
 
 Most AI deck tools skip straight to slides. This pack doesn't. It interrogates
-you first, fixes the story, and only then builds — because a deck fails at the
-narrative level long before it fails at the design level.
+you first, fixes the story, establishes a real design system, and only then
+builds — because a deck fails at the narrative level long before it fails at
+the design level, and a generated deck fails at the design level the moment
+it's built on the generator's defaults instead of your brand. Nothing is
+called done until it passes a quality gate.
 
 ## Start here
 
 1. **Install the pack** (two ways, below — takes a minute).
 2. **Connect the DeckCP MCP** — mint a token or use the OAuth connector at
    [deckcp.com/mcp](https://deckcp.com/mcp). *Optional to start:* the Tier 1
-   skills (interview, outline, GitHub lookup) work with no account at all.
+   skills (interview, outline, critique, GitHub lookup) work with no account at all.
 3. **Run `/deckcp-onboard`** — it checks your setup, orients on your decks and
    brand, asks one question about what you're trying to make happen, and routes
    you to the right skill. New user? It'll walk you into building your first
@@ -22,9 +25,10 @@ narrative level long before it fails at the design level.
 ## The workflow
 
 ```
-/deck-interview → /deck-outline → /deckcp-build-deck → /deckcp-share → /deckcp-analyze
-   brief.json       outline.json     a real DeckCP deck     out the door     who viewed, who to
-                                                                             follow up with
+/deck-interview → /deck-outline → /deckcp-brand-kit → /deckcp-build-deck → /deckcp-share → /deckcp-analyze
+   brief.json       outline.json    brand-kit.json       generate → QC gate     out the door     who viewed, who to
+                    ↓ /deck-critique  (extract or          ↓ /deckcp-quality-control                 follow up with
+                      pressure-test    synthesize)           scored + fixed before "done"
 ```
 
 1. **`/deck-interview`** — gets grilled *by* your agent: who is this deck for,
@@ -33,16 +37,30 @@ narrative level long before it fails at the design level.
 2. **`/deck-outline`** — turns the brief into a story spine, picked for the
    deck type (investor, sales, partnership; live vs. sent-as-link) — so every
    slide earns its place and every headline states a conclusion, not a topic.
-3. **`/deckcp-build-deck`** — drives the [DeckCP](https://deckcp.com) pipeline:
-   generate on-brand slides, validate each one, render for review.
-4. **`/deckcp-share`** — invite people with roles, or set the gate: public
+3. **`/deckcp-brand-kit`** — decides what the deck is built *on*. Have a
+   logo, a brand guide, an old deck, or a website? It **extracts** your real
+   brand — literal hex from the SVG, real CSS variables and fonts from the
+   site, the PPTX theme slots — and cites every token. Have nothing? It
+   **synthesizes** a premium system benchmarked on
+   [deckcp.com/templates](https://deckcp.com/templates): one surface pair,
+   one accent, one type pairing, one signature device. Then writes it into
+   the DeckCP theme (and brand masters, when you own the brand).
+4. **`/deckcp-build-deck`** — drives the [DeckCP](https://deckcp.com)
+   pipeline: generate slides on that system, validate each one, render —
+   then runs **`/deckcp-quality-control`**, the mandatory gate: every slide
+   rendered and scored on brand accuracy, alignment, spacing consistency,
+   visual polish, repetitive layouts, and "does this look AI-made", and
+   fixed until it passes.
+5. **`/deckcp-share`** — invite people with roles, or set the gate: public
    link, email-gated (views become identified leads), or password.
-5. **`/deckcp-analyze`** — read the per-slide dwell curve like an editor: the
+6. **`/deckcp-analyze`** — read the per-slide dwell curve like an editor: the
    slide where viewers drop off is your next edit. Then `/github-lookup` +
    `/deckcp-email` to work the follow-up.
 
-And in between: `/deckcp-read-deck` to orient on any existing deck, and
-`/deckcp-edit` to change it — theme, copy, order — without regenerating.
+And in between: `/deck-critique` to pressure-test the story at any point
+(an outline, a built deck, a PDF someone sent you), `/deckcp-read-deck` to
+orient on any existing deck, and `/deckcp-edit` to change it — theme, copy,
+order — without regenerating.
 
 Steps 1–2 work with **no DeckCP account at all**. Use them with any deck tool.
 
@@ -88,9 +106,12 @@ the full 34-tool surface is documented in [`MCP-TOOLS.md`](MCP-TOOLS.md).
 | `deckcp-onboard` | 1 | Start here: checks your setup, orients, and routes you to the right skill with one question. |
 | `deck-interview` | 1 | Interview you about audience, goal, ask, and proof — and push back on weak positioning. Emits `brief.json`. |
 | `deck-outline` | 1 | Build the story spine from the brief before any slides exist. Emits `outline.json` + `outline.md`. |
+| `deck-critique` | 1 | Pressure-test the story: headline-only read, the skeptic, the 5-second test, proof audit, the ask. Seven findings max, prioritized, with the fix and the skill that makes it. |
 | `github-lookup` | 1 | Resolve a person from GitHub — username, commit SHA, or email — to a name, profile, and contact. Zero tokens (`gh` CLI). |
 | `deckcp-gather-assets` | 2 | Find your own images/videos on disk, dedupe by hash, upload to DeckCP — so slides use your real photos, not stock art. |
-| `deckcp-build-deck` | 2 | Brief/outline → generate → validate every slide → render. Orchestration, minimal tokens. |
+| `deckcp-brand-kit` | 2 | The design system the deck is built on: extract the real brand (SVG hex, site CSS/fonts, brand guide, PPTX theme — every token cited) or synthesize one to the deckcp.com/templates standard. Validates contrast + fonts; writes theme/masters. |
+| `deckcp-build-deck` | 2 | Brief/outline → brand kit → generate → validate every slide → render → quality gate. Orchestration, minimal tokens. |
+| `deckcp-quality-control` | 2 | The mandatory final gate: script scan + render every slide, score six dimensions (brand, alignment, spacing, polish, repetition, generic-AI look), fix what fails, re-score. "Done" means passed. |
 | `deckcp-read-deck` | 2 | Orient on an existing deck: structure, rendered slides, and the story its headlines tell. The step before any edit. |
 | `deckcp-edit` | 2 | Deterministic edit recipes — theme (colors/fonts/margins), update a slide, reorder, duplicate, delete — validated and rendered after every change. |
 | `deckcp-author-slides` | 2 | Manual editing: hand-write slides against the rendering contract — exact words, exact layout, charts, presets, masters — when the pipelines shouldn't decide. |
@@ -104,12 +125,13 @@ the full 34-tool surface is documented in [`MCP-TOOLS.md`](MCP-TOOLS.md).
 
 Planned next (see [`manifest.json`](manifest.json) for the full inventory and status):
 
-- **Critique & analysis** — `deck-critique` (what's weak and why),
-  `deck-analyze-consistency` (script-first font/color/terminology scan),
-  `deck-analyze-visual` (render each slide and *look* at it),
-  `deck-analyze-multi` (investor / sales / skeptic / 5-second-test lenses).
+- **Analysis** — `deck-analyze-multi` (run the investor / sales / skeptic /
+  5-second lenses as separate passes and synthesize). The consistency and
+  visual scans landed inside `deckcp-quality-control`.
 - **Voice** — `deck-writing-samples` distills your tone from things you've written.
-- **Brand** — `deckcp-brand` assembles a brand brief (palette, voice, logos).
+- **Brand record write** — `deckcp-brand-kit` writes the deck theme and
+  brand masters today; the brand record itself (palette/logos/guidelines) is
+  still pasted into the web UI until the MCP grows a brand-write tool.
 
 ## Design principles
 
@@ -117,8 +139,10 @@ Planned next (see [`manifest.json`](manifest.json) for the full inventory and st
   free — asset dedup, hashing, consistency scans, GitHub lookups, sending mail.
 - **Right model for the step.** Pure script where possible; a cheap model only
   for mechanical classification; **your own model, not a downgraded one**, for
-  the judgment steps — interview, outline, critique — because that's where deck
-  quality actually comes from.
+  the judgment steps — interview, outline, critique, the QC look — because
+  that's where deck quality actually comes from.
+- **A real system, then a real gate.** Generation never starts on an empty
+  brand, and nothing is "done" until it has been rendered, scored, and fixed.
 - **Useful before you sign up.** Tier 1 stands on its own. If it makes your
   story better, Tier 2 is waiting.
 

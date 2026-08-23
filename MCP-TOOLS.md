@@ -39,7 +39,10 @@ Skill: [`deckcp-read-deck`](skills/deckcp-read-deck/SKILL.md).
 | `delete_deck` | ⚠️ Soft-deletes the deck **and all its slides**. Reversible only via the database. Confirm with the user, always. |
 
 Skills: [`deckcp-build-deck`](skills/deckcp-build-deck/SKILL.md) (create),
-[`deckcp-edit`](skills/deckcp-edit/SKILL.md) (update).
+[`deckcp-edit`](skills/deckcp-edit/SKILL.md) (update),
+[`deckcp-brand-kit`](skills/deckcp-brand-kit/SKILL.md) (`deck_theme` is how a
+brand kit lands on a deck — it's the highest-precedence layer, so it's also the
+safe place to apply a *third party's* brand without touching the user's own).
 
 ## Slides — write, validate, view
 
@@ -54,7 +57,10 @@ Skills: [`deckcp-build-deck`](skills/deckcp-build-deck/SKILL.md) (create),
 | `render_slides` | Intent first: bare `{deck_slug}` shows the user the inline viewer; `format:'image'` returns bitmaps **only you** can see (for inspecting your own edits); `format:'urls'`/`'html'` return links/snapshots. Rendering is incremental; `refresh:true` after theme/master changes. |
 
 Skills: [`deckcp-edit`](skills/deckcp-edit/SKILL.md),
-[`deckcp-build-deck`](skills/deckcp-build-deck/SKILL.md).
+[`deckcp-build-deck`](skills/deckcp-build-deck/SKILL.md),
+[`deckcp-quality-control`](skills/deckcp-quality-control/SKILL.md) (the gate:
+`check_slide` on every slide + `render_slides format:'image'` on every slide,
+then a six-dimension score and the fix loop).
 
 ## Generation (server-side AI pipelines)
 
@@ -76,8 +82,13 @@ Skill: [`deckcp-build-deck`](skills/deckcp-build-deck/SKILL.md).
 | `get_masters` | A deck's master slides (named layouts: background, logo slot, title/subtitle presets, footers, decor layer), MERGED across global ← brand ← deck scopes. Assign via `frontmatter.master` in `upsert_slides`. |
 | `set_masters` | Replace the master array wholesale (get, modify, PUT back). `scope:'deck'` needs editor access; `scope:'brand'` (owner/org) installs a house style inherited by **every** deck on the brand. Follow with `render_slides refresh:true`. |
 
-Skill: [`deckcp-author-slides`](skills/deckcp-author-slides/SKILL.md) — the
-manual-editing skill built on this whole group (contract, presets, masters).
+Skills: [`deckcp-author-slides`](skills/deckcp-author-slides/SKILL.md) — the
+manual-editing skill built on this whole group (contract, presets, masters);
+[`deckcp-brand-kit`](skills/deckcp-brand-kit/SKILL.md) — reads `get_brand` as
+an extraction source and installs a house style with `set_masters
+scope:'brand'`. Note there is **no brand-write tool**: the brand record's
+palette/logos/guidelines are edited in the web UI; the kit hands the user the
+exact values to paste.
 
 ## Assets
 
@@ -127,10 +138,10 @@ Skill: [`deckcp-voice-memos`](skills/deckcp-voice-memos/SKILL.md).
 | Group | Tools | Documented by |
 | --- | --- | --- |
 | Identity & orientation | 4 | `deckcp-read-deck`, README (install) |
-| Deck lifecycle | 3 | `deckcp-build-deck`, `deckcp-edit` — `delete_deck` intentionally has no skill |
-| Slides | 7 | `deckcp-edit`, `deckcp-build-deck` |
+| Deck lifecycle | 3 | `deckcp-build-deck`, `deckcp-edit`, `deckcp-brand-kit` (`update_deck.deck_theme`) — `delete_deck` intentionally has no skill |
+| Slides | 7 | `deckcp-edit`, `deckcp-build-deck`, `deckcp-quality-control` (`check_slide` + `render_slides` as the gate) |
 | Generation | 3 | `deckcp-build-deck` — `generate_slides_from_text` mentioned here only |
-| Authoring reference | 5 | `deckcp-author-slides` (manual editing: contract, presets, masters) |
+| Authoring reference | 5 | `deckcp-author-slides` (manual editing: contract, presets, masters), `deckcp-brand-kit` (`get_brand` as source, `set_masters` for the house style) |
 | Assets | 2 | `deckcp-gather-assets` — `search_assets` mentioned here only |
 | Sharing | 4 | `deckcp-share` |
 | Analytics & CRM | 5 | `deckcp-analyze`, `deckcp-capture` |

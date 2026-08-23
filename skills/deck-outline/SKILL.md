@@ -61,6 +61,12 @@ For each slide capture: `purpose`, `headline` (the conclusion), `key_points`
 (2–4 max), `evidence` (which proof from the brief, if any), and `visual` (what
 carries it — chart, diagram, photo, product shot).
 
+Vary the `visual` on purpose. Three "chart" slides in a row, or eight slides
+whose visual is "none", is how a deck ends up as the same card grid eight
+times — the QC gate will flag it later, and it's cheaper to plan pacing here:
+a full-bleed statement or photo every 3–4 slides, one big-number slide, one
+table where the content is actually rows × columns.
+
 ## Step 3 — cut
 
 Ruthlessly. A seed deck is ~10–12 slides, a sales deck ~8–10. If a slide doesn't
@@ -98,9 +104,20 @@ user can eyeball the flow.
 ## Step 5 — read it back as a story
 
 Read the headlines aloud in order. If they don't form a coherent argument on their
-own, the outline isn't done — fix the sequence before handing off. Then:
-*"Run `deckcp-build-deck` to generate slides from this, or `deck-critique` later to
-pressure-test the built deck."*
+own, the outline isn't done — fix the sequence before handing off. For a
+second opinion on the spine *before* any slides exist — the cheapest moment
+to fix a story — run `deck-critique` on `outline.json` now.
+
+Then route, in this order:
+
+1. **`deckcp-brand-kit`** — establish the design system the slides will be
+   built on (extract the user's real brand, or synthesize one to the
+   deckcp.com/templates standard). Do this *before* building; a generator
+   with no system defaults to the generic look.
+2. **`deckcp-build-deck`** — generates from this outline, then runs the
+   `deckcp-quality-control` gate.
+3. **`deck-critique`** — again on the built deck, if the story shifted
+   during generation.
 
 ## Guardrails
 

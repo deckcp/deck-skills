@@ -1,17 +1,22 @@
 {
   "name": "deckcp-deck-making-skills",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "title": "DeckCP deck-making skill pack",
-  "description": "Interview, outline, critique, build, edit, analyze, and share great decks from Claude Code. Two tiers: provider-agnostic deck craft that works with no DeckCP account, plus DeckCP-powered skills that drive the DeckCP MCP.",
+  "description": "Interview, outline, critique, brand, build, quality-check, edit, analyze, and share great decks from Claude Code. Two tiers: provider-agnostic deck craft that works with no DeckCP account, plus DeckCP-powered skills that drive the DeckCP MCP. Every deck is built on a real design system and gated by a quality check before it is called done.",
   "target_runtime": "claude-code",
   "install_dir": ".claude/skills",
   "public_repo": "deckcp/deck-making-skills",
   "raw_base_url": "https://raw.githubusercontent.com/deckcp/deck-making-skills/main",
-  "audience": ["startups/founders", "salespeople", "business development"],
+  "audience": [
+    "startups/founders",
+    "salespeople",
+    "business development"
+  ],
   "principles": [
     "Scripts over tokens — deterministic bash/node does the heavy lifting for free (dedup, hashing, consistency scans, formatting).",
     "Three model tiers, chosen per step and justified in each SKILL.md: (1) pure script wherever deterministic; (2) Haiku 4.5 subagent only for cheap mechanical classification (asset captioning, fuzzy terminology matching); (3) the user's main-loop model for real-judgment steps (interview, outline, critique, multi-lens analysis) — NOT downgraded, because the Tier-1 craft skills are the self-marketing surface.",
-    "Tier 1 is deliberately useful with no DeckCP account, so it self-markets DeckCP to people who then convert."
+    "Tier 1 is deliberately useful with no DeckCP account, so it self-markets DeckCP to people who then convert.",
+    "Every deck is built on a real design system (deckcp-brand-kit: extract the brand literally, or synthesize to the deckcp.com/templates standard) and nothing is done until it passes deckcp-quality-control (render every slide, score brand/alignment/spacing/polish/repetition/generic-AI, fix, re-score)."
   ],
   "tiers": {
     "1": "Provider-agnostic deck craft — no DeckCP account required.",
@@ -49,23 +54,23 @@
     {
       "name": "deck-critique",
       "tier": 1,
-      "status": "planned",
+      "status": "ready",
       "model_step": "main-loop",
-      "summary": "Analyze a deck and say what's weak — narrative, clarity, the ask. Honest, specific, prioritized."
+      "summary": "Pressure-test the story: headline-only read, the skeptic, the 5-second test, proof audit (evidence vs hope), the ask, audience + setting fit. Seven prioritized findings max (blocker/weak/polish) with the fix and the skill that makes it. scripts/spine.js prints the headline spine from outline.json / a saved get_deck / markdown."
     },
     {
       "name": "deck-analyze-consistency",
       "tier": 1,
-      "status": "planned",
+      "status": "absorbed",
       "model_step": "script",
-      "summary": "Script-first check of fonts/colors/spacing/terminology consistency across slides. Zero tokens for the scan; Haiku only for fuzzy terminology grouping."
+      "summary": "Script-first check of fonts/colors/spacing/terminology consistency across slides. Zero tokens for the scan; Haiku only for fuzzy terminology grouping. ABSORBED into deckcp-quality-control (scripts/scan-deck.js does the colour/size/spacing/repetition scan)."
     },
     {
       "name": "deck-analyze-visual",
       "tier": 1,
-      "status": "planned",
+      "status": "absorbed",
       "model_step": "main-loop",
-      "summary": "Render each slide and look at it — balance, hierarchy, contrast, density, the 5-second test."
+      "summary": "Render each slide and look at it — balance, hierarchy, contrast, density, the 5-second test. ABSORBED into deckcp-quality-control (render every slide, score six dimensions)."
     },
     {
       "name": "deck-analyze-multi",
@@ -96,18 +101,25 @@
       "summary": "Search the user's drive for images/videos, dedupe by hash, copy into ./deck-assets/, batch-upload via the MCP. Pure script."
     },
     {
+      "name": "deckcp-brand-kit",
+      "tier": 2,
+      "status": "ready",
+      "model_step": "mixed",
+      "summary": "The design system a deck is built on. EXTRACT (script-first, scripts/extract-brand.js): literal hex from SVG fills/strokes, :root CSS vars + fonts + logo from a website, dk1/lt1/accent slots + typefaces from a PPTX theme, transcribed brand-guide lines — every token cited, never shifted. SYNTHESIZE (main-loop): one surface pair, one accent, one type pairing, one signature device, one structural language, benchmarked on deckcp.com/templates. scripts/check-kit.js validates hex, WCAG contrast, and the curated font catalog, then emits the update_deck.deck_theme payload. Writes theme (deck scope), logos (upload_asset), house style (set_masters scope brand, owned brands only, confirmed). Supersedes the planned deckcp-brand."
+    },
+    {
       "name": "deckcp-build-deck",
       "tier": 2,
       "status": "ready",
       "model_step": "mcp",
-      "summary": "brief/outline → generate_outline → generate_slides_from_outline → check_slide → render_slides. Orchestration, minimal tokens."
+      "summary": "brief/outline → deckcp-brand-kit (mandatory before generating) → generate_outline → generate_slides_from_outline → check_slide → render_slides → deckcp-quality-control (mandatory gate before \"done\"). Orchestration, minimal tokens."
     },
     {
-      "name": "deckcp-brand",
+      "name": "deckcp-quality-control",
       "tier": 2,
-      "status": "planned",
-      "model_step": "main-loop",
-      "summary": "Assemble a brand brief (palette, voice, logos). NOTE: no brand-write MCP tool exists yet — produces brand-brief.json."
+      "status": "ready",
+      "model_step": "mixed",
+      "summary": "The mandatory final gate. scripts/scan-deck.js (zero tokens) flags off-palette hexes and colour classes, rainbow Card accents, sub-22px text, spacing-token sprawl, repeated layout skeletons, icon-card grids, dark-gradient defaults, buzzwords, label titles; check_slide on every slide; then render_slides format image on EVERY slide and score six dimensions 1-5 (brand accuracy, alignment, spacing consistency, visual polish, repetitive layouts, generic-AI look). Pass = all ≥4. Fix loop maps each failure to the cheapest tool (deck_theme, masters, upsert class swap, rewrite_slide), max three passes, re-render everything, qc-report.md."
     },
     {
       "name": "deckcp-read-deck",
