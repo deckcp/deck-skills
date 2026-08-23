@@ -1,6 +1,6 @@
 {
   "name": "deckcp-deck-making-skills",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "title": "DeckCP deck-making skill pack",
   "description": "Interview, outline, critique, brand, build, quality-check, edit, analyze, and share great decks from Claude Code. Two tiers: provider-agnostic deck craft that works with no DeckCP account, plus DeckCP-powered skills that drive the DeckCP MCP. Every deck is built on a real design system and gated by a quality check before it is called done.",
   "target_runtime": "claude-code",

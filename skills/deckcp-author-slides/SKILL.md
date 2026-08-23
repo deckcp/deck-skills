@@ -68,6 +68,34 @@ coordinateSpace: "slide"            # absolute layout mode — shell then does N
   for anything custom — sandboxed iframe in the viewer's browser, must call
   `ready()`.
 
+**Accent color — how to actually get the brand accent (learned the hard way):**
+
+- The brand accent lives in **`--deck-primary`** (set from `deck_theme.accent`).
+  But many built-in presets and classes reference **`var(--accent, #ffb020)`**
+  — a *different* variable that `deck_theme` does NOT set, so it falls back to
+  the framework **amber `#ffb020`**. That's why a "gold" deck can render amber:
+  `slide-eyebrow` (`text-accent`), `big-stat-value-accent`,
+  `process-step-number-accent`, `timeline-chip-progress`, `callout-insight`
+  all use `--accent` and come out amber on a themed deck. To get the *brand*
+  accent, use things wired to `--deck-primary`: the `stat-value*` presets,
+  `shape-brand-fill`/`shape-brand-outline`, and components like `<Stat>`,
+  `<ProcessSteps>` (its numbers), and `<Table accentRows={[…]}>`.
+- **`upsert_slides` strips preset `style` objects** (and inline styles, and
+  arbitrary hex/`text-[…]`). So a `<Prose data-preset="stat-value">` written
+  as MDX loses the gold `color` on write and renders near-invisible. Gold text
+  in MDX must come from a **component that colors itself** (`<Stat>`,
+  `ProcessSteps`, a `Table` accent row) — not a Prose+preset. For labels and
+  body, use dark ink (`text-slate-900/700`); the muted-gold accent (`#A08162`
+  and its kin) is low-contrast (~3:1) and should carry numbers/rules, not text.
+  If you truly need preset styling to survive, author with **`slide_tree`**
+  (editor-native, full fidelity), not `mdx_content`.
+- **Chart colors are fixed semantic tokens, not hex.** `CostBreakdown`,
+  `ProcessSteps`, etc. take `color`/`tone` = `"accent" | "calm" | "warn" |
+  "positive"` → gold / sky / amber / green. Only `accent` is the brand color;
+  you can't pass a brand hex, so a multi-segment chart is off-palette by
+  construction. For brand-pure data, prefer a `<Table variant="rules"
+  accentRows={[…]}>` or a row of `<Stat>`s over a multi-color chart.
+
 **Layout discipline (enforced by `check_slide`):**
 
 - Canvas is fixed **1920×1080** and overflow **clips** — no scroll. Budget
