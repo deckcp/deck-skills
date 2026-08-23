@@ -13,7 +13,11 @@ generation and decides, explicitly, which of two roads the deck takes:
 
 - **EXTRACT** — the user has a logo, a brand guide, an existing deck, or a
   website. Their brand already exists; the job is to read it *literally* and
-  lose nothing in translation.
+  lose nothing in translation — not just the colors and fonts, but the
+  **whole visual system**: imagery treatment, layout style, graphic
+  elements, spacing, and the repeating chrome that makes every slide feel
+  like one family. The deck should look like the user's own design team made
+  it.
 - **SYNTHESIZE** — the user has nothing. Don't hand them "a deck"; design them
   a system as tight as the ones on [deckcp.com/templates](https://deckcp.com/templates),
   where each template is one surface pair, one accent, one type pairing, one
@@ -83,13 +87,39 @@ It accepts any mix of sources and writes `./deck-brief/brand-extract.json`:
 | `.svg` | Every `fill`/`stroke`/`stop-color`/inline-CSS hex and `rgb()` (normalized to 7-char hex) with occurrence counts; gradient stops flagged; `font-family` if the logo has live text. |
 | `https://…` | HTML + same-origin linked stylesheets: `:root` custom properties (`--primary`, `--bg`, …) with names kept as role hints; `<meta name="theme-color">`; `font-family` declarations and Google Fonts `<link>` families; `<img>`/inline `<svg>` whose src/alt/class says "logo"; `og:image`. |
 | `.css` / `.html` | Same as a website, offline. |
-| `.pptx` | `ppt/theme/theme1.xml`: the `dk1/lt1/dk2/lt2/accent1–6/hlink` color slots and the major/minor `latin` typefaces. This is the deck's *declared* system, not a guess. |
+| `.pptx` | `ppt/theme/theme1.xml`: the `dk1/lt1/dk2/lt2/accent1–6/hlink` color slots and the major/minor `latin` typefaces. This is the deck's *declared* system, not a guess. **Also render the pages and look** (see A1.5) — the theme XML gives tokens, but the layouts, chrome, and imagery only read on the pixels. |
 | `.pdf` | `pdffonts`-style font list when `pdffonts`/`pdftotext` exist (brand guides usually name their fonts in text — the script greps "Pantone", "HEX", "RGB", "CMYK", "typeface", "font" lines and keeps them verbatim for you to transcribe). |
 | `.png` / `.jpg` | **No literal colors exist in a raster.** The script reports that and skips it; see A2. |
 
 Read the summary it prints. Counts matter: in an SVG the hex with the most
 fills is usually the brand color; the one with the most strokes, an outline;
 a `#FFFFFF` with one fill is knockout, not a palette color.
+
+### A1.5 — look at the source (a brand guide or existing deck is a design, not a swatch list)
+
+A hex list is not a brand. When the source is a **brand guide, an existing
+deck, or a website**, *look at it* — the layout system, the imagery, the
+chrome, and the spacing carry as much identity as the palette, and the user
+asked you to match all of it.
+
+- **Website** → open it in the browser pane (`preview_start`) and screenshot
+  a few pages.
+- **PDF (brand guide or deck)** → render the pages to images and read them.
+  `pdftotext` alone misses the whole visual system. If no page renderer is on
+  PATH, DeckCP's own `pdfjs-dist` + `@napi-rs/canvas` render pages headlessly
+  (import the `legacy` build; polyfill `DOMMatrix`/`Path2D`/`ImageData` from
+  the canvas lib; some knockout/foil pages won't rasterize — that's fine,
+  most will). Or use the `pdf` skill.
+- **PPTX** → the `pptx` skill reads slide text and shapes; render to images
+  for the actual look.
+
+Then write down, in the kit, what you *saw* — the four fields in A2.5. The
+OJEJE reference, for instance: every page is a gold tracked-caps eyebrow +
+a large serif headline on a fixed left margin + a bottom footer rule, with a
+*different* body each slide (split panel, numbered steps beside a photo, a
+stat row over a data panel, an editorial timeline, an icon grid used once)
+and real food photography framed in a dark panel. That system — not just
+`#A08162` — is what "looks like their team made it" means.
 
 ### A2 — assign roles (your judgment, small)
 
@@ -133,6 +163,32 @@ one.
 values, named typefaces, logo clear-space and minimum-size rules, the
 do/don't list. Pantone → hex only via the guide's own conversion table if it
 has one; otherwise flag it as a Pantone name with `confidence: "named"`.
+
+### A2.5 — the system beyond color and type
+
+From what you saw in A1.5, capture four things (they become kit fields, and
+the build step turns them into a master + generation rules):
+
+- **`chrome`** — the repeating frame every slide shares: is there an eyebrow
+  kicker (where, what case/color)? A headline treatment (serif/sans, size,
+  alignment, left margin)? A footer rule or running signature? Page numbers?
+  This is the single strongest "one design team" signal — name it precisely
+  so it can be built as a master.
+- **`imagery`** — how photos are treated: full-bleed, framed in a panel,
+  cutout on dark, duotone, none? Is there real photography at all, or is the
+  brand illustration/mark-driven? Say what a slide's image should look like.
+- **`layout_style`** — the structural language (this is `structural_language`
+  below) plus the palette of body layouts the source actually uses (split
+  panels, numbered lists, stat rows, tables, timelines). Cross-reference
+  [`references/layout-archetypes.md`](../deckcp-build-deck/references/layout-archetypes.md)
+  in the build skill.
+- **`graphic_elements`** — the repeated devices: hairline rules, accent
+  circles with numerals, dashed connectors, capsule/pill labels, a mark used
+  as a watermark. These are `signature_device`, but list every one you saw.
+
+If the source is a single logo with no deck or site, you have colors and
+maybe a font — synthesize the chrome/imagery/layout around them (say so in
+each field) rather than leaving them blank.
 
 ### A3 — write the extracted kit
 
@@ -206,6 +262,15 @@ the dominant one. Tell the user which you chose and the one-line reason.
   wordmark rule instead: the company name set in the display face at
   `deck-text-9xl`. Do not generate a logo.
 
+Synthesis fills the same `chrome`, `imagery`, `layout_style`, and
+`graphic_elements` fields as extraction — you're *designing* them instead of
+reading them. Decide the chrome (an eyebrow + a headline treatment + a footer
+rule is the safe premium default), the imagery direction (even "the user
+supplies photos via deckcp-gather-assets; frame them in a panel"), and which
+of the archetypes in
+[`references/layout-archetypes.md`](../deckcp-build-deck/references/layout-archetypes.md)
+the deck will pace through.
+
 Write the kit with `"mode": "synthesize"` and a `guidelines` paragraph that
 reads like a template description on the benchmark page — if it couldn't sit
 in that list, it isn't tight enough yet.
@@ -231,7 +296,11 @@ in that list, it isn't tight enough yet.
   },
   "logos": { "color": "./deck-assets/logo.svg", "white": null, "icon": null, "uploaded": {} },
   "surface": { "default_variant": "light | dark", "mood": "editorial", "page_margin": 96 },
-  "signature_device": "one sentence",
+  "chrome": "the repeating per-slide frame: eyebrow (where/case/color), headline (face/size/align/left-margin), footer rule + running signature, page numbers",
+  "imagery": "how photos are treated (full-bleed / framed-in-panel / cutout-on-dark / duotone / none), and whether the brand is photo- or mark-driven",
+  "layout_style": "the body layouts the source uses — see references/layout-archetypes.md",
+  "graphic_elements": ["hairline rules", "accent numeral circles", "dashed connectors", "…"],
+  "signature_device": "one sentence — the single most-repeated device",
   "structural_language": "cards | hairlines | flat-panels | editorial-grid — one sentence",
   "guidelines": "2–4 sentences a pipeline can obey",
   "dont": ["no gradients", "accent never on body text", "…"],
@@ -294,13 +363,28 @@ Record returned URLs in `brand-kit.json → logos.uploaded`. Use them in masters
 
 **4c — house style via masters (owned brand only — confirm first):**
 
-`set_masters scope:'brand'` installs the signature device once, inherited by
-**every deck on the brand** — which is exactly why you confirm before
-calling it. Build 2–4 masters (e.g. `paper` content, `section` full-accent
-divider, `title`) from the kit: `background.color` from the surface pair,
-`logo.which/size`, `title.preset`/`subtitle.preset` from
-`list_style_presets`, `footers`, and a `decor` tree for the device (the
-hairline, the rail, the square). Then:
+This is where the **`chrome`** field becomes real, and it's the highest-value
+thing this skill produces: a master carrying the eyebrow + headline + footer
+rule so **every generated slide inherits the identical frame** — the single
+strongest "designed, not generated" signal (see
+[`references/layout-archetypes.md`](../deckcp-build-deck/references/layout-archetypes.md)
+§"The chrome").
+
+`set_masters scope:'brand'` installs it once, inherited by **every deck on the
+brand** — which is exactly why you confirm before calling it. Build 2–4
+masters from the kit:
+
+- a **content** master (e.g. `paper`): `background.color` from the surface
+  pair; the eyebrow driven by `frontmatter.sectionLabel` via a
+  `sectionLabel`/`title` preset from `list_style_presets`; the headline via
+  the `title.preset` (display face); `footers` = the running signature at
+  left + page number at right; a `decor` tree for the signature device (the
+  hairline rule, the rail).
+- a **section divider** master: the dark surface color (`background.color`),
+  the mark reversed in white (`logo.which:"white"`), no footer.
+- optionally a **title/cover** master.
+
+Match the `title.preset`/`subtitle.preset` to the mapped fonts. Then:
 
 ```
 get_masters { deck_slug }                              # see what's inherited now

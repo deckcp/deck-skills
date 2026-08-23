@@ -42,6 +42,20 @@ palette on file" / "No approved logos on file" means every deck built on it
 will be generic by default; say so, and make `deckcp-brand-kit` the first
 stop before any build.
 
+**The brand decision drives everything else** — set it up front so the deck
+matches the user's real company, not a generic template:
+
+- **Any brand asset exists** — a logo, a brand guide, an existing deck, a
+  website, a colour list — that is the **primary source of truth**.
+  `deckcp-brand-kit` extracts it *literally* (colours, type, imagery, layout,
+  the repeating chrome) so the deck looks like their own design team made it.
+- **Nothing exists** — do **not** settle for a basic deck. `deckcp-brand-kit`
+  synthesizes a premium design system benchmarked on
+  [deckcp.com/templates](https://deckcp.com/templates).
+
+Ask "do you have a logo, brand guide, existing deck, or website I should
+match?" whenever it isn't already clear.
+
 ## Step 3 — one question, then route
 
 Ask what they're trying to make happen (or infer it if they already said),

@@ -56,10 +56,10 @@ catches, by dimension:
 
 | Dimension | Mechanical signals |
 | --- | --- |
-| Brand accuracy | hex literals outside the kit palette; `text-emerald-500`-style colour classes; >2 `Card accent` hues (rainbow cards); gradients the kit didn't ask for |
+| Brand accuracy | hex literals outside the kit palette; `text-emerald-500`-style colour classes; >2 `Card accent` hues (rainbow cards); gradients the kit didn't ask for; **chrome inconsistency** — content slides missing the shared master while others have it, split across >2 masters, or an uneven eyebrow |
 | Alignment | `style={{}}` (stripped on write → unpositioned), `items={[…]}` (dropped) — everything else is pixels |
 | Spacing consistency | more than ~5 distinct gap tokens or ~8 padding tokens deck-wide; raw `gap-7`/`p-9` used once; >4 type sizes on one slide |
-| Visual polish | raw `text-xs…xl` (under the 22px floor); emoji; >130 words or <4 words on a content slide |
+| Visual polish | raw `text-xs…xl` (under the 22px floor); emoji; >130 words or <4 words on a content slide; **no imagery** on a ≥5-slide deck (unless the kit says mark-driven) |
 | Repetitive layouts | runs of ≥3 identical layout skeletons; one skeleton on >50% of slides; single variant + no imagery; the server's `deck_variety` score |
 | Generic-AI look | icon-card grids on ≥40% of slides; dark-with-gradient on ≥50%; buzzwords (seamless, unlock, leverage, next-generation…); >6 icons per slide; topic-label titles |
 
@@ -82,10 +82,10 @@ Open every image. Not a sample — every one. Then score. The rubric below is
 what "4" means; write a one-line justification per dimension naming the
 worst slide.
 
-### Brand accuracy — does it look like *their* brand?
-- **5** every colour is a kit colour in its kit role (accent on numbers, not on body); logos are the real files at a deliberate size; type is the kit pairing; the signature device is present on every slide.
-- **4** one slide leans on a neutral the kit didn't name, or the accent does two jobs.
-- **≤3** a colour not in the kit, a wrong logo variant (colour logo on a dark slide), a font that isn't the kit's, the device missing for stretches.
+### Brand accuracy — does it look like *their* brand, as one family?
+- **5** every colour is a kit colour in its kit role (accent on numbers, not on body); logos are the real files at a deliberate size; type is the kit pairing; **the chrome is identical on every content slide** — same eyebrow, same headline treatment, same footer rule, same left margin — because they share a master; the signature device is present throughout.
+- **4** one slide leans on a neutral the kit didn't name, or the accent does two jobs, or one slide's chrome sits slightly off the others.
+- **≤3** a colour not in the kit, a wrong logo variant (colour logo on a dark slide), a font that isn't the kit's, the device missing for stretches, or **the chrome visibly differs slide to slide** (eyebrow present here and gone there, headlines at different sizes/positions) — the tell that each slide was built alone instead of on a system.
 
 ### Alignment — do edges line up?
 - **5** titles share a baseline across slides; left edges of title, body, and grid agree; grids have equal gutters; nothing kisses the canvas edge; charts sit on the same grid as text.
@@ -98,9 +98,9 @@ worst slide.
 - **≤3** cards with different padding on different slides; gaps that change per slide; content crowding the margin on some slides and floating on others.
 
 ### Visual polish — would a designer sign it?
-- **5** clear hierarchy (2–3 sizes per slide); charts legible at a glance with the kit's colours; photos cropped with intent; no orphan words, no widows in titles; nothing under 22px; no empty bottom third.
-- **4** one chart with a default colour, one awkward crop.
-- **≤3** collapsed content in the middle of the canvas; thin cards with empty bottoms; a table that clips; tiny text; emoji.
+- **5** clear hierarchy (2–3 sizes per slide); charts legible at a glance with the kit's colours; **real imagery, cropped with intent, carrying a good share of slides** (per the kit's imagery direction); no orphan words, no widows in titles; nothing under 22px; no empty bottom third.
+- **4** one chart with a default colour, one awkward crop, or imagery a little sparse.
+- **≤3** collapsed content in the middle of the canvas; thin cards with empty bottoms; a table that clips; tiny text; emoji; or a ≥5-slide deck with **no photography at all** (a wireframe), unless the brand is deliberately mark-driven.
 
 ### Repetitive layouts — does the deck have pacing?
 - **5** no two consecutive slides share a skeleton; at least one full-bleed or single-statement moment; a tonal shift (section page, photo band, stat slide) every 3–4 slides.
@@ -126,7 +126,9 @@ findings at once), then per slide. Map each to its tool:
 | Failure | Fix |
 | --- | --- |
 | Wrong accent/fonts/mood deck-wide | `update_deck { deck_theme: {…} }` from the kit's payload (`check-kit.js` prints it), then `render_slides { refresh:true }` |
+| Chrome differs slide to slide (eyebrow/headline/footer not shared) | build ONE content master carrying the eyebrow + headline + footer rule (`deckcp-brand-kit` Step 4c), `set_masters`, then set `frontmatter.master` on every content slide + `frontmatter.sectionLabel` for the eyebrow; `render_slides refresh:true` |
 | Device missing / chrome inconsistent | put it in a master (`get_masters` → edit → `set_masters`), opt slides in via `frontmatter.master` |
+| No imagery / wireframe look | pull the user's real photos with `deckcp-gather-assets` (or `search_assets` for approved brand imagery), place them per the kit's imagery treatment (full-bleed, framed-in-panel, cutout-on-dark); never substitute decorative icons |
 | Off-palette hex or colour class on a slide | mechanical MDX edit: swap to the kit colour or a slate neutral; `upsert_slides` at the same `slide_order` |
 | Rainbow `Card accent`s | pick one accent, replace on every Card (`upsert_slides`) |
 | `text-sm` etc. | replace with `deck-text-*`; re-budget the slide's height |

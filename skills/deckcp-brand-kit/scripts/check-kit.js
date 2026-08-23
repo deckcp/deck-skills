@@ -157,6 +157,8 @@ if (!kit.mode || !["extract", "synthesize"].includes(kit.mode)) fails.push('mode
 if (kit.mode === "synthesize" && !kit.direction) fails.push("synthesized kits must name a `direction`");
 if (!kit.guidelines || kit.guidelines.trim().split(/\s+/).length < 15) fails.push("guidelines must be 2–4 concrete sentences a pipeline can obey");
 if (!kit.signature_device) fails.push("signature_device is missing — the one repeated device is what keeps the deck from looking generated");
+if (!kit.chrome) warns.push("chrome is not set — without a described eyebrow/headline/footer frame, the build step can't make every slide feel like one family (the #1 'designed not generated' signal). Fill it, then build it as a master.");
+if (!kit.imagery) warns.push("imagery is not set — say whether the deck uses real photos (and how they're treated) or is mark-driven; a deck with no imagery reads as a wireframe.");
 if (!kit.structural_language) fails.push("structural_language is missing (cards | hairlines | flat-panels | editorial-grid)");
 const surface = kit.surface || {};
 if (surface.default_variant && !["light", "dark"].includes(surface.default_variant)) fails.push("surface.default_variant must be light or dark");
@@ -209,6 +211,7 @@ ${ROLES.map((r) => { const c = kit.colors[r]; const h = hexOf(r); return `| ${r}
 **Surface:** ${surface.default_variant || "light"} · mood ${theme.defaultMood} · margin ${theme.pageMargin}px
 **Signature device:** ${kit.signature_device}
 **Structure:** ${kit.structural_language}
+${kit.chrome ? `**Chrome (build as a master):** ${kit.chrome}\n` : ""}${kit.imagery ? `**Imagery:** ${kit.imagery}\n` : ""}${Array.isArray(kit.graphic_elements) && kit.graphic_elements.length ? `**Graphic elements:** ${kit.graphic_elements.join(", ")}\n` : ""}
 
 ${kit.guidelines.trim()}
 

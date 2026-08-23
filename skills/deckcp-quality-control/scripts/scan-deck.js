@@ -111,8 +111,10 @@ for (const s of slides) {
   const bucket = (n) => (n === 0 ? "0" : n <= 2 ? "1-2" : n <= 4 ? "3-4" : "5+");
   const fingerprint = [fm.variant || "light", ratio || "flow", topComps.join(","), "cards" + bucket(cards), hasImg ? "img" : "noimg"].join("|");
 
+  const chromeVariant = ["hero", "close"].includes(fm.variant || "");
   per.push({
     slide_order: s.slide_order, id: s.id, title, variant: fm.variant || "light", master: fm.master || null,
+    section_label: fm.sectionLabel || fm.sectionlabel || null, is_chrome_slide: !chromeVariant,
     words: wc, components: compCount, cards, icons, hexes, off_palette: offPalette, color_classes: colorClasses,
     card_accents: cardAccents, gradients, tiny_text: tiny, sizes, gaps, pads, buzzwords: buzz,
     emoji: EMOJI.test(text), label_title: LABEL_TITLES.test(title.trim()), has_image: hasImg,
@@ -134,6 +136,28 @@ for (const p of per) {
 }
 const allAccents = uniq(per.flatMap((p) => p.card_accents));
 if (allAccents.length > 2) F("brand", "fail", null, `Card accent colours used: ${allAccents.join(", ")} — ${allAccents.length} hues is a rainbow, not a brand. Pick one (two at most) and apply deck-wide.`);
+
+// chrome consistency — does every content slide feel like one family? The
+// single strongest "designed not generated" signal (kit.chrome / a master).
+const contentSlides = per.filter((p) => p.is_chrome_slide);
+if (contentSlides.length >= 3) {
+  const masters = count(contentSlides.map((p) => p.master || "(none)"));
+  const masterKeys = Object.keys(masters);
+  const withMaster = contentSlides.filter((p) => p.master).length;
+  if (kit && kit.chrome && withMaster === 0) {
+    F("brand", "fail", null, `the kit defines chrome ("${String(kit.chrome).slice(0, 60)}…") but NO content slide opts into a master — every slide is reinventing its frame. Build the chrome master and set frontmatter.master on each slide.`);
+  } else if (withMaster > 0 && withMaster < contentSlides.length) {
+    const naked = contentSlides.filter((p) => !p.master).map((p) => p.slide_order);
+    F("brand", "fail", null, `${naked.length}/${contentSlides.length} content slides have no master while others do (slides ${naked.join(", ")}) — the chrome will differ between them. Put every content slide on the same master.`);
+  } else if (masterKeys.length > 2 && withMaster === contentSlides.length) {
+    F("brand", "warn", null, `content slides split across ${masterKeys.length} masters (${masterKeys.join(", ")}) — more than a content + a divider master usually means inconsistent chrome.`);
+  }
+  // eyebrow/section-label presence should be all-or-none among content slides
+  const withLabel = contentSlides.filter((p) => p.section_label).length;
+  if (withLabel > 0 && withLabel < contentSlides.length && !contentSlides.every((p) => p.master)) {
+    F("brand", "warn", null, `${withLabel}/${contentSlides.length} content slides carry a sectionLabel eyebrow, the rest don't — the top-of-slide chrome is inconsistent. Either a master supplies it everywhere, or every slide sets frontmatter.sectionLabel.`);
+  }
+}
 
 // alignment — scripts can only catch structural alignment tells; pixels come from the render
 for (const p of per) {
@@ -160,6 +184,12 @@ for (const p of per) {
   if (p.words < 4 && !["hero", "close"].includes(p.variant)) F("polish", "warn", p.slide_order, `only ${p.words} words — is this slide carrying anything?`);
   if (p.emoji) F("polish", "fail", p.slide_order, "emoji in slide text — reads as chat, not a deck");
 }
+// imagery coverage — a premium deck carries real photos on a good share of
+// slides (the reference: food photography on most); a wireframe carries none.
+const imgSlides = per.filter((p) => p.has_image).length;
+const markDriven = kit && kit.imagery && /mark[- ]driven|no imagery|illustration|no photo/i.test(String(kit.imagery));
+if (n >= 5 && imgSlides === 0 && !markDriven) F("polish", "fail", null, `no imagery on any of ${n} slides — reads as a wireframe. Use the user's own photos (deckcp-gather-assets) or approved brand imagery on at least a third of slides. (If the brand is deliberately mark-driven, record that in kit.imagery to silence this.)`);
+else if (n >= 8 && imgSlides > 0 && imgSlides / n < 0.2 && !markDriven) F("polish", "warn", null, `only ${imgSlides}/${n} slides carry imagery — a premium deck leans on real photos more than that.`);
 
 // repetition
 const fps = per.map((p) => p.fingerprint);

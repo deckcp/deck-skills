@@ -84,13 +84,22 @@ short block the pipeline can obey:
 
 ```
 DESIGN SYSTEM (binding): <guidelines>. Signature device: <signature_device>.
-Structure: <structural_language>. Type: <display> for titles, <body> for
-everything else. Palette roles: Background <hex>, Text <hex>, Primary <hex>,
-Accent <hex> (used only for <job>), Secondary <hex>. Don't: <dont list>.
+Structure: <structural_language>. Chrome on every slide: <chrome>. Imagery:
+<imagery>. Type: <display> for titles, <body> for everything else. Palette
+roles: Background <hex>, Text <hex>, Primary <hex>, Accent <hex> (used only
+for <job>), Secondary <hex>. Don't: <dont list>.
+LAYOUT VARIETY (binding): no two consecutive slides share a layout; pace
+through distinct archetypes (split feature, numbers-as-hero stat row, media +
+numbered steps, editorial timeline, data/rules table, ONE icon-card grid at
+most, a full-bleed section divider every 3–4 slides).
 ```
 
 The brand lockdown the pipeline already sees covers the palette; this block
-is what stops it from defaulting to icon-card grids on a gradient.
+is what stops it from defaulting to icon-card grids on a gradient. The
+archetype menu and the chrome-as-master pattern are in
+[`references/layout-archetypes.md`](references/layout-archetypes.md) — read it
+before you shape the outline, and let it drive each slide's `visual` choice so
+the deck gets template-grade variety, not one repeated skeleton.
 
 ## Step 2 — create or reuse the deck
 
@@ -109,10 +118,14 @@ see the same system (`check-kit.js` prints this exact object):
 update_deck { deck_slug, deck_theme: { accent, secondary, fontDisplay, fontBody, defaultMood, pageMargin } }
 ```
 
-If the kit installed brand masters (`set_masters scope:'brand'`), they're
-inherited automatically; for a deck-scope house style, `set_masters
-{ deck_slug, scope:'deck', masters }` now, and reference master ids in the
-outline notes so generated slides opt in.
+**Build the chrome master before generating.** If the kit's `chrome` field is
+set and no master carries it yet, build it now (`deckcp-brand-kit` Step 4c has
+the recipe) so every generated slide inherits the same eyebrow + headline +
+footer frame — this is what makes the deck read as one family. If the kit
+installed brand masters (`set_masters scope:'brand'`), they're inherited
+automatically; for a deck-scope house style, `set_masters { deck_slug,
+scope:'deck', masters }` now, and reference master ids in the outline notes so
+generated slides opt in via `frontmatter.master`.
 
 ## Step 3 — generate
 
