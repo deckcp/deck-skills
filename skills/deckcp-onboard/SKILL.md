@@ -63,7 +63,7 @@ and route to exactly one skill:
 
 | The user wants… | Route |
 | --- | --- |
-| A new deck (pitch, sales, partnership) | `deck-interview` → `deck-outline` → `deckcp-brand-kit` → `deckcp-build-deck` (which ends in `deckcp-quality-control`) |
+| A new deck (pitch, sales, partnership) | `deck-interview` → `deck-outline` → `deckcp-brand-kit` → `deckcp-design-director` → `deckcp-build-deck` (which ends in `deckcp-quality-control`) |
 | To set up their brand — logo, colours, fonts, "match our website" — or they have none and want it to look designed | `deckcp-brand-kit` |
 | To understand a deck that already exists | `deckcp-read-deck` |
 | To know if the deck is any good — the story | `deck-critique` |
@@ -85,10 +85,14 @@ Worth saying once to a new user:
 - Every deck is built on a design system — yours, extracted literally from
   your logo/site/guide, or one synthesized to the standard of
   deckcp.com/templates — never on the generator's defaults.
+- Before slides generate, `deckcp-design-director` turns the story + brand into
+  a visual thesis and per-slide art-direction plan, so the generator is not
+  inventing composition from scratch.
 - Slides are validated (`check_slide`) and rendered — the agent looks at its
   own work before showing you — and no deck is called done until it passes
-  `deckcp-quality-control`: scored on brand accuracy, alignment, spacing,
-  polish, repetition, and "does this look generated", then fixed.
+  `deckcp-quality-control`: scored on brand accuracy, design/reference fidelity,
+  alignment, spacing, polish, intentional rhythm, and "does this look generated",
+  then fixed.
 - Nothing is emailed, shared publicly, or deleted without asking first.
 - The full tool surface behind these skills is documented in `MCP-TOOLS.md`
   in this repo.

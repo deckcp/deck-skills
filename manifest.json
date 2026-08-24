@@ -1,8 +1,8 @@
 {
   "name": "deckcp-deck-making-skills",
-  "version": "0.7.0",
+  "version": "0.8.2",
   "title": "DeckCP deck-making skill pack",
-  "description": "Interview, outline, critique, brand, build, quality-check, edit, analyze, and share great decks from Claude Code. Two tiers: provider-agnostic deck craft that works with no DeckCP account, plus DeckCP-powered skills that drive the DeckCP MCP. Every deck is built on a real design system and gated by a quality check before it is called done.",
+  "description": "Interview, outline, critique, extract/synthesize a brand system, art-direct the deck, build, quality-check, edit, analyze, and share decks from Claude Code. The workflow separates brand identity from deck-specific design direction so slide generation receives binding composition instructions rather than generic brand prose; v0.8.1 adds a visual-storytelling layer so ideas are translated into the strongest medium (diagram, spatial plan, map, proportion graphic, photo) instead of defaulting to text; v0.8.2 adds visual restraint and deck rhythm — a per-deck visual_strategy (peaks vs pauses), per-slide visual_intensity and visual_translation.confidence, and a QC visual_restraint_check — so visuals are used selectively and typography-led slides are preserved when they are stronger. Avoids both failure modes: all-text and all-infographic.",
   "target_runtime": "claude-code",
   "install_dir": ".claude/skills",
   "public_repo": "deckcp/deck-making-skills",
@@ -13,10 +13,10 @@
     "business development"
   ],
   "principles": [
-    "Scripts over tokens — deterministic bash/node does the heavy lifting for free (dedup, hashing, consistency scans, formatting).",
-    "Three model tiers, chosen per step and justified in each SKILL.md: (1) pure script wherever deterministic; (2) Haiku 4.5 subagent only for cheap mechanical classification (asset captioning, fuzzy terminology matching); (3) the user's main-loop model for real-judgment steps (interview, outline, critique, multi-lens analysis) — NOT downgraded, because the Tier-1 craft skills are the self-marketing surface.",
-    "Tier 1 is deliberately useful with no DeckCP account, so it self-markets DeckCP to people who then convert.",
-    "Every deck is built on a real design system (deckcp-brand-kit: extract the brand literally, or synthesize to the deckcp.com/templates standard) and nothing is done until it passes deckcp-quality-control (render every slide, score brand/alignment/spacing/polish/repetition/generic-AI, fix, re-score)."
+    "Scripts over tokens — deterministic bash/node does the heavy lifting where possible.",
+    "Use the main-loop model for judgment steps: interview, outline, brand synthesis, design direction, critique, and visual QC.",
+    "Tier 1 remains useful without a DeckCP account.",
+    "Every deck is built on a real design system, receives a deck-specific art direction + slide plan, and is not done until rendered, scored, fixed, and re-rendered."
   ],
   "tiers": {
     "1": "Provider-agnostic deck craft — no DeckCP account required.",
@@ -28,14 +28,14 @@
       "tier": 1,
       "status": "ready",
       "model_step": "mcp",
-      "summary": "Start here — verify the MCP connection (degrade gracefully to Tier 1 without one), orient on decks/brand, ask one intent question, route to exactly one next skill."
+      "summary": "Start here — verify the MCP connection (degrade gracefully to Tier 1 without one), orient on decks/brand, ask one intent question, route to exactly one next skill. The new-deck route now runs deck-interview → deck-outline → deckcp-brand-kit → deckcp-design-director → deckcp-build-deck (→ deckcp-quality-control)."
     },
     {
       "name": "deckcp-author-slides",
       "tier": 2,
       "status": "ready",
       "model_step": "main-loop",
-      "summary": "Manual slide authoring against the rendering contract: classes-only vocabulary, typed chart props vs pipe-string primitives, frontmatter shape, presets, masters, and the check_slide → upsert → render-and-look loop. Absolute slide-space trees (coordinateSpace slide + placements) for pixel-exact chrome, with the Prose h-full / editor-class-allowlist / style-object gotchas."
+      "summary": "Manual slide authoring against the rendering contract: classes-only vocabulary, typed chart props vs pipe-string primitives, frontmatter shape, presets, masters, and the check_slide → upsert → render-and-look loop. Absolute slide-space trees (coordinateSpace slide + placements) for pixel-exact chrome, with the Prose h-full / editor-class-allowlist / style-object gotchas. Used by deckcp-build-deck's reference-exact mode when geometry must not be left to generic generation."
     },
     {
       "name": "deck-interview",
@@ -49,7 +49,7 @@
       "tier": 1,
       "status": "ready",
       "model_step": "main-loop",
-      "summary": "Outline-first: turn the brief into a story spine (problem→insight→solution→proof→ask) before any slides. Emits outline.json + outline.md."
+      "summary": "Outline-first: turn the brief into a story spine (problem→insight→solution→proof→ask) before any slides. Emits outline.json + outline.md with only a coarse per-slide visual role (chart/diagram/photo/product/table/none) plus an optional one-line visual_intent (the communication need, not styling); exact composition and visual translation are deferred to deckcp-design-director. scripts/scaffold-outline.sh writes the empty structure."
     },
     {
       "name": "deck-critique",
@@ -70,7 +70,7 @@
       "tier": 1,
       "status": "absorbed",
       "model_step": "main-loop",
-      "summary": "Render each slide and look at it — balance, hierarchy, contrast, density, the 5-second test. ABSORBED into deckcp-quality-control (render every slide, score six dimensions)."
+      "summary": "Render each slide and look at it — balance, hierarchy, contrast, density, the 5-second test. ABSORBED into deckcp-quality-control (render every slide, score seven dimensions)."
     },
     {
       "name": "deck-analyze-multi",
@@ -105,21 +105,28 @@
       "tier": 2,
       "status": "ready",
       "model_step": "mixed",
-      "summary": "The design system a deck is built on. EXTRACT (script-first, scripts/extract-brand.js) captures the WHOLE system — not just colour/type but imagery treatment, layout style, graphic elements, and the repeating per-slide chrome (eyebrow + headline + footer), rendering an existing deck/guide to images and matching what it sees: literal hex from SVG fills/strokes, :root CSS vars + fonts + logo from a website, dk1/lt1/accent slots + typefaces from a PPTX theme, transcribed brand-guide lines — every token cited, never shifted. SYNTHESIZE (main-loop): one surface pair, one accent, one type pairing, one signature device, one structural language, benchmarked on deckcp.com/templates. scripts/check-kit.js validates hex, WCAG contrast, and the curated font catalog, then emits the update_deck.deck_theme payload. Writes theme (deck scope), logos (upload_asset), house style (set_masters scope brand, owned brands only, confirmed). Supersedes the planned deckcp-brand. references/match-a-reference-deck.md: reverse-engineer a finished deck by MEASUREMENT (pdf.js text-run dump, embedded font names incl. the Caladea/Carlito = Cambria/Calibri clones, 960x540pt -> 2x canvas), write the rules, then generate. scripts/extract-assets.js pulls the LOGO (vector page → 8x render, text masked, largest ink blob, white→alpha, recoloured variants), embedded IMAGES/TEXTURES (auto-tagged texture vs photo with dominant hex) and page renders out of a brand PDF — zero tokens. MULTILINGUAL: non-Latin scripts (Korean/JP/Chinese/Thai/Arabic/…) render by loading the matching Noto font via a deck_theme slot (verified) — references/multilingual-fonts.md, fonts.scripts in the kit; no more romanizing."
+      "summary": "The design system a deck is built on. EXTRACT (script-first, scripts/extract-brand.js) captures the WHOLE system — not just colour/type but imagery treatment, layout style, graphic elements, and the repeating per-slide chrome WHEN the source has one (chrome may legitimately be absent — never invent a universal frame), rendering an existing deck/guide to images and matching what it sees: literal hex from SVG fills/strokes, :root CSS vars + fonts + logo from a website, dk1/lt1/accent slots + typefaces from a PPTX theme, transcribed brand-guide lines — every token cited, never shifted. SYNTHESIZE (main-loop): one surface pair, one accent, one type pairing, one signature device, one structural language, benchmarked on deckcp.com/templates. NEW (v0.8): in addition to the legacy prose fields (kept for backward compatibility), brand-kit.json carries a structured design_system object — references/design-system-schema.md — with canvas/margins/grid, spacing scale, typography roles, chrome (incl. enabled:false), imagery, containers, color jobs, data-visualization style, density rules, and measured reference-fidelity hard/soft rules; deckcp-design-director, deckcp-build-deck and QC prefer it over prose. scripts/check-kit.js validates hex, WCAG contrast, and the curated font catalog (design_system is additive; check-kit may ignore it), then emits the update_deck.deck_theme payload. Writes theme (deck scope), logos (upload_asset), house style (set_masters scope brand, owned brands only, confirmed — only source-derived chrome, skipped when chrome is disabled). Supersedes the planned deckcp-brand. references/match-a-reference-deck.md: reverse-engineer a finished deck by MEASUREMENT (pdf.js text-run dump, embedded font names incl. the Caladea/Carlito = Cambria/Calibri clones, 960x540pt -> 2x canvas), write the rules, then generate. scripts/extract-assets.js pulls the LOGO (vector page → 8x render, text masked, largest ink blob, white→alpha, recoloured variants), embedded IMAGES/TEXTURES (auto-tagged texture vs photo with dominant hex) and page renders out of a brand PDF — zero tokens. MULTILINGUAL: non-Latin scripts (Korean/JP/Chinese/Thai/Arabic/…) render by loading the matching Noto font via a deck_theme slot (verified) — references/multilingual-fonts.md, fonts.scripts in the kit; no more romanizing."
+    },
+    {
+      "name": "deckcp-design-director",
+      "tier": 2,
+      "status": "ready",
+      "model_step": "main-loop",
+      "summary": "outline + brand-kit -> design-direction.json + slide-plan.json. Defines build mode (fast/brand/reference-exact), visual thesis, rhythm, signature moves, restraint rules, and binding art direction for every slide. v0.8.1 adds the Visual Translation Principle: for each slide decide whether the idea is stronger as a visual (diagram/spatial-plan/process/map/proportion-graphic/photo) and record a per-slide visual_translation, plus deck-level visual_media_mix and iconography_direction (all additive/optional; typography-led with needed:false is first-class). Reads references/design-principles.md, slide-art-direction-schema.md, anti-ai-aesthetics.md, reference-fidelity.md, visual-storytelling.md and the build skill's layout-archetypes.md. Chrome is brand/reference-derived (may be none); repetition is allowed when intentional; icons are semantic not decorative. v0.8.2 adds the Visual Restraint Principle: don't visualize statements, visualize structures; a restraint gate (communication+brand gain > complexity cost) recorded as visual_translation.confidence (high/medium/low) and per-slide visual_intensity (typography-led/supported/visual-led); a deck-level visual_strategy (mode minimal/selective[default]/visual-rich + visual_peaks/supporting_visuals/typography_led) that outranks visual_media_mix and plans peaks not coverage; least-complex-intervention and remove-before-adding passes. Writes ./deck-brief/design-direction.json + slide-plan.json, which deckcp-build-deck and deckcp-quality-control treat as binding."
     },
     {
       "name": "deckcp-build-deck",
       "tier": 2,
       "status": "ready",
-      "model_step": "mcp",
-      "summary": "brief/outline → deckcp-brand-kit (mandatory before generating) → generate_outline → generate_slides_from_outline → check_slide → render_slides → deckcp-quality-control (mandatory gate before \"done\"). Orchestration, minimal tokens. Reads references/layout-archetypes.md for template-grade layout variety + the chrome-as-master pattern."
+      "model_step": "mixed",
+      "summary": "brief/outline → deckcp-brand-kit (mandatory) → deckcp-design-director (mandatory: design-direction.json + slide-plan.json are binding inputs) → build per design-direction.json.build_mode: fast / brand = constrained generate_outline + generate_slides_from_outline with the brand system, design direction and per-slide art-direction serialized into context; reference-exact = measured theme + source-derived masters, server generation only where composition is flexible, deckcp-author-slides / upsert_slides for geometry-sensitive slides → check_slide → render_slides → deckcp-quality-control (mandatory gate before \"done\"). Reads references/layout-archetypes.md for the semantic archetype menu; purposeful repetition is allowed; masters come from the active brand/reference, never a universal chrome. v0.8.1: consumes per-slide visual_translation + deck visual_media_mix / iconography_direction — executes the planned visual (spatial-plan/process/proportion-graphic/map/annotated-image) in the brand's language, and when the server can't, flags it and escalates to deckcp-author-slides rather than silently emitting a paragraph; never forces a graphic onto a needed:false slide. v0.8.2: consumes visual_strategy + per-slide visual_intensity + visual_translation.confidence — slide-level intent and visual_strategy outrank the deck media mix, low/medium-confidence visuals default toward restraint, and a remove-before-adding pass runs before finalizing. Non-English text: load the matching Noto font, never romanize."
     },
     {
       "name": "deckcp-quality-control",
       "tier": 2,
       "status": "ready",
       "model_step": "mixed",
-      "summary": "The mandatory final gate. scripts/scan-deck.js (zero tokens) flags off-palette hexes and colour classes, rainbow Card accents, sub-22px text, spacing-token sprawl, repeated layout skeletons, icon-card grids, dark-gradient defaults, buzzwords, label titles; check_slide on every slide; then render_slides format image on EVERY slide and score six dimensions 1-5 (non-Latin scripts verified to render (not boxes), brand accuracy — now incl. chrome consistency across slides, alignment, spacing consistency, visual polish — now incl. imagery coverage, repetitive layouts, generic-AI look). Pass = all ≥4. Fix loop maps each failure to the cheapest tool (deck_theme, masters, upsert class swap, rewrite_slide), max three passes, re-render everything, qc-report.md."
+      "summary": "The mandatory final gate. scripts/scan-deck.js (zero tokens) flags off-palette hexes and colour classes, rainbow Card accents, sub-22px text, spacing-token sprawl, repeated layout skeletons, icon-card grids, dark-gradient defaults, buzzwords, label titles — its repetition / chrome / imagery heuristics are now ADVISORY, read against slide-plan.json.repetition_intent and brand-kit design_system.chrome / imagery (a repeated case-study series is not a failure; absent chrome is not a failure); check_slide on every slide; render_slides format image on EVERY slide (non-Latin scripts verified to render, not boxes); a deck-level sequence / contact-sheet pass (v0.8.1: also a visual-rhythm read against visual_media_mix — catches accidental all-text/one-medium monotony, never penalizes deliberately typographic decks); then score seven dimensions 1-5 (brand accuracy, design-intent / reference fidelity, alignment, spacing consistency, visual polish, intentional rhythm / repetition, generic-AI look), with a named visual_opportunity_check inside design-intent fidelity (PASS/ADVISORY/FAIL — FAIL only when the plan required a visual_translation and the build ignored it, or comprehension is hurt; never fails a needed:false slide). v0.8.2 adds a visual_restraint_check (the opposite: FAIL an over-designed slide — a statement given a diagram, 3-4 items forced into a bespoke icon set, decorative/duplicate devices) plus a peaks-and-pauses read against visual_strategy; the two checks are opposite guardrails and never contradict. Pass = all ≥4. Fix loop maps each failure to the cheapest tool (deck_theme, masters, upsert class swap, rewrite_slide, deckcp-author-slides for drifting reference geometry), max three passes, re-render everything, qc-report.md. Upstream routing on failure: brand-kit / design-director / outline-critique / author-slides."
     },
     {
       "name": "deckcp-read-deck",

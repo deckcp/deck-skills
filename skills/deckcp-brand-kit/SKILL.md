@@ -123,13 +123,17 @@ That turns "it looks kind of like this" into a system doc with exact chrome
 positions, a type scale, and container specs — which is what "designed by the
 same team" actually requires.
 
-Then write down, in the kit, what you *saw* — the four fields in A2.5. The
-OJEJE reference, for instance: every page is a gold tracked-caps eyebrow +
-a large serif headline on a fixed left margin + a bottom footer rule, with a
-*different* body each slide (split panel, numbered steps beside a photo, a
-stat row over a data panel, an editorial timeline, an icon grid used once)
-and real food photography framed in a dark panel. That system — not just
-`#A08162` — is what "looks like their team made it" means.
+Then write down, in the kit, what you *saw* — not only prose descriptors, but
+measurable rules where the source supports them. A finished reference may reveal
+a fixed headline x-position, a recurring image ratio, a strict no-card system,
+a small label used as the only accent, or no repeated chrome at all. That visual
+grammar — not just the palette — is what "looks like their team made it" means.
+
+Capture both the legacy prose fields in A2.5 **and** the structured
+`design_system` object defined in
+[`references/design-system-schema.md`](references/design-system-schema.md).
+Downstream skills prefer `design_system` when present and fall back to the prose
+fields for backward compatibility.
 
 ### A2 — assign roles (your judgment, small)
 
@@ -222,11 +226,11 @@ has one; otherwise flag it as a Pantone name with `confidence: "named"`.
 From what you saw in A1.5, capture four things (they become kit fields, and
 the build step turns them into a master + generation rules):
 
-- **`chrome`** — the repeating frame every slide shares: is there an eyebrow
-  kicker (where, what case/color)? A headline treatment (serif/sans, size,
-  alignment, left margin)? A footer rule or running signature? Page numbers?
-  This is the single strongest "one design team" signal — name it precisely
-  so it can be built as a master.
+- **`chrome`** — the repeating frame *if the source has one*: eyebrow / section
+  label, headline position, footer, page number, logo, rail, watermark, etc.
+  Some strong systems have almost no chrome beyond stable margins and type.
+  Never invent a universal frame. When chrome exists, name it precisely enough
+  to build as a master.
 - **`imagery`** — how photos are treated: full-bleed, framed in a panel,
   cutout on dark, duotone, none? Is there real photography at all, or is the
   brand illustration/mark-driven? Say what a slide's image should look like.
@@ -321,10 +325,10 @@ the dominant one. Tell the user which you chose and the one-line reason.
 
 Synthesis fills the same `chrome`, `imagery`, `layout_style`, and
 `graphic_elements` fields as extraction — you're *designing* them instead of
-reading them. Decide the chrome (an eyebrow + a headline treatment + a footer
-rule is the safe premium default), the imagery direction (even "the user
-supplies photos via deckcp-gather-assets; frame them in a panel"), and which
-of the archetypes in
+reading them. Decide whether chrome is needed at all; do not default to an
+eyebrow + serif headline + footer simply because it feels "premium." Decide
+the imagery direction (even "the user supplies photos via deckcp-gather-assets;
+frame them in a panel"), and which of the archetypes in
 [`references/layout-archetypes.md`](../deckcp-build-deck/references/layout-archetypes.md)
 the deck will pace through.
 
@@ -334,37 +338,17 @@ in that list, it isn't tight enough yet.
 
 ## Step 3 — brand-kit.json (both paths)
 
-```json
-{
-  "mode": "extract | synthesize",
-  "direction": "editorial-paper | dark-war-room | … | null (extract)",
-  "brand_name": "",
-  "colors": {
-    "Background": { "hex": "#FAFAF7", "source": "site :root --bg", "confidence": "literal | sampled | named | chosen" },
-    "Text":       { "hex": "#141414", "source": "", "confidence": "" },
-    "Primary":    { "hex": "", "source": "", "confidence": "" },
-    "Accent":     { "hex": "", "source": "", "confidence": "" },
-    "Secondary":  { "hex": null, "source": "absent in source", "confidence": "" }
-  },
-  "extra_colors": { "Sand": { "hex": "", "source": "" } },
-  "fonts": {
-    "display": { "brand": "Söhne", "mapped": "Inter", "why": "" },
-    "body":    { "brand": "Inter", "mapped": "Inter", "why": "in catalog" },
-    "scripts": [{ "script": "Korean", "sans": "Noto Sans KR", "serif": "Noto Serif KR" }]
-  },
-  "logos": { "color": "./deck-assets/logo.svg", "white": null, "icon": null, "uploaded": {} },
-  "surface": { "default_variant": "light | dark", "mood": "editorial", "page_margin": 96 },
-  "chrome": "the repeating per-slide frame: eyebrow (where/case/color), headline (face/size/align/left-margin), footer rule + running signature, page numbers",
-  "imagery": "how photos are treated (full-bleed / framed-in-panel / cutout-on-dark / duotone / none), and whether the brand is photo- or mark-driven",
-  "layout_style": "the body layouts the source uses — see references/layout-archetypes.md",
-  "graphic_elements": ["hairline rules", "accent numeral circles", "dashed connectors", "…"],
-  "signature_device": "one sentence — the single most-repeated device",
-  "structural_language": "cards | hairlines | flat-panels | editorial-grid — one sentence",
-  "guidelines": "2–4 sentences a pipeline can obey",
-  "dont": ["no gradients", "accent never on body text", "…"],
-  "sources": ["logo.svg", "https://example.com", "brand-guide.pdf"]
-}
-```
+Write `./deck-brief/brand-kit.json` using the complete schema in
+[`references/design-system-schema.md`](references/design-system-schema.md).
+
+Keep the existing top-level fields (`mode`, `direction`, `brand_name`, `colors`,
+`fonts`, `logos`, `surface`, `chrome`, `imagery`, `layout_style`,
+`graphic_elements`, `signature_device`, `structural_language`, `guidelines`,
+`dont`, `sources`) for backward compatibility. Add the structured
+`design_system` object for downstream design/build/QC.
+
+For extraction, every measured/literal value keeps its source/confidence. For
+synthesis, mark chosen values honestly and keep the system restrained.
 
 Then validate:
 
@@ -377,7 +361,8 @@ It fails on: malformed hex, `Text`/`Background` under 4.5:1, `Accent`/
 prints (a) the `deck_theme` payload for `update_deck`, (b) a paste-ready block
 for the brand record, and (c) a one-paragraph `brand-kit.md` summary. Fix
 and re-run until it passes — a kit that fails contrast will fail the QC gate
-later anyway.
+later anyway. Extra `design_system` fields are additive; `check-kit.js` may ignore
+them today, but `deckcp-design-director`, `deckcp-build-deck`, and QC consume them.
 
 ## Step 4 — write it into DeckCP (MCP connected)
 
@@ -431,10 +416,11 @@ Record returned URLs in `brand-kit.json → logos.uploaded`. Use them in masters
 
 **4c — house style via masters (owned brand only — confirm first):**
 
-This is where the **`chrome`** field becomes real, and it's the highest-value
-thing this skill produces: a master carrying the eyebrow + headline + footer
-rule so **every generated slide inherits the identical frame** — the single
-strongest "designed, not generated" signal (see
+This is where the **`chrome`** field becomes real **when the active design
+system actually has repeating chrome**. A master can carry the source-derived
+headline frame, footer, section label, logo, rail, or other invariant so slides
+inherit it identically. If `design_system.chrome.enabled` is false, skip the
+chrome master rather than inventing one (see
 [`references/layout-archetypes.md`](../deckcp-build-deck/references/layout-archetypes.md)
 §"The chrome").
 
@@ -442,12 +428,10 @@ strongest "designed, not generated" signal (see
 brand** — which is exactly why you confirm before calling it. Build 2–4
 masters from the kit:
 
-- a **content** master (e.g. `paper`): `background.color` from the surface
-  pair; the eyebrow driven by `frontmatter.sectionLabel` via a
-  `sectionLabel`/`title` preset from `list_style_presets`; the headline via
-  the `title.preset` (display face); `footers` = the running signature at
-  left + page number at right; a `decor` tree for the signature device (the
-  hairline rule, the rail).
+- a **content** master when useful: `background.color` from the surface pair,
+  plus only the source-derived repeating elements (title preset, section label,
+  footer, logo, rail, rule, etc.). Do not add an eyebrow/footer when the active
+  system does not use them.
 - a **section divider** master: the dark surface color (`background.color`),
   the mark reversed in white (`logo.which:"white"`), no footer.
 - optionally a **title/cover** master.
@@ -474,9 +458,11 @@ Report: which path, the five colors with their sources, the type pairing (and
 any substitution), the device, what was written where (deck theme / masters /
 "paste into /brands"). Then:
 
-> "Run `deckcp-build-deck` — it reads `brand-kit.json`, applies the theme
-> before generating, and folds the guidelines into the generation context.
-> `deckcp-quality-control` will score the finished deck against this kit."
+> "Run `deckcp-design-director` next — it combines `brand-kit.json` with the
+> outline to create the deck's visual thesis and per-slide art-direction plan.
+> Then `deckcp-build-deck` builds from those binding inputs, and
+> `deckcp-quality-control` scores the finished deck against both the brand kit
+> and the intended design direction."
 
 ## Guardrails
 

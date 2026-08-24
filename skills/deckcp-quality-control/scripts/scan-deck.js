@@ -157,11 +157,15 @@ if (allAccents.length > 2) F("brand", "fail", null, `Card accent colours used: $
 // chrome consistency — does every content slide feel like one family? The
 // single strongest "designed not generated" signal (kit.chrome / a master).
 const contentSlides = per.filter((p) => p.is_chrome_slide);
+// a structured design system may declare the brand has NO repeating chrome; then
+// content slides legitimately carry no master and the legacy kit.chrome requirement
+// does not apply. Absent the structured field, legacy behavior is preserved.
+const chromeDisabled = !!(kit && kit.design_system && kit.design_system.chrome && kit.design_system.chrome.enabled === false);
 if (contentSlides.length >= 3) {
   const masters = count(contentSlides.map((p) => p.master || "(none)"));
   const masterKeys = Object.keys(masters);
   const withMaster = contentSlides.filter((p) => p.master).length;
-  if (kit && kit.chrome && withMaster === 0) {
+  if (kit && kit.chrome && withMaster === 0 && !chromeDisabled) {
     F("brand", "fail", null, `the kit defines chrome ("${String(kit.chrome).slice(0, 60)}…") but NO content slide opts into a master — every slide is reinventing its frame. Build the chrome master and set frontmatter.master on each slide.`);
   } else if (withMaster > 0 && withMaster < contentSlides.length) {
     const naked = contentSlides.filter((p) => !p.master).map((p) => p.slide_order);
