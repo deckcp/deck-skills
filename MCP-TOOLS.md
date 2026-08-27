@@ -72,6 +72,18 @@ then a six-dimension score and the fix loop).
 
 Skill: [`deckcp-build-deck`](skills/deckcp-build-deck/SKILL.md).
 
+## Templates & design fallback
+
+Use when there is no strong company design source — a template supplies the DESIGN VOCABULARY (typography, grids, spacing, treatments, closing pattern), never the content. Match multi-dimensionally, then apply and recompose to your outline.
+
+| Tool | What it does |
+| --- | --- |
+| `list_deck_templates` | The design families with matchable metadata (`category`, `use_case`, `tags`, `accent`) + a derived `design_profile` (light/dark, personality, typography, image dependency, data density, composition). No slides. Optional `category` filter. |
+| `get_deck_template` | One template's design vocabulary: `deck_theme`, masters, typography, and a per-slide archetype summary (cover/content/closing). Design patterns, not content to copy. |
+| `apply_deck_template` | Clone the template's DESIGN into a new deck you own (returns `deck_slug`). The clone carries the template's sample content — then RECOMPOSE to your outline and drop every sample. |
+
+Skill: [`deckcp-design-director`](skills/deckcp-design-director/SKILL.md) (picks `build_mode: template-fallback`) → [`deckcp-build-deck`](skills/deckcp-build-deck/SKILL.md) (apply → adapt → recompose).
+
 ## Authoring reference (read-only, no side effects)
 
 | Tool | What it does |
@@ -96,6 +108,7 @@ exact values to paste.
 | --- | --- |
 | `upload_asset` | Image/video → deck-assets bucket → public URL for slides. Base64 `data` (images, ≤8MB) or `source_url` (required for videos, ≤50MB). |
 | `search_assets` | Semantic search over the shared asset library (url, description, tags, similarity) — reuse approved images instead of generating. |
+| `search_stock_images` | Real stock photography (Unsplash) for MOOD/CONTEXT/LIFESTYLE only — returns candidates (`url`, `thumb_url`, aspect, author). Use the chosen `url` as `upload_asset { source_url }` (fires the attribution ping). NEVER pass off stock UI as the product, and NEVER label a stock person as a real founder/employee/customer/investor. |
 
 Skill: [`deckcp-gather-assets`](skills/deckcp-gather-assets/SKILL.md).
 

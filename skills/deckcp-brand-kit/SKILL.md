@@ -48,10 +48,23 @@ so every downstream skill (`deckcp-build-deck`, `deckcp-author-slides`,
 Look before you ask. In this order:
 
 ```bash
-ls ./deck-brief/brand-kit.json 2>/dev/null     # already done? reuse, don't redo
+ls ./deck-brief/brand-kit.json 2>/dev/null       # already done? reuse, don't redo
+cat ./deck-brief/input-evidence.json 2>/dev/null # input-intelligence may have detected + gathered brand evidence
 ls ./deck-assets/*.svg ./deck-assets/*logo* 2>/dev/null   # gather-assets may have found a logo
-cat ./deck-brief/brief.json 2>/dev/null         # deck_type / audience / setting drive the synth direction
+cat ./deck-brief/brief.json 2>/dev/null          # deck_type / audience / setting drive the synth direction
 ```
+
+**If `input-evidence.json` exists, start from its `brand` evidence** — it already
+recorded which sources the user has, the literal colors/fonts/logo it could extract,
+and each value's `status`/`confidence`/`authority`/`source`. Treat that as the
+starting point for **Path A** and do not re-run detection the skill above already did:
+map its `observed` colors/fonts straight into role assignment (A2), carry its `source`
+strings verbatim, and only fill genuine gaps. `brand` evidence present with any
+`observed` color/logo → **Path A**; brand evidence all `unknown` (or the file absent)
+→ decide by the checks below. Honor the honesty: a `status: inferred` value is a
+starting guess to confirm, never a literal brand token. (The confidence crosswalk in
+[`../deckcp-input-intelligence/references/input-evidence-schema.md`](../deckcp-input-intelligence/references/input-evidence-schema.md)
+maps its `exact|high|medium|low|inferred` onto this kit's `literal|sampled|named|chosen`.)
 
 ```
 get_brand { brand_slug }        # MCP connected: does the brand already have a real palette + logos?
@@ -62,7 +75,9 @@ on file."` is the signal that the brand is empty. A brand with five role
 colors, logos, and guidelines is itself a source — **EXTRACT from it** and
 skip to Step 3; don't synthesize over a brand that exists.
 
-Then ONE question, only if it's still unclear:
+Then ONE question, only if it's still unclear **and `input-evidence.json` didn't
+already settle it** (when that file lists the user's brand sources, don't re-ask what
+it detected):
 
 > "Do you have any of: a logo file (SVG best), a brand guide (PDF), an
 > existing deck (PPTX/PDF), or a website I should match? If none — say so and

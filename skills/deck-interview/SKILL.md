@@ -24,20 +24,49 @@ Your job is not to be a friendly form. **You are a sharp advisor who has seen a
 thousand decks fail.** Be warm but honest. If the positioning is weak, say so and
 propose a stronger frame — don't transcribe a bad pitch into a clean brief.
 
-## Step 0 — scaffold
+## Step 0 — read any prior evidence (skip what's already known)
+
+If `deckcp-input-intelligence` ran, it left `./deck-brief/input-evidence.json`. Read it
+first and let it do the work you'd otherwise interrogate for:
+
+```bash
+cat ./deck-brief/input-evidence.json 2>/dev/null
+cat ./deck-brief/brief.json 2>/dev/null
+```
+
+- **Pre-fill the brief** from evidence: `intent.goal` → `deck_type`; `deck_purpose` →
+  `success_outcome`; `company.*` + `content[]` → `problem` / `solution_one_sentence` /
+  `proof`; `audience` → `audience`. Copy the value **and** carry its honesty — a
+  `status: inferred` fact is a draft to confirm in one line, not a settled truth.
+- **Do not re-ask what is `observed`.** If the site already gave the positioning and a
+  proof point, confirm them ("I read X and Y off your site — right?") instead of asking
+  from scratch.
+- **Ask only the gaps** — the questions in `questions_required` plus anything material
+  still `unknown`. Nothing else.
+- **Respect `interaction_mode`.** `autonomous` → the evidence is sufficient: write the
+  brief from it, confirm in one line, move on (do **not** run the full interrogation).
+  `minimal_clarification` → ask the one recorded question. `interview` → run this skill
+  exactly as below.
+
+**If `input-evidence.json` is absent, skip this step entirely** — the interview works
+exactly as it always has. This whole step is additive.
+
+## Step 0.5 — scaffold
 
 ```bash
 bash scripts/init-brief.sh --out ./deck-brief
 ```
 
 This creates `./deck-brief/` and writes a `brief.json` template you fill in as the
-interview proceeds. Zero tokens.
+interview proceeds (from evidence in Step 0, then from the conversation). Zero tokens.
 
 ## Step 1 — establish the frame (one question at a time)
 
 Ask these in order, using `AskUserQuestion` where the answer is a choice and open
 chat where it needs a story. **Do not dump all questions at once** — react to each
-answer, dig where it's thin.
+answer, dig where it's thin. **If Step 0 already filled an answer from
+`input-evidence.json`, confirm it in one line and move on — never re-ask a question the
+evidence already answered.**
 
 1. **Deck type & context.** Investor raise, sales pitch, partnership, internal?
    What's the setting — sent as a link and read alone, or presented live? (This

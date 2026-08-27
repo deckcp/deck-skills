@@ -128,6 +128,11 @@ Goal: preserve measured visual grammar — type scale, margins, chrome, image ra
 
 Do not pick `reference-exact` merely because a reference exists. Pick it when fidelity is the request.
 
+### `template-fallback`
+Use when there is **no strong design source** — no explicit user design reference, no existing company deck/template, no formal brand/presentation guide, and no GENUINELY rich company design evidence (a coherent layout/composition/type system, not merely colors + logo from a website). This is the design-source hierarchy: explicit reference → current company deck/template → formal brand guide → rich company design evidence → **DeckCP template library (this mode)**. A weak website design signal must NOT yield a weak deck.
+
+Set `design_source: "deckcp_template"`. Adopt a DeckCP template as the DESIGN VOCABULARY (typography, grids, spacing, hero/metric/chart/diagram treatments, section + closing patterns, visual rhythm) — NOT as content. Match multi-dimensionally (genre, audience, brand personality, image availability, data density, tone, editorial/corporate/technical/lifestyle character, light/dark), never "investor → first pitch template". Record the chosen `template_id` and WHY it fits in `design-direction.json`. deckcp-build-deck (Tier 2) instantiates it via `list_deck_templates` → `get_deck_template` → `apply_deck_template`, then recomposes to your outline. Still write a real visual thesis below — the template grounds it; it does not replace it.
+
 ## Step 2 — write the visual thesis
 
 Choose one **clear visual thesis** for the deck.

@@ -249,6 +249,17 @@ The target is "same design team," not merely "same colors."
 
 This path intentionally spends more judgment on fidelity.
 
+### Path D — `template-fallback` (design_source: deckcp_template)
+
+The Design Director chose a DeckCP template as the DESIGN VOCABULARY because no strong company design source existed. Instantiate it, then make it the company's and recompose it to the approved outline — **apply → adapt → recompose**:
+
+1. **Apply.** `list_deck_templates` (filter by category if useful) → match the `template_id` the direction recorded (or re-match multi-dimensionally: genre, audience, brand personality, image availability, data density, tone, light/dark) → `get_deck_template { template_id }` to learn the vocabulary (theme, masters, typography, per-archetype treatments, closing pattern) → `apply_deck_template { template_id, title }`. This clones the template's design into a NEW deck and returns its `deck_slug` — use that deck from here on (do not also `create_deck`).
+2. **Adapt to the brand.** The clone carries the template's theme + sample content. Apply the company's brand: `update_deck { deck_slug, deck_theme }` (+ `set_masters` if the direction defines masters), PRESERVING the template's design quality — do NOT mechanically recolor every neutral or replace all backgrounds; that destroys contrast, hierarchy, whitespace, and rhythm.
+3. **Recompose to the outline.** The template is a vocabulary, NOT the content. Rewrite every slide with the company's evidence-bound content from `outline.json` / slide-plan; add, reorder, and delete slides so the deck matches YOUR plan — not the template's slide count, order, sample company, sample claims, sample metrics, sample images, or sample CTA. Map each of your slides onto the template's archetype whose treatment fits (hero, metric hero, chart/data, comparison, diagram, editorial split, section divider, closing). Remove every leftover sample slide.
+4. Keep visual rhythm (peaks/pauses) and a distinct, intentional closing slide. Render 2–3 representative slides early to confirm the adaptation holds before doing the rest.
+
+Assets still follow the decision tree in "Authentic assets & placeholders" below (authentic → mood stock via `search_stock_images` → non-image visual → placeholder).
+
 ### Existing-outline preference
 
 Prefer an outline the user has seen. It is still cheaper to fix story before slides.
@@ -358,6 +369,37 @@ Then point onward:
 
 > "Run `deck-critique` to pressure-test the narrative, `deckcp-gather-assets` to
 > swap in your real photos, or `deckcp-share` to send it out."
+
+## Authentic assets & placeholders (decision tree)
+
+When a slide's art direction calls for a visual
+(`asset_status: placeholder` in the slide plan, or an art-direction
+requirement you can't satisfy with a real asset), work the tree in order:
+**AUTHENTIC → mood STOCK → non-image visual → placeholder.**
+
+- Prefer the authentic asset: use one already in `input-evidence.json`, or
+  acquire it (`fetch_page` a product/customer page → `upload_asset` the image;
+  `import_source` a document). If a chart/diagram/text-led treatment communicates
+  the idea better, use that instead.
+- If the image is EDITORIAL/MOOD/CONTEXT/LIFESTYLE (atmosphere, not factual
+  proof), use real stock: `search_stock_images { query }` → `upload_asset
+  { source_url }` (that upload fires Unsplash's required attribution ping).
+  **Hard rules:** never present a stock screenshot/mockup as the company's actual
+  product (product proof needs authentic product UI or a product-screenshot
+  placeholder), and never label a stock person as a real founder, employee,
+  customer, or investor.
+- If it genuinely can't be acquired, build a **polished, intentional placeholder
+  inside the intended composition** — the correct crop/aspect ratio, preserved
+  spacing and layout, a concise label of the expected asset (e.g. `[ PRODUCT
+  SCREENSHOT ] Current search-results experience · 16:9 · official product
+  page`), easy to replace later. Never a broken-image look, never generic stock.
+- **Asset-gap ≠ evidence-gap:** do NOT hold an otherwise-evidenced slide just
+  because an optional image is missing — build it with the placeholder. Only
+  hold for missing *facts* (content preflight), not missing *pictures*.
+- When done, tell the user concisely which slides carry placeholders and what to
+  drop in (e.g. "3 slides have intentional placeholders for company assets that
+  weren't available"). Don't interrupt generation to ask about an unavailable
+  asset. Full contract: `get_deck_playbook`.
 
 ## Guardrails
 

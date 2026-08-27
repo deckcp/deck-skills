@@ -1,8 +1,8 @@
 {
   "name": "deckcp-deck-making-skills",
-  "version": "0.8.2",
+  "version": "0.8.5",
   "title": "DeckCP deck-making skill pack",
-  "description": "Interview, outline, critique, extract/synthesize a brand system, art-direct the deck, build, quality-check, edit, analyze, and share decks from Claude Code. The workflow separates brand identity from deck-specific design direction so slide generation receives binding composition instructions rather than generic brand prose; v0.8.1 adds a visual-storytelling layer so ideas are translated into the strongest medium (diagram, spatial plan, map, proportion graphic, photo) instead of defaulting to text; v0.8.2 adds visual restraint and deck rhythm — a per-deck visual_strategy (peaks vs pauses), per-slide visual_intensity and visual_translation.confidence, and a QC visual_restraint_check — so visuals are used selectively and typography-led slides are preserved when they are stronger. Avoids both failure modes: all-text and all-infographic.",
+  "description": "Interview, outline, critique, extract/synthesize a brand system, art-direct the deck, build, quality-check, edit, analyze, and share decks from Claude Code. The workflow separates brand identity from deck-specific design direction so slide generation receives binding composition instructions rather than generic brand prose; v0.8.1 adds a visual-storytelling layer so ideas are translated into the strongest medium (diagram, spatial plan, map, proportion graphic, photo) instead of defaulting to text; v0.8.2 adds visual restraint and deck rhythm — a per-deck visual_strategy (peaks vs pauses), per-slide visual_intensity and visual_translation.confidence, and a QC visual_restraint_check — so visuals are used selectively and typography-led slides are preserved when they are stronger. v0.8.3 adds a smart-onboarding input-intelligence layer that runs BEFORE the pipeline: it detects and classifies whatever the user supplies (logo, website, social, brand guide, PDF/PPTX, existing deck, data, existing DeckCP brand), records evidence with per-dimension source authority and observed/inferred/unknown confidence in an additive input-evidence.json, resolves conflicts, classifies reference intent, and asks only questions that genuinely cannot be discovered — so a website + a goal can reach a finished deck with zero unnecessary questions. Avoids both failure modes: all-text and all-infographic. v0.8.5 adds a template-first visual-quality fallback: the design source ('what should it look like') is separated from the content source ('what should it say'), and when no strong company design system exists (only colors + a logo is weak), deckcp-design-director picks build_mode 'template-fallback' and adopts a DeckCP template as a DESIGN VOCABULARY — matched multi-dimensionally, applied via the new list_deck_templates / get_deck_template / apply_deck_template MCP tools, then recomposed to the approved outline (never the template's content). Also adds an asset decision tree (authentic → mood stock via search_stock_images → non-image visual → labeled placeholder) with hard rules — never pass off stock UI as the product, never label a stock person as a real identity — a mandatory intentional closing slide, and deck-level visual QC (designed deck vs formatted documents) that still honors visual restraint.",
   "target_runtime": "claude-code",
   "install_dir": ".claude/skills",
   "public_repo": "deckcp/deck-making-skills",
@@ -16,6 +16,7 @@
     "Scripts over tokens — deterministic bash/node does the heavy lifting where possible.",
     "Use the main-loop model for judgment steps: interview, outline, brand synthesis, design direction, critique, and visual QC.",
     "Tier 1 remains useful without a DeckCP account.",
+    "Understand the inputs before the pipeline runs: detect and classify what the user supplied, gather what evidence is available, record provenance + per-dimension authority + observed/inferred/unknown confidence, and ask only what cannot be discovered.",
     "Every deck is built on a real design system, receives a deck-specific art direction + slide plan, and is not done until rendered, scored, fixed, and re-rendered."
   ],
   "tiers": {
@@ -28,7 +29,14 @@
       "tier": 1,
       "status": "ready",
       "model_step": "mcp",
-      "summary": "Start here — verify the MCP connection (degrade gracefully to Tier 1 without one), orient on decks/brand, ask one intent question, route to exactly one next skill. The new-deck route now runs deck-interview → deck-outline → deckcp-brand-kit → deckcp-design-director → deckcp-build-deck (→ deckcp-quality-control)."
+      "summary": "Start here — verify the MCP connection (degrade gracefully to Tier 1 without one), orient on decks/brand, and route to exactly one next skill. When the user supplies anything beyond a bare prompt (logo/website/social/guide/PDF/PPTX/deck/assets/existing brand), hand to deckcp-input-intelligence first. The new-deck route now runs deckcp-input-intelligence → deck-interview → deck-outline → deckcp-brand-kit → deckcp-design-director → deckcp-build-deck (→ deckcp-quality-control)."
+    },
+    {
+      "name": "deckcp-input-intelligence",
+      "tier": 1,
+      "status": "ready",
+      "model_step": "mixed",
+      "summary": "Smart onboarding — understand the inputs BEFORE the pipeline runs. Detect + classify every input (prompt/logo/website/social/brand-guide/PDF/PPTX/company-deck/design-reference/content-source/structure-reference/edit-target/images/data/existing DeckCP brand) via scripts/classify-inputs.sh (zero tokens); acquire what evidence is available (reusing brand-kit's extract-brand.js and the agent's fetch/browser — acquisition kept separate from reasoning, and designed so a Phase-2 scrape_brand_site / import_source MCP wrapper can supply it later); attach provenance + per-dimension source authority + observed/inferred/unknown confidence; classify reference intent (default ambiguous, never auto reference-exact); resolve conflicts by authority + freshness; and ask only material, undiscoverable questions. Emits additive ./deck-brief/input-evidence.json (scripts/scaffold-evidence.sh) with interaction_mode (autonomous/minimal_clarification/interview) and recommended_route (autonomous/brand-discovery/interview-led/reference-led/repair-transform), then routes to exactly one next skill. references/input-evidence-schema.md + references/authority-routing.md. Fully additive: absent input-evidence.json = unchanged legacy behavior. Does not touch the v0.8.2 design pipeline (design-director / build modes / QC)."
     },
     {
       "name": "deckcp-author-slides",

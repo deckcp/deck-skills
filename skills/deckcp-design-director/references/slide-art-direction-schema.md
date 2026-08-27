@@ -152,3 +152,28 @@ These schemas are intentionally plain JSON. Extra fields are allowed when useful
   treat as `medium`.
 - Old v0.8.0 plans (no `visual_translation`) and v0.8.1 plans (no `confidence` /
   `visual_intensity` / `visual_strategy`) remain valid; the defaults above apply.
+
+## Authentic-asset fields (v0.8.4 — additive, optional; every genre)
+
+The Design Director MAY declare that a composition needs a specific authentic
+company/product/customer visual — without changing its core responsibility. These
+fields are optional and additive; plans that omit them are unchanged.
+
+- **`asset_status`** — `authentic | acquired | placeholder | not_required`. Default
+  `not_required`.
+- **`asset_needed`** — the authentic asset the slide wants (e.g. "current product
+  search-results screenshot"), or `null`.
+- **`asset_role`** — its job on the slide (e.g. "primary product proof"), or `null`.
+- **`asset_reason`** — why a placeholder was chosen (e.g. "no authentic screenshot
+  could be acquired"), or `null`.
+- **`recommended_source`** — where to obtain it (e.g. "official product page"), or `null`.
+- **`replacement_notes`** — concise instruction for what to drop in later, or `null`.
+- **`preferred_aspect_ratio`** — e.g. `16:9`, `landscape`, or `null`.
+
+The Director specifies the requirement (e.g. "this composition needs an authentic
+product screenshot"); if the asset can't be acquired, the build step inserts a
+polished, labeled placeholder at the right crop rather than substituting decorative
+stock. Priority: authentic official asset → acquired authentic asset → a meaningful
+non-image visual (chart/diagram) → intentional placeholder → **never** unrelated
+stock filler. A missing *asset* does not hold an otherwise-evidenced slide (that is
+the content preflight's job for missing *facts*). Full contract: `get_deck_playbook`.

@@ -53,8 +53,23 @@ matches the user's real company, not a generic template:
   synthesizes a premium design system benchmarked on
   [deckcp.com/templates](https://deckcp.com/templates).
 
-Ask "do you have a logo, brand guide, existing deck, or website I should
-match?" whenever it isn't already clear.
+Whether the user has brand assets is detected in Step 2.5, not asked here.
+
+## Step 2.5 — if the user brought inputs, understand them first
+
+If the user supplied **anything beyond a bare one-line prompt** — a logo, a
+website URL, a social link, a brand guide, a PDF/PPTX, an existing deck, a
+folder of assets, or a real DeckCP brand from Step 2 — hand off to
+`deckcp-input-intelligence` **before** asking anything else. It detects and
+classifies every input, gathers what evidence it can, records where each fact
+came from and how sure it is, resolves conflicts by source authority, and asks
+only what genuinely can't be discovered — then routes to exactly one next
+skill. This is what turns *"here's our website, make me an investor deck"* into
+a finished deck with zero unnecessary questions.
+
+A bare one-line prompt with nothing attached can skip straight to the routing
+table below — `deckcp-input-intelligence` would just record `interview-led`
+anyway.
 
 ## Step 3 — one question, then route
 
@@ -63,7 +78,8 @@ and route to exactly one skill:
 
 | The user wants… | Route |
 | --- | --- |
-| A new deck (pitch, sales, partnership) | `deck-interview` → `deck-outline` → `deckcp-brand-kit` → `deckcp-design-director` → `deckcp-build-deck` (which ends in `deckcp-quality-control`) |
+| A new deck (pitch, sales, partnership) | `deckcp-input-intelligence` (detect inputs + route) → `deck-interview` → `deck-outline` → `deckcp-brand-kit` → `deckcp-design-director` → `deckcp-build-deck` (which ends in `deckcp-quality-control`) |
+| To improve / polish an existing deck they supply | `deckcp-input-intelligence` (classifies it as edit-target) → `deckcp-read-deck` → `deckcp-edit` |
 | To set up their brand — logo, colours, fonts, "match our website" — or they have none and want it to look designed | `deckcp-brand-kit` |
 | To understand a deck that already exists | `deckcp-read-deck` |
 | To know if the deck is any good — the story | `deck-critique` |

@@ -336,6 +336,79 @@ The server `deck_variety` score is a clue, not the verdict.
 - vague buzzword headlines
 - "premium" expressed mainly as beige + serif with no brand reason
 
+## Step 3.5 — content QC (the WHAT — a polished slide that is generic or unsupported still fails)
+
+The seven dimensions above judge how the deck looks. This pass judges what it
+says, using the checks from `get_deck_playbook` (call it for the deck's
+`deck_type` if you don't already have the playbook). Run these on every
+**substantive** slide (cover / dividers / close are exempt from specificity):
+
+- **evidence_specificity** — is each factual claim backed by real evidence with a
+  source? FAIL when a claim is asserted with no evidence/source, when a number
+  appears with no provenance, or when a **high-stakes** claim (revenue,
+  profitability, market size, users/customers, growth, transaction economics,
+  market share, competition, regulatory) is presented as observed fact without an
+  authoritative current source — it must be sourced, labeled inferred, or held
+  (`evidence_gap`). A plausible inference asserted as fact is a FAIL.
+- **company_specificity** — strip the company name: would this slide fit many
+  unrelated companies? FAIL when yes (e.g. "Category-defining scale.", "A
+  capital-light take-rate marketplace.", "Why <X> wins" + generic cards).
+- **generic_ai_language** — does the copy prefer concrete mechanisms/metrics/
+  behavior over abstract strategy words? FAIL when a challenged term is used where
+  a concrete statement was available.
+- **authentic_asset_use** — does the slide use the most authentic asset available
+  (real product screenshots / company imagery) for its job? Judge against the
+  decision tree AUTHENTIC → mood STOCK → non-image visual → placeholder.
+  Legitimate MOOD/CONTEXT/LIFESTYLE stock (relevant, professionally cropped) is
+  acceptable and NOT a failure. **Placeholders are NOT failures:** an
+  intentional, labeled, editable placeholder (correct crop, preserved
+  composition) for an authentic asset that couldn't be acquired is acceptable.
+  FAIL when: generic stock stands in where an authentic asset was explicitly
+  required; **a stock screenshot/mockup is passed off as the company's actual
+  product** (product proof needs authentic product UI or a product-screenshot
+  placeholder); **a stock person is labeled as a real founder/employee/customer/
+  investor**; stock is irrelevant or badly cropped; a placeholder is
+  unlabeled/ambiguous or destroys the layout; or the slide pretends a placeholder
+  is real company material. Distinguish a missing ASSET (placeholder OK, the slide
+  proceeds) from missing EVIDENCE (may require holding the slide).
+- **slide_communication_job** — does the slide do exactly one clear job? FAIL on a
+  title-card with an empty body, or a slide cramming several jobs.
+
+A content FAIL is a real failure even at visual 5/5. **Fix content failures
+upstream, not with decoration:** route to `deck-outline` / the content preflight
+to rewrite the slide against available evidence (or cut it) — do not dress an
+empty claim with a nicer layout. If the evidence genuinely isn't there, the
+honest fix is a weaker-but-true slide, an `inferred`-labeled slide, or one fewer
+slide — never a fabricated fact.
+
+## Step 3.6 — deck-level visual QC (designed deck, not formatted documents)
+
+Read the whole rendered deck once more against these deck-level checks (from
+`get_deck_playbook`). Their purpose is to catch the dominant failure mode — a
+deck that is correct and on-brand but reads as *formatted documents*, not a
+*designed deck*. **"More visuals" ≠ "better":** restraint still applies — a
+typography-led slide that is stronger is a PASS, and over-visualization fails the
+peaks-and-pauses read above.
+
+- Is this a DESIGNED deck or a set of formatted documents?
+- Is there sufficient visual rhythm (peaks/pauses/density changes)?
+- Are too many slides text-only?
+- Are the same layouts repeating unintentionally?
+- Are cards being used by default where another composition is stronger?
+- Are available authentic/stock images being ignored?
+- Are stock images relevant and professionally cropped?
+- Are stock people represented honestly (never labeled as a real person)?
+- Are placeholders intentional and integrated (not broken-image)?
+- Is the closing slide genuinely intentional and distinct?
+- Is there at least one memorable visual peak when the genre calls for it?
+- Does the template system stay coherent after brand adaptation (contrast/
+  hierarchy/rhythm intact)? — applies when `build_mode: template-fallback`.
+- Is large whitespace intentional, not the result of an under-designed slide?
+
+Record deck-level failures with the fix (recompose the layout, add a peak, adopt/
+repair the template vocabulary, replace ignored assets, make the close distinct)
+in the scorecard's deck-level observations, and fix them in Step 5.
+
 ## Step 4 — write the scorecard
 
 `./deck-brief/qc-report.md`:
