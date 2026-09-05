@@ -1,6 +1,6 @@
 ---
 name: deck
-description: Make a deck that makes something happen — the whole process, one stage at a time, from "what are we making" through interview, outline, visuals, build and hand-editing. The state lives in one markdown doc on the deck itself, so this works on a phone and picks up where you left off. Use when the user wants a new deck, wants to rework an existing one, or says "interview me", "help me with my pitch", "turn this into a deck".
+description: Make a deck that makes something happen — or fix one that doesn't. Two paths from one entry point: a NEW deck runs interview → outline → visuals → build → hand-edit, and IMPROVING an existing deck (or a PPTX/PDF they drop) derives the outline and the brand from the deck itself first and asks questions second. State lives in one markdown doc on the deck, so it works on a phone and resumes where you left off. Use when the user wants a new deck, says their deck isn't landing, drops a deck to improve, or says "interview me", "help me with my pitch", "turn this into a deck", "review my deck".
 argument-hint: "[deck-slug] [--stage framing|interview|outline|visuals|build|edit] [--critique]"
 ---
 
@@ -27,6 +27,25 @@ see *Where the doc lives* below. Stages 1-3 are worth doing either way.
 Read it **before every stage**, even one you just wrote — the founder may have edited
 it in the inline panel since. If there is no deck yet, stage 1 creates one; the doc
 rides on the deck from the first minute.
+
+## First question: new, or improve?
+
+Ask it before anything else, because the two paths are genuinely different — not
+different speeds of the same path:
+
+> **"Are we starting something new, or improving a deck you've already got?"**
+
+**New** → stages 1-3 below, in order. The interview comes first because nothing
+else can tell you who it's for or what has to happen.
+
+**Improve** → **do not interview first.** The deck already answers most of what
+the interview asks, and asking a founder to re-describe a deck they are holding
+is how you lose them in the first minute. Derive the doc from the deck, build
+the brand from the deck, show them, and *then* ask the two or three questions
+the deck genuinely cannot answer. Full path: `references/improve.md`.
+
+The improve path is also the fast one — the founder sees a real outline and a
+real critique before they have answered a single question.
 
 ## The two rules
 
@@ -115,6 +134,10 @@ right?"* Re-asking what the evidence already told you is how an interview loses 
 founder in the first two minutes.
 
 ## The six stages
+
+> Everything below is the **new-deck** path. On the improve path, stages 1-3
+> collapse into one derive-then-confirm pass (`references/improve.md`) and you
+> rejoin at the stage 3 gate.
 
 **1 · Framing** — thirty seconds, three answers.
 Ask in their words: *"Is this something you'll present, or something you'll email?"*

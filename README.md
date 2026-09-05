@@ -21,13 +21,34 @@ they encoded is still here, just no longer wearing a schema.
 1. **Install the pack** (two ways, below — takes a minute).
 2. **Connect the DeckCP MCP** — mint a token or use the OAuth connector at
    [deckcp.com/mcp](https://deckcp.com/mcp).
-3. **Run `/deck`** — that's the whole thing. It works out where you are and picks up
-   from there, whether that's "I have nothing" or "I have a deck and slide 7 is wrong."
+3. **Run `/deck`** — that's the whole thing. Its first question is the only one
+   that changes the path: **new deck, or improve one you've already got?**
 
-## One document, six stages
+## Improving a deck you already have
 
-There is **one artifact**: a markdown document that lives on the deck itself. It starts
-as interview notes, gains a slide list, gains a visual line per slide, gets critiqued,
+If you've got a deck — in DeckCP, or a PPTX/PDF you drop in — it **doesn't
+interview you.** Your deck already answers most of what an interview asks, and
+being asked to re-describe a deck you're holding is insufferable.
+
+Instead it reads the deck, renders every slide and looks at them, and writes the
+whole document up front: the outline as it stands, a better headline proposed
+wherever yours is a topic label (with your original kept on a `was:` line so you
+can see exactly what it changed), what the deck currently claims, your real
+assets, and a diagnosis. It takes the brand **from your deck** — including the
+embedded fonts, which a website can't give it.
+
+Then it shows you all of that and asks the two or three things your deck can't
+answer: who is this for *now*, what's the ask *now*, and what proof do you have
+that never made it onto a slide.
+
+The slide check runs on the derived outline, so you get a prioritised list of
+what's actually wrong rather than an opinion. In most real decks the top finding
+is the same one: headlines that name a topic instead of stating a conclusion.
+
+## Starting something new — one document, six stages
+
+Both paths write the same thing. There is **one artifact**: a markdown document
+that lives on the deck itself. It starts as interview notes, gains a slide list, gains a visual line per slide, gets critiqued,
 and gets built. You edit it at every stage, and it *is* the state — so nothing asks you
 to repeat yourself, and it resumes days later in a different client.
 
