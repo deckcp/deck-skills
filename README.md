@@ -125,8 +125,8 @@ work the follow-up.
 node - <<'JS'
 (async () => {
   const fs = require('fs'), path = require('path'), os = require('os');
-  const rawBase = 'https://raw.githubusercontent.com/deckcp/deck-making-skills/main';
-  const treeApi = 'https://api.github.com/repos/deckcp/deck-making-skills/git/trees/main?recursive=1';
+  const rawBase = 'https://raw.githubusercontent.com/deckcp/deck-skills/main';
+  const treeApi = 'https://api.github.com/repos/deckcp/deck-skills/git/trees/main?recursive=1';
   let dest = '.claude/skills'; // use '~/.claude/skills' to install globally
   if (dest === '~' || dest.startsWith('~/')) dest = path.join(os.homedir(), dest.slice(1));
   const tree = (await (await fetch(treeApi)).json()).tree || [];

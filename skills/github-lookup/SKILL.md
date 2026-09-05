@@ -35,7 +35,7 @@ when run inside one; pass `--repo owner/name` otherwise:
 
 ```bash
 bash scripts/gh-person.sh --commit db3d6ac
-bash scripts/gh-person.sh --commit db3d6ac --repo deckcp/deck-making-skills
+bash scripts/gh-person.sh --commit db3d6ac --repo deckcp/deck-skills
 ```
 
 **By email** — best-effort: finds a public commit authored by that address and
