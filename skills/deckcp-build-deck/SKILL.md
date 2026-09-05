@@ -1,7 +1,7 @@
 ---
 name: deckcp-build-deck
 description: Build a real DeckCP deck from a brief or outline — establish the brand kit, run design direction, generate or author slides from a binding per-slide art-direction plan, validate each one, render, and run the quality-control gate before calling it done. Use when the user says "build the deck", "make the slides", "turn this into a DeckCP deck", or after deck-interview/deck-outline. Requires the DeckCP MCP connected.
-argument-hint: "[--brief ./deck-brief/brief.json] [--outline ./deck-brief/outline.json] [--brand <slug>] [--deck <slug>]"
+argument-hint: "[--deck <slug>] [--brand <slug>]"
 ---
 
 # Build Deck (DeckCP MCP orchestration — minimal tokens)
@@ -67,8 +67,6 @@ cat ./deck-brief/brand-kit.json 2>/dev/null
 ## Step 0.75 — design direction (mandatory, before slides)
 
 ```bash
-cat ./deck-brief/design-direction.json 2>/dev/null
-cat ./deck-brief/slide-plan.json 2>/dev/null
 ```
 
 - **Both exist** → use them.
@@ -80,29 +78,34 @@ Do not skip this because `brand-kit.json` already contains design language. The 
 describes the brand; the design director decides how **this deck** composes, paces,
 and expresses that brand.
 
-`design-direction.json.build_mode` controls Step 3:
+The **Build mode.** line in `Art direction` controls Step 3:
 
 - `fast` — constrained server generation.
 - `brand` — constrained server generation with brand/system rules + slide plan.
 - `reference-exact` — prefer measured masters + `deckcp-author-slides` / exact
   placement for slides where geometry is part of the requested match.
 
-## Step 1 — assemble context from the story + design artifacts
+## Step 1 — assemble context from the deck doc + the brand kit
 
-Read the full handoff:
-
+```
+get_deck_doc{deck_slug}
+```
 ```bash
-cat ./deck-brief/brief.json 2>/dev/null
-cat ./deck-brief/outline.json 2>/dev/null
-cat ./deck-brief/brand-kit.json
-cat ./deck-brief/design-direction.json
-cat ./deck-brief/slide-plan.json
+cat ./deck-brief/brand-kit.json     # the brand/reference source of truth
 ```
 
-- `outline.json` remains the narrative source of truth.
-- `brand-kit.json` is the brand/reference source of truth.
-- `design-direction.json` is the deck-level creative source of truth.
-- `slide-plan.json` is the per-slide composition source of truth.
+- The doc's **`Slides`** section is the narrative source of truth: one
+  `### N. Headline` per slide, with `point:` and the founder's plain-words
+  `visual:` line.
+- The doc's **`Art direction`** section is the per-slide composition source of
+  truth — the archetype each `visual:` line maps to, plus the deck-level thesis
+  and rhythm. `deckcp-design-director` writes it. If it is missing, run that
+  first; do not invent compositions here.
+- The doc's **`What it should look like`** names the real assets and what has to
+  be *seen*. Use it before reaching for stock.
+- `brand-kit.json` stays a JSON file deliberately: `check-kit.js` scores hex
+  values, contrast ratios and type scales numerically, and it is the one
+  artifact in this pipeline no human edits by hand.
 
 Compose a tight generation `context` from audience, ask, problem, insight, solution,
 proof, differentiation, and objections. Then append **three binding layers**:
@@ -207,16 +210,16 @@ source-derived invariant. If chrome is disabled, do **not** invent one.
 
 If the kit installed brand masters (`set_masters scope:'brand'`), inherit them.
 For deck-scope styling, set the needed masters now and map semantic master ids from
-`slide-plan.json` to available DeckCP master ids.
+`Art direction` to available DeckCP master ids.
 
 ## Step 3 — build according to `build_mode`
 
-Read `design-direction.json.build_mode`.
+Read the **Build mode.** line in `Art direction`.
 
 ### Path A — `fast`
 
 Use the normal pipeline, but pass the binding brand + direction + slide-plan context.
-If `outline.json` exists, map its slides directly or use `generate_outline` only when
+Map the doc's `Slides` directly, or use `generate_outline` only when
 the server needs an outline id. Then:
 
 ```
@@ -255,7 +258,7 @@ The Design Director chose a DeckCP template as the DESIGN VOCABULARY because no 
 
 1. **Apply.** `list_deck_templates` (filter by category if useful) → match the `template_id` the direction recorded (or re-match multi-dimensionally: genre, audience, brand personality, image availability, data density, tone, light/dark) → `get_deck_template { template_id }` to learn the vocabulary (theme, masters, typography, per-archetype treatments, closing pattern) → `apply_deck_template { template_id, title }`. This clones the template's design into a NEW deck and returns its `deck_slug` — use that deck from here on (do not also `create_deck`).
 2. **Adapt to the brand.** The clone carries the template's theme + sample content. Apply the company's brand: `update_deck { deck_slug, deck_theme }` (+ `set_masters` if the direction defines masters), PRESERVING the template's design quality — do NOT mechanically recolor every neutral or replace all backgrounds; that destroys contrast, hierarchy, whitespace, and rhythm.
-3. **Recompose to the outline.** The template is a vocabulary, NOT the content. Rewrite every slide with the company's evidence-bound content from `outline.json` / slide-plan; add, reorder, and delete slides so the deck matches YOUR plan — not the template's slide count, order, sample company, sample claims, sample metrics, sample images, or sample CTA. Map each of your slides onto the template's archetype whose treatment fits (hero, metric hero, chart/data, comparison, diagram, editorial split, section divider, closing). Remove every leftover sample slide.
+3. **Recompose to the outline.** The template is a vocabulary, NOT the content. Rewrite every slide with the company's evidence-bound content from the doc's `Slides` + `Art direction`; add, reorder, and delete slides so the deck matches YOUR plan — not the template's slide count, order, sample company, sample claims, sample metrics, sample images, or sample CTA. Map each of your slides onto the template's archetype whose treatment fits (hero, metric hero, chart/data, comparison, diagram, editorial split, section divider, closing). Remove every leftover sample slide.
 4. Keep visual rhythm (peaks/pauses) and a distinct, intentional closing slide. Render 2–3 representative slides early to confirm the adaptation holds before doing the rest.
 
 Assets still follow the decision tree in "Authentic assets & placeholders" below (authentic → mood stock via `search_stock_images` → non-image visual → placeholder).
@@ -276,7 +279,7 @@ emit a paragraph or bullet list instead.
   markers; `annotated-image`/`product-visual`, a framed image with callouts. The archetype
   variants in [`references/layout-archetypes.md`](references/layout-archetypes.md) map each one.
 - The visual **inherits the brand language** — stroke, geometry, spacing, corners, type, color
-  from `brand-kit.json.design_system` + `design-direction.json`. Prefer simple grammar; avoid
+  from `brand-kit.json.design_system` + `Art direction`. Prefer simple grammar; avoid
   the diagram clichés listed in `deckcp-design-director/references/visual-storytelling.md`.
 - If `iconography_direction.enabled` is true and a slide legitimately uses icons, use that ONE
   style. If it is false or absent, do not introduce icons. **Icons are semantic, not
@@ -377,7 +380,7 @@ When a slide's art direction calls for a visual
 requirement you can't satisfy with a real asset), work the tree in order:
 **AUTHENTIC → mood STOCK → non-image visual → placeholder.**
 
-- Prefer the authentic asset: use one already in `input-evidence.json`, or
+- Prefer the authentic asset: use one the doc's `What it should look like` names, or
   acquire it (`fetch_page` a product/customer page → `upload_asset` the image;
   `import_source` a document). If a chart/diagram/text-led treatment communicates
   the idea better, use that instead.

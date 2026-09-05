@@ -1,7 +1,7 @@
 ---
 name: deckcp-quality-control
 description: The mandatory final gate before any DeckCP deck is called done — render every slide, review the whole deck as a sequence, score brand accuracy, design-intent/reference fidelity (including a visual-opportunity and a visual-restraint check), alignment, spacing consistency, visual polish, intentional rhythm/repetition, and generic AI-looking design, then fix what fails and re-score. Catches both under-designed (text-heavy) and over-designed (infographic) slides. Use automatically at the end of deckcp-build-deck and after any multi-slide edit. Requires the DeckCP MCP connected.
-argument-hint: "[--deck <slug>] [--kit ./deck-brief/brand-kit.json] [--direction ./deck-brief/design-direction.json] [--plan ./deck-brief/slide-plan.json] [--max-passes 3]"
+argument-hint: "[--deck <slug>] [--kit ./deck-brief/brand-kit.json] [--max-passes 3]"
 ---
 # Quality Control (the gate — pixels + intent, not generation success)
 
@@ -41,8 +41,6 @@ graphics, and an earned visual peak is never failed for being visual.
 
 ```bash
 cat ./deck-brief/brand-kit.json 2>/dev/null
-cat ./deck-brief/design-direction.json 2>/dev/null
-cat ./deck-brief/slide-plan.json 2>/dev/null
 ```
 
 Then:
@@ -56,14 +54,14 @@ Save `get_deck` JSON to `./deck-brief/deck.json` for the scanner.
 
 Reference precedence for QC:
 
-1. `slide-plan.json` — what this slide was supposed to communicate/compositionally do
-2. `design-direction.json` — the deck-level visual thesis and build mode
+1. the slide's block in the doc's `Art direction` — what it was supposed to communicate and compositionally do
+2. the deck-level half of `Art direction` — the visual thesis and build mode
 3. `brand-kit.json.design_system` — structured brand/reference rules
 4. legacy brand-kit prose fields
 5. DeckCP brand lockdown only as a fallback
 
 If no brand kit exists and the brand has no usable system, stop and run
-`deckcp-brand-kit`. If the deck was built without `design-direction.json`, run
+`deckcp-brand-kit`. If the deck was built with no `Art direction` section, run
 `deckcp-design-director` before calling the deck finished; otherwise there is no design
 intent to evaluate.
 
@@ -82,7 +80,7 @@ failures** now:
 | Missing / inconsistent master | Failure only when the design system says that master/chrome should repeat |
 | Tiny text / overflow / dropped style props | Real technical / polish failure |
 | Many gap/padding tokens | Likely spacing inconsistency |
-| Repeated layout skeletons | Investigate against `slide-plan.json.repetition_intent`; repeated case studies may be correct |
+| Repeated layout skeletons | Investigate against the **Repetition.** note in `Art direction`; repeated case studies may be correct |
 | No photography | Failure only when imagery strategy calls for photography; not for intentionally type/UI/diagram-led systems |
 | Icon-card / gradient patterns | Generic-AI warning unless explicitly supported by the active design system |
 
@@ -126,7 +124,7 @@ Look for deck-level problems that are easy to miss one slide at a time:
 - `reference-exact` geometry drifts over the sequence
 
 **Visual rhythm (v0.8.1).** Also read the deck as a mix of media, judged against
-`design-direction.json.visual_media_mix` (when present):
+The **Media mix.** line in `Art direction` (when present):
 
 - Is the deck dominated by one medium — every slide typography-only, or every slide a chart?
 - Are diagrams / pictograms / data visuals / photography used where they genuinely help?
@@ -135,7 +133,7 @@ Look for deck-level problems that are easy to miss one slide at a time:
   dense information, and visual pause?
 
 Do **not** enforce numerical quotas mechanically, and do **not** flag a deck that is
-intentionally typographic per its direction. Judge against `design-direction.json`: the failure
+intentionally typographic per its direction. Judge against `Art direction`: the failure
 mode is *accidental* monotony, not a deliberate one.
 
 **Peaks and pauses (v0.8.2).** The opposite deck-level failure is over-visualization. Read the
@@ -171,7 +169,7 @@ Write 2–4 deck-level observations before scoring individual dimensions.
 
 ### 2. Design-intent / reference fidelity — did we build the deck we planned?
 
-Read `design-direction.json` + the corresponding `slide-plan.json` packet for every slide.
+Read `Art direction` — the deck-level half plus every slide's block.
 
 **5**
 - deck-level visual thesis is obvious
@@ -203,7 +201,7 @@ clearer, faster, or more memorable as a visual?* Record one of:
   medium here, or the planned visual is present and working).
 - **ADVISORY** — a visual might improve the slide, but the current approach is acceptable.
   Note it; do not lower the score for it.
-- **FAIL** — the slide's `slide-plan.json` explicitly required a meaningful `visual_translation`
+- **FAIL** — the slide's `Art direction` block explicitly required a meaningful visual translation
   (`needed:true`) and the rendered slide **ignored it** (fell back to text), OR the textual
   treatment materially damages comprehension. A FAIL here caps this dimension at **≤3**.
 
@@ -440,7 +438,7 @@ Work deck-wide first, then per-slide.
 | Source-derived chrome should repeat but drifts | build/fix the appropriate master, opt intended slides into it |
 | Chrome was invented but kit says none | remove the unnecessary master/decor rather than normalizing it |
 | Reference geometry drifts | use measured rules; author geometry-sensitive slides via `deckcp-author-slides` / `upsert_slides` |
-| Generator ignored slide archetype/composition | rewrite with the exact `slide-plan.json.art_direction`; if it ignores again, hand-author the slide |
+| Generator ignored slide archetype/composition | rewrite with the slide's exact `Art direction` block; if it ignores again, hand-author the slide |
 | Off-palette slide color | mechanical MDX/class swap to kit role |
 | Rainbow card accents | reduce to the kit's explicit color jobs |
 | Tiny text | restructure density; do not merely shrink more |

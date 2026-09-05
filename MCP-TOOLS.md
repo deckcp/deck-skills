@@ -1,6 +1,6 @@
 # DeckCP MCP — complete tool reference
 
-Every tool the [DeckCP](https://deckcp.com) MCP server exposes — 34 in all —
+Every tool the [DeckCP](https://deckcp.com) MCP server exposes — 55 in all —
 grouped by what they're for, with access requirements and the skill in this
 pack that teaches the workflow around each. Connect the MCP, then any tool
 below is callable from your agent.
@@ -19,6 +19,22 @@ below is callable from your agent.
 - A per-deck "not authorized" error is not a token problem; share the deck
   with the `whoami` email. A 401 is a token problem; reconnect.
 
+## The deck doc — where every deck-making session starts
+
+| Tool | What it does |
+| --- | --- |
+| `get_deck_doc` | The deck's process document: framing, interview notes in the user's own words, what it should look like, the slide list with a plain-words visual line each, the art direction, and the agent's read. Its frontmatter says which stage the work is at and which stages the user has SIGNED OFF, so this is how you resume without asking them to repeat themselves. Call it FIRST, and again before every stage. `exists: false` means nothing has run yet. On MCP-Apps hosts it opens an inline editor the user can edit section by section. Returns the slide check whenever `Slides` has content. |
+| `update_deck_doc` | Write ONE section (`section` + `markdown`), and/or merge frontmatter (`kind` / `stage` / `brand` / `confirm`). There is deliberately no whole-doc write: the user's own words live in those sections. Every write snapshots the prior doc first, so an edit is undoable. Writing `Slides` returns the lint — one point per slide, the number budget, a visual line on every slide, and whether the density says this is really an email deck. |
+
+Skill: [`deck`](skills/deck/SKILL.md) — the whole process, six stages, one document.
+
+**`kind` sets the rules for everything downstream:** `pitch` (narrated live —
+sparse, one point per slide), `email` (read alone — carries more), `both` (a
+sparse deck PLUS an appendix; the body is held to the pitch budget).
+
+**Never `confirm` a stage the user didn't confirm out loud.** The gate is
+theirs; the frontmatter is only its memory.
+
 ## Identity & orientation
 
 | Tool | What it does |
@@ -27,6 +43,9 @@ below is callable from your agent.
 | `list_decks` | All non-deleted decks — slug, title, description, audience, slide count. `search` filters by title; `include_archived` optional. |
 | `get_deck` | One deck by slug: metadata + ordered slides (id, order, frontmatter, MDX). On MCP-Apps hosts it also opens the inline deck viewer. |
 | `install_deck_skills` | Returns the install procedure for this skill pack (repo, raw URLs, a ready-to-run Node script). No auth or deck access needed. |
+| `get_started` | Call ONCE on first connect with no specific task: what DeckCP is, the state of this account (empty / imported / active), and the best first moves to offer. Skip it when the user already gave a task. |
+| `interview_deck` | The question set no tool can answer for you — audience, the one outcome, the status quo, the proof, the hero fact, the objection, format, voice — routed to four-to-six by product `stage`. Pass `answers` back to get a brief plus the `outline_context` string for `generate_outline`. Static and cheap; at `stage:'idea'` proof is deliberately skipped, because demanding traction that doesn't exist is how decks acquire invented numbers. |
+| `get_deck_playbook` | Genre-aware quality rules + audience questions + abstracted exemplars for a `deck_type` (investor / sales / marketing / company_overview / report / franchise), plus the evidence-acquisition and asset decision contracts. |
 
 Skill: [`deckcp-read-deck`](skills/deckcp-read-deck/SKILL.md).
 
@@ -37,6 +56,11 @@ Skill: [`deckcp-read-deck`](skills/deckcp-read-deck/SKILL.md).
 | `create_deck` | New deck (placeholder first slide). Requires `title` + `brand_slug`; slug auto-derived if omitted. |
 | `update_deck` | Metadata + theme: title, description, audience, brand move, archive. `deck_theme` is **shallow-merged** — change `accent` alone; `null` clears a field back to brand default. Fields: `accent`, `secondary`, `fontDisplay`, `fontBody`, `defaultMood`, `pageMargin`. |
 | `delete_deck` | ⚠️ Soft-deletes the deck **and all its slides**. Reversible only via the database. Confirm with the user, always. |
+| `import_deck` | Converts an external PPTX/PDF into a real editable DeckCP deck — layout, imagery, embedded fonts, and a draft brand distilled from the file. Chunked: a big file returns `status:"in_progress"`, so call again with `job_id` until `done`. This is the tool when the user wants *this file* to become their deck. |
+| `create_import_upload` | A signed URL to PUT a local file to, for anything over a few MB — then pass its `path` as `import_deck{upload_path}`. Don't send large base64. |
+| `import_source` | READS a PPTX/PDF: text, slide count, draft colors/fonts, media. Creates nothing — evidence for a deck you will author. Never claim you edited a source you only analyzed. |
+| `fetch_page` | Fetches one HTML page as evidence (investor relations, newsroom, a product page). The follow-up to a link `scrape_brand_site` discovered. |
+| `scrape_brand_site` | A website's company facts, colors, logo and images. Authority: official site. Fonts are NOT extracted. |
 
 Skills: [`deckcp-build-deck`](skills/deckcp-build-deck/SKILL.md) (create),
 [`deckcp-edit`](skills/deckcp-edit/SKILL.md) (update),
@@ -53,6 +77,7 @@ safe place to apply a *third party's* brand without touching the user's own).
 | `delete_slides` | Soft-delete slides by id (ids from `get_deck`). |
 | `reorder_slides` | Pass the **complete** id list in the new order; renumbers to 10/20/30; atomic. |
 | `duplicate_slide` | Exact copy of one slide, placed after the original (or at a given order). |
+| `set_slide_visibility` | Hide/show a slide without deleting it. A hidden slide owns NO page number, so every surface counts the sequence the audience actually sees. |
 | `check_slide` | Free, deterministic, no render: class-vocabulary validation, structure lint, layout-balance analysis on the 1920×1080 canvas, catalog-tag advisories. Run before every upsert and after every edit. |
 | `render_slides` | Intent first: bare `{deck_slug}` shows the user the inline viewer; `format:'image'` returns bitmaps **only you** can see (for inspecting your own edits); `format:'urls'`/`'html'` return links/snapshots. Rendering is incremental; `refresh:true` after theme/master changes. |
 
@@ -61,6 +86,17 @@ Skills: [`deckcp-edit`](skills/deckcp-edit/SKILL.md),
 [`deckcp-quality-control`](skills/deckcp-quality-control/SKILL.md) (the gate:
 `check_slide` on every slide + `render_slides format:'image'` on every slide,
 then a six-dimension score and the fix loop).
+
+## Sequences — automated follow-up
+
+| Tool | What it does |
+| --- | --- |
+| `generate_sequence` | Draft a follow-up sequence (email / wait / branch steps) for a deck and audience. |
+| `create_sequence` | Persist a sequence — the tree of steps that drips after a view. |
+| `list_sequences` / `get_sequence` | The org's sequences, and one sequence's full step tree + enrollment state. |
+| `enroll_lead` / `unenroll_lead` | Put a lead into a sequence, or take them out. One active enrollment per lead per org; unsubscribes and reply-exit are handled server-side. |
+
+No skill yet — `deckcp-analyze` is where the follow-up decision gets made today.
 
 ## Generation (server-side AI pipelines)
 
@@ -150,12 +186,15 @@ Skill: [`deckcp-voice-memos`](skills/deckcp-voice-memos/SKILL.md).
 
 | Group | Tools | Documented by |
 | --- | --- | --- |
-| Identity & orientation | 4 | `deckcp-read-deck`, README (install) |
-| Deck lifecycle | 3 | `deckcp-build-deck`, `deckcp-edit`, `deckcp-brand-kit` (`update_deck.deck_theme`) — `delete_deck` intentionally has no skill |
-| Slides | 7 | `deckcp-edit`, `deckcp-build-deck`, `deckcp-quality-control` (`check_slide` + `render_slides` as the gate) |
+| The deck doc | 2 | `deck` — the entry point; every session starts with `get_deck_doc` |
+| Identity & orientation | 7 | `deck` (`interview_deck`, `get_deck_playbook`), `deckcp-read-deck`, README (install) |
+| Deck lifecycle | 8 | `deck`, `deckcp-build-deck`, `deckcp-edit`, `deckcp-brand-kit` (`update_deck.deck_theme`) — `delete_deck` intentionally has no skill |
+| Slides | 8 | `deckcp-edit`, `deckcp-build-deck`, `deckcp-quality-control` (`check_slide` + `render_slides` as the gate) |
+| Sequences | 6 | no skill yet — the follow-up decision is made in `deckcp-analyze` |
 | Generation | 3 | `deckcp-build-deck` — `generate_slides_from_text` mentioned here only |
+| Templates & design fallback | 3 | `deckcp-build-deck`, `deckcp-design-director` |
 | Authoring reference | 5 | `deckcp-author-slides` (manual editing: contract, presets, masters), `deckcp-brand-kit` (`get_brand` as source, `set_masters` for the house style) |
-| Assets | 2 | `deckcp-gather-assets` — `search_assets` mentioned here only |
+| Assets | 3 | `deckcp-gather-assets` — `search_assets` and `search_stock_images` mentioned here only |
 | Sharing | 4 | `deckcp-share` |
 | Analytics & CRM | 5 | `deckcp-analyze`, `deckcp-capture` |
 | Personal | 1 | `deckcp-voice-memos` |

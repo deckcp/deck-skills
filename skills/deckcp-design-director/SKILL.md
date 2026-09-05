@@ -1,7 +1,7 @@
 ---
 name: deckcp-design-director
-description: Turn a finished story outline + brand kit into a binding visual direction and per-slide art-direction plan BEFORE slide generation. Use after deck-outline + deckcp-brand-kit, or whenever a deck has a strong reference and must feel intentionally designed rather than merely on-brand. Emits design-direction.json + slide-plan.json.
-argument-hint: "[--outline ./deck-brief/outline.json] [--kit ./deck-brief/brand-kit.json] [--out ./deck-brief]"
+description: Expand the founder's plain-words visual lines into a binding visual direction and per-slide art direction BEFORE slide generation. Use after /deck stage 3 + deckcp-brand-kit, or whenever a deck has a strong reference and must feel intentionally designed rather than merely on-brand. Writes the deck doc's 'Art direction' section.
+argument-hint: "[deck-slug] [--kit ./deck-brief/brand-kit.json]"
 ---
 # Design Director (brand system → art direction → slide plan)
 
@@ -11,8 +11,8 @@ Do not generate slides yet.
 
 The job is to convert narrative + brand/reference evidence into two binding artifacts:
 
-- `./deck-brief/design-direction.json` — the deck-level creative direction.
-- `./deck-brief/slide-plan.json` — one art-direction packet per slide.
+- The deck doc's **`Art direction`** section — the deck-level creative direction
+  followed by one block per slide, keyed by the same `### N` as `Slides`.
 
 These files sit between `deckcp-brand-kit` and `deckcp-build-deck`. They remove the biggest source of generic output: asking the slide generator to invent composition, pacing, hierarchy, image treatment, density, and signature moves on its own.
 
@@ -85,23 +85,39 @@ reference. Read it before Step 4.5.
 
 ## Step 0 — load the truth
 
-Read:
-
+```
+get_deck_doc{deck_slug}
+```
 ```bash
-cat ./deck-brief/brief.json 2>/dev/null
-cat ./deck-brief/outline.json
 cat ./deck-brief/brand-kit.json
 ```
 
-If `outline.json` does not exist, run `deck-outline` first.
+If the doc's `Slides` section is empty, run `/deck` stage 3 first.
 If `brand-kit.json` does not exist, run `deckcp-brand-kit` first.
+
+**The founder has already decided the medium.** Each slide in `Slides` carries a
+plain-words `visual:` line — "one big number, the $40k, nothing else on it",
+"picture of the plant on the left, the three points on the right", "just the one
+line". That line is **binding on medium** and advisory on composition. Your job
+is to expand it, not to overrule it: map it to an archetype from
+`layout-archetypes.md`, then decide the composition, focal point, hierarchy and
+avoid-list the founder never has to think about. If a `visual:` line genuinely
+cannot work, say so to the founder in one line and let them change it — do not
+quietly build something else.
+
+**Where your output goes:** the doc's `Art direction` section, via
+`update_deck_doc{section:"Art direction", markdown}` — one block per slide plus
+the deck-level thesis and rhythm. Not `design-direction.json`, not
+`slide-plan.json`; those are gone. It is persisted rather than kept in context
+because the QC pass has to score the built deck against this intent, possibly in
+a later session.
 
 Also inspect any user-provided reference deck/page renders recorded in the brand kit. If the brand kit says the reference was measured, treat those measured values as hard evidence, not inspiration.
 
 Read these references before deciding:
 
 - `references/design-principles.md`
-- `references/slide-art-direction-schema.md`
+- `references/art-direction-format.md`
 - `references/anti-ai-aesthetics.md`
 - `references/reference-fidelity.md`
 - `references/visual-storytelling.md`
@@ -109,7 +125,7 @@ Read these references before deciding:
 
 ## Step 1 — classify the build mode
 
-Write one of these into `design-direction.json.build_mode`:
+Record one of these as the **Build mode.** line in `Art direction`:
 
 ### `fast`
 Use when the user has no reference deck and the brand kit is synthesized or lightly extracted from a logo/site only.
@@ -131,7 +147,7 @@ Do not pick `reference-exact` merely because a reference exists. Pick it when fi
 ### `template-fallback`
 Use when there is **no strong design source** — no explicit user design reference, no existing company deck/template, no formal brand/presentation guide, and no GENUINELY rich company design evidence (a coherent layout/composition/type system, not merely colors + logo from a website). This is the design-source hierarchy: explicit reference → current company deck/template → formal brand guide → rich company design evidence → **DeckCP template library (this mode)**. A weak website design signal must NOT yield a weak deck.
 
-Set `design_source: "deckcp_template"`. Adopt a DeckCP template as the DESIGN VOCABULARY (typography, grids, spacing, hero/metric/chart/diagram treatments, section + closing patterns, visual rhythm) — NOT as content. Match multi-dimensionally (genre, audience, brand personality, image availability, data density, tone, editorial/corporate/technical/lifestyle character, light/dark), never "investor → first pitch template". Record the chosen `template_id` and WHY it fits in `design-direction.json`. deckcp-build-deck (Tier 2) instantiates it via `list_deck_templates` → `get_deck_template` → `apply_deck_template`, then recomposes to your outline. Still write a real visual thesis below — the template grounds it; it does not replace it.
+Record **Design source.** `deckcp_template`. Adopt a DeckCP template as the DESIGN VOCABULARY (typography, grids, spacing, hero/metric/chart/diagram treatments, section + closing patterns, visual rhythm) — NOT as content. Match multi-dimensionally (genre, audience, brand personality, image availability, data density, tone, editorial/corporate/technical/lifestyle character, light/dark), never "investor → first pitch template". Record the chosen `template_id` and WHY it fits in `Art direction`. deckcp-build-deck (Tier 2) instantiates it via `list_deck_templates` → `get_deck_template` → `apply_deck_template`, then recomposes to your outline. Still write a real visual thesis below — the template grounds it; it does not replace it.
 
 ## Step 2 — write the visual thesis
 
@@ -213,11 +229,11 @@ Also decide two deck-level visual-language calls now (both optional, both additi
   decides where visuals actually go. Do not chase mix percentages by adding a chart/diagram/
   icon/photo just to hit a category.
 
-All three objects are defined in [`references/slide-art-direction-schema.md`](references/slide-art-direction-schema.md).
+The format — and which lines the build and QC skills actually read — is in [`references/art-direction-format.md`](references/art-direction-format.md).
 
 ## Step 4 — plan deck rhythm before individual layouts
 
-Read the headline spine in `outline.json`.
+Read the headline spine in the doc's `Slides` section.
 
 Assign each slide a `rhythm_role`:
 
@@ -332,9 +348,9 @@ Every slide gets:
 
 If the outline content does not fit its density budget, change the slide structure now. Do not shrink typography later to rescue an overstuffed slide.
 
-## Step 7 — write `design-direction.json`
+## Step 7 — write the deck-level half of `Art direction`
 
-Use the schema in `references/slide-art-direction-schema.md`.
+Use the format in `references/art-direction-format.md`.
 
 Minimum shape:
 
@@ -395,9 +411,9 @@ additive** — omit them for a purely typographic deck, or set `iconography_dire
 false` when icons are not appropriate. When absent, assume `visual_strategy.mode: selective`.
 They exist to plan visual peaks and prevent accidental monotony, never to force categories.
 
-## Step 8 — write `slide-plan.json`
+## Step 8 — write the per-slide half of `Art direction`
 
-For every slide in `outline.json`, copy the narrative fields and add art direction.
+For every slide in `Slides`, add a block under the same `### N` heading. Do NOT copy the narrative fields — they already live in `Slides` and duplicating them lets the two drift apart.
 
 Minimum packet:
 
@@ -478,7 +494,7 @@ Fix the plan now. This is cheaper than fixing rendered slides.
 
 Next: `deckcp-build-deck`.
 
-The build skill must treat `design-direction.json` and `slide-plan.json` as **binding inputs**, not optional suggestions.
+The build skill must treat `Art direction` as a **binding input**, not an optional suggestion — and must treat the founder's own `visual:` line in `Slides` as binding above it.
 
 ## Icons are semantic, not decorative
 

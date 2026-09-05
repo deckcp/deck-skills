@@ -39,8 +39,9 @@ Never make them pick from a vocabulary:
 > Slide 7 — picture of the plant on the left, the three points on the right.
 > Slide 9 — just the one line.
 
-They nod or rewrite. You map plain words → archetype when you build; the founder never
-sees an archetype name, because only a machine needs one.
+They nod or rewrite. The plain-words → archetype mapping happens later, in stage 4
+(`deckcp-design-director`, into the doc's `Art direction` section) — the founder never
+has to produce an archetype name, because only a machine needs one.
 
 **There is no "no visual."** Every slide has a visual form — a text slide is one
 decisive sentence carried by scale and whitespace, which is an archetype
@@ -59,7 +60,7 @@ as bad as one that is all text; the restraint is the craft.
 The founder's phrasing on the left is what goes in the doc. The right column is what
 you hand the build stage (see `layout-archetypes.md` in `deckcp-build-deck` for all 19).
 
-| They say | You build |
+| They say | Archetype (stage 4 records this, not the founder) |
 | --- | --- |
 | "just the one line" | Statement |
 | "one big number" | Big stat |

@@ -49,12 +49,12 @@ Look before you ask. In this order:
 
 ```bash
 ls ./deck-brief/brand-kit.json 2>/dev/null       # already done? reuse, don't redo
-cat ./deck-brief/input-evidence.json 2>/dev/null # input-intelligence may have detected + gathered brand evidence
+# brand evidence: the doc's 'What it should look like' names the real assets
 ls ./deck-assets/*.svg ./deck-assets/*logo* 2>/dev/null   # gather-assets may have found a logo
-cat ./deck-brief/brief.json 2>/dev/null          # deck_type / audience / setting drive the synth direction
+get_deck_doc{deck_slug}                          # 'What we're making' (kind/audience) + 'What it should look like' (real assets, register) drive the synth direction
 ```
 
-**If `input-evidence.json` exists, start from its `brand` evidence** — it already
+**Start from the doc's `What it should look like`** — it already
 recorded which sources the user has, the literal colors/fonts/logo it could extract,
 and each value's `status`/`confidence`/`authority`/`source`. Treat that as the
 starting point for **Path A** and do not re-run detection the skill above already did:
@@ -75,7 +75,7 @@ on file."` is the signal that the brand is empty. A brand with five role
 colors, logos, and guidelines is itself a source — **EXTRACT from it** and
 skip to Step 3; don't synthesize over a brand that exists.
 
-Then ONE question, only if it's still unclear **and `input-evidence.json` didn't
+Then ONE question, only if it's still unclear **and the doc didn't
 already settle it** (when that file lists the user's brand sources, don't re-ask what
 it detected):
 
@@ -298,7 +298,7 @@ means meeting its discipline.
 ### B2 — pick a direction from the brief
 
 Read `deck_type`, `audience`, `setting`, and the product's register from
-`brief.json`. Choose ONE direction and name it (this name becomes the kit's
+the doc's `What we're making`. Choose ONE direction and name it (this name becomes the kit's
 `direction`):
 
 | Direction | When | Surface · accent · type · device |

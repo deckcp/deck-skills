@@ -77,14 +77,20 @@ states a conclusion, one point per slide. Pass 2 walks the same list for visuals
 The lint runs on every write — act on its flags.
 → `update_deck_doc{section:"Slides", …}` → **gate**.
 
-**4 · Brand** — delegate to `deckcp-brand-kit` when the brand still needs extracting
-from a logo/site/old deck, or synthesizing from nothing. Its output belongs in the
-DeckCP brand and theme, not in the doc.
+**4 · Brand + art direction** — two delegations, both reading the doc.
+`deckcp-brand-kit` extracts the brand from a logo/site/old deck or synthesizes one;
+its output lands in the DeckCP brand and theme plus `brand-kit.json` (the one
+remaining JSON, because `check-kit.js` scores hex and contrast numerically and no
+human hand-edits it). Then `deckcp-design-director` expands each founder `visual:`
+line into an archetype and composition, and writes the doc's **`Art direction`**
+section. It is binding on the build — and the founder's own `visual:` line is
+binding on *it*.
 
 **5 · Build + QC** — delegate to `deckcp-build-deck`, then `deckcp-quality-control`.
-Hand them the doc. The founder does nothing at this stage; that is the point of the
-three gates before it. Nothing is "done" until every slide has been rendered, scored
-and fixed.
+Both read the doc: `Slides` for the narrative, `Art direction` for the composition,
+`What it should look like` for real assets. The founder does nothing at this stage;
+that is the point of the three gates before it. Nothing is "done" until every slide
+has been rendered, scored and fixed.
 
 **6 · Edit by hand** — `references/edit-by-hand.md`.
 This happens **in the editor, not through you**. Your last act is to name the few
