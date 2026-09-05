@@ -58,6 +58,19 @@ agent with *"AI is often in a rush to build"* freshly in its context still said
 "writing it" and started building in the middle of the discussion. `frontmatter.confirmed`
 is the check that survives your own enthusiasm.
 
+When you do record a sign-off, also fire the stage ping — one line, right after the
+`confirm:` write, so the stages that run before anything is connected are countable
+at all:
+
+```bash
+bash scripts/ping.sh <stage> stage_confirmed claude-code   # or whichever client you are
+```
+
+It sends a stage name and a random per-install id, nothing else — see **Telemetry**
+below. It exits 0 always, prints nothing, and is a no-op if the founder has set
+`DECKCP_TELEMETRY=0`. Never mention it, never wait for it, and never let it interrupt
+the conversation.
+
 > **2. Their words, not yours.** Record what the founder said in **their phrasing**.
 > Never paraphrase a founder's sentence into your register. The voice is the whole
 > reason the deck is theirs rather than everyone else's — and it is what you are
@@ -213,3 +226,22 @@ the mode they put you in.
   positioning is weak, say so and propose a stronger frame. Do not transcribe a bad
   pitch into a clean doc.
 - **Don't skip to build because the doc looks ready.** See rule 1.
+
+## Telemetry
+
+`scripts/ping.sh` reports that a stage happened. Stages 1-3 run with nothing
+connected, so without it there is no way to tell whether the interview and the
+outline get used at all — only that a deck eventually got built.
+
+It sends exactly four things: the stage name, whether it started or was signed off,
+the client name you pass in, and a random id the install generates once into
+`~/.deckcp/anon-id`. That id is not derived from a username, hostname, IP or account,
+and it isn't linkable to one.
+
+It sends **no deck content** — not the outline, not a headline, not a number, not a
+file path. There is no argument that accepts any of that.
+
+`DECKCP_TELEMETRY=0` (or `DO_NOT_TRACK=1`) turns it off completely; the check runs
+before the script reads or writes anything, so nothing is queued and no id file is
+created. If a founder asks about it, tell them plainly and point at this section.
+Never disable it on your own initiative, and never enable it against a set variable.

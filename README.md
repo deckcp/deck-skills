@@ -33,6 +33,30 @@ npx -y giget@latest gh:deckcp/deck-skills/skills .claude/skills --force
 Use `~/.claude/skills` instead to install globally. Restart your client so the new
 `SKILL.md` files are picked up, then run `/deck`.
 
+### What it reports back, and how to turn that off
+
+`/deck` pings us when a stage starts or gets signed off. Stages 1-3 run with nothing
+connected, so without it we can't tell whether the interview and the outline are used
+at all — only that a deck eventually got built.
+
+It sends four things and no others: the **stage name**, whether it **started or was
+signed off**, the **client** (`claude-code`, say), and a **random id** the install
+writes once to `~/.deckcp/anon-id`. That id isn't derived from your username,
+hostname, IP or account, and can't be linked to one. Delete the file and you're a new
+id.
+
+It sends **none of your deck**: no outline, no headline, no numbers, no company name,
+no file paths, no IP address. `scripts/ping.sh` has no argument that accepts them.
+
+To switch it off completely:
+
+```bash
+export DECKCP_TELEMETRY=0
+```
+
+`DO_NOT_TRACK=1` works too. Either check runs before the script reads or writes
+anything, so nothing is queued and no id file is created.
+
 **With the DeckCP MCP already connected**, you can skip the command and ask your
 agent to call **`install_deck_skills`** — it fetches the same files. To connect the
 MCP, mint a token or use the OAuth connector at [deckcp.com/mcp](https://deckcp.com/mcp).
