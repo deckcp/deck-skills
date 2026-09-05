@@ -70,6 +70,21 @@ Writing the slide list runs a deterministic check — one point per slide, a num
 bust the budget it says the real diagnosis: this isn't a broken pitch deck, it's an
 email deck, and those have different rules.
 
+### You don't need an account to start, or a form to get one
+
+Stages 1-3 are worth doing with nothing connected — the interview and the
+outline are the part that decides whether the deck works. When you want it
+built, there's no signup page: your agent creates the workspace itself (no
+browser, no password) and hands you a link to claim it with one sign-in. Until
+you open that link the workspace belongs to nobody, so there's nothing to
+cancel if you walk away.
+
+**One thing makes it yours.** Give it your website and it takes your real
+colors, logo and imagery. Give it any deck you've used before and it takes your
+fonts too — the one thing a website can't tell it. Give it both and it uses
+both. Give it neither and it designs you a system rather than quietly falling
+back on a template.
+
 ### Then, once it's out the door
 
 `/deckcp-share` sets the gate (public link, email-gated so views become identified

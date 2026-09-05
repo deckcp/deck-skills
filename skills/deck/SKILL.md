@@ -21,6 +21,9 @@ repo for the format.
 get_deck_doc{deck_slug}     # exists:false → nothing has run yet; frontmatter.stage → where you are
 ```
 
+**No DeckCP connection?** Don't stop, and don't send them to a signup page —
+see *Where the doc lives* below. Stages 1-3 are worth doing either way.
+
 Read it **before every stage**, even one you just wrote — the founder may have edited
 it in the inline panel since. If there is no deck yet, stage 1 creates one; the doc
 rides on the deck from the first minute.
@@ -40,6 +43,63 @@ is the check that survives your own enthusiasm.
 > Never paraphrase a founder's sentence into your register. The voice is the whole
 > reason the deck is theirs rather than everyone else's — and it is what you are
 > handing the build stage to preserve.
+
+## Where the doc lives — and the one CTA
+
+The doc wants to live **on the deck**, because that is what makes it resume on a
+phone, in another client, next week. That needs a DeckCP workspace, and getting
+one costs the founder nothing: **no browser, no password, no form.**
+
+If `whoami` / `get_deck_doc` says there is no connection, offer it in one line
+and keep moving:
+
+> "I can spin you up a DeckCP workspace right now — no signup form, and you
+> claim it later with one sign-in. Or we can keep this in the chat. Which?"
+
+- **Yes** → `signup` (reconnect with the guest bearer `deckcp-signup` if your
+  client needs it, or `POST /api/mcp/signup`). Pass their email ONLY if they
+  volunteered it; it is used to mail the claim link and nothing else. Then
+  `create_deck` — the workspace ships with a starter brand so it works
+  immediately — and the doc has a home from stage 1.
+- **No** → run stages 1-3 with the doc **in the conversation**, in exactly the
+  same five sections. Say once what they're giving up (it won't survive the
+  chat, and their phone won't have it), then drop it.
+
+**Be accurate about what `signup` does.** It creates an *unclaimed* workspace
+owned by a synthetic identity — it does **not** create an account on their email
+address, and you are not signing them up for anything. They own it when they
+open the claim link and sign in themselves. Never describe it as "I made you an
+account", and if they already have a DeckCP account `signup` refuses and tells
+you to connect over OAuth instead.
+
+### The CTA — at the stage 3 gate, not before
+
+The moment the outline is one they believe in is the moment the offer lands.
+Not at hello, and not while the story is still wrong:
+
+> **"That's a deck. Want me to build it?"**
+> *Sign up and build it* — I'll put it in a workspace, build every slide **on
+> your brand**, render them, and fix what fails. Then here's your link; sign in
+> once and it's yours.
+
+If stage 1 already got a website or an old deck, say so — the offer is much
+stronger when it is *"on your brand"* and not *"on a template"*:
+
+> "I've got your colors and logo off the site, and the type off last year's
+> deck. Want me to build this on that?"
+
+And if stage 1 got neither, ask for one thing, once, right here — this is the
+moment a founder will actually go and find the URL:
+
+> "Send me your website or any deck you've used and I'll build it on your real
+> brand instead of a default one."
+
+Then show the `claim_url` — and show it again whenever you finish something
+worth keeping. Until someone opens it, that workspace belongs to nobody.
+
+**One offer, then build or drop it.** If they'd rather take the outline
+elsewhere, hand it over cleanly — the markdown is theirs, it works in any deck
+tool, and a pushy CTA is how you lose the ones who'd have come back.
 
 ## Voice-first
 
@@ -61,8 +121,20 @@ Ask in their words: *"Is this something you'll present, or something you'll emai
 `pitch` is narrated live and stays sparse; `email` is read alone and can carry more;
 **`both` is a real answer** — it means a sparse deck **plus an appendix**, not a
 compromise deck that fails at both. Then: who is the one person reading it, and what
-has to happen after they do. Settle the brand here too (`get_brand`, or note that it
-needs extracting/synthesizing later — it is a prerequisite, not a narrative stage).
+has to happen after they do. Settle **what it's built on** here too — one question with three cheap answers,
+and every one of them takes the founder about ten seconds:
+
+- **"What's your website?"** → `scrape_brand_site{url}`: real colors, the logo,
+  company facts, site imagery. **It does not extract fonts.**
+- **"Got a deck you've used before?"** → `import_source{data|source_url}` READS
+  it: text, draft colors, **and the embedded fonts** — the thing the website
+  can't give you. It creates nothing, so it is safe to point at anything.
+- **Neither** → say so plainly and `deckcp-brand-kit` synthesizes a premium
+  system at stage 4. Never build on the generator's defaults by accident.
+
+Ask for both if they have both — the website for color and logo, the old deck
+for type. If they want that old deck to *become* this deck rather than to donate
+its brand, that is `import_deck`, a different intent; ask which they meant.
 → `update_deck_doc{kind, brand, section:"What we're making", markdown}` → **gate**.
 
 **2 · Interview** — `references/interview.md`.
