@@ -1,56 +1,51 @@
-# DeckCP deck-making skills
+# The /deck skill kit
 
-A [Claude Code](https://claude.com/claude-code) skill pack for making decks that
-actually work — built for **founders, salespeople, and BD** who need a deck to
-*make something happen*, not just look finished.
+`/deck` is a skill kit for founders and salespeople who need a deck that gets a
+prospect interested and then gets them to yes. It runs inside the AI you already
+use — Claude, ChatGPT, Gemini, Grok, whichever one already has your context —
+and it does the whole job, from the first question to the finished slides.
 
-Most AI deck tools skip straight to slides. This pack doesn't. It interrogates
-you first, fixes the story, establishes a real design system, and only then
-builds — because a deck fails at the narrative level long before it fails at
-the design level, and a generated deck fails at the design level the moment
-it's built on the generator's defaults instead of your brand. Nothing is called
-done until it passes a quality gate.
+![Use your AI to interview you. Your AI already has your context — your spreadsheets, your numbers, your logos.](https://deckcp.com/blog/deck-skill/use-your-ai.webp)
+
+It starts with an interview: what you're building, why it matters, who it's for.
+Your numbers, your voice, the pictures you already have. That becomes an outline.
+
+You then work through the outline together, one slide at a time. What each slide
+says and what it leaves out, which number carries it, what it looks like.
+
+Before anything gets built, your AI critiques the outline and you fix what it finds.
+
+Then it builds the deck.
 
 **v0.9 is one skill, not twenty.** `/deck` runs the whole process over a single
 markdown document that lives on your deck, with your sign-off required at every
 stage. The old multi-skill chain and its six JSON handoffs are gone; the craft
 they encoded is still here, just no longer wearing a schema.
 
-## Start here
+## Install
 
-1. **Install the pack** (two ways, below — takes a minute).
-2. **Connect the DeckCP MCP** — mint a token or use the OAuth connector at
-   [deckcp.com/mcp](https://deckcp.com/mcp).
-3. **Run `/deck`** — that's the whole thing. Its first question is the only one
-   that changes the path: **new deck, or improve one you've already got?**
+One line, into the current project:
 
-## Improving a deck you already have
+```bash
+npx -y giget@latest gh:deckcp/deck-skills/skills .claude/skills --force
+```
 
-If you've got a deck — in DeckCP, or a PPTX/PDF you drop in — it **doesn't
-interview you.** Your deck already answers most of what an interview asks, and
-being asked to re-describe a deck you're holding is insufferable.
+Use `~/.claude/skills` instead to install globally. Restart your client so the new
+`SKILL.md` files are picked up, then run `/deck`.
 
-Instead it reads the deck, renders every slide and looks at them, and writes the
-whole document up front: the outline as it stands, a better headline proposed
-wherever yours is a topic label (with your original kept on a `was:` line so you
-can see exactly what it changed), what the deck currently claims, your real
-assets, and a diagnosis. It takes the brand **from your deck** — including the
-embedded fonts, which a website can't give it.
+**With the DeckCP MCP already connected**, you can skip the command and ask your
+agent to call **`install_deck_skills`** — it fetches the same files. To connect the
+MCP, mint a token or use the OAuth connector at [deckcp.com/mcp](https://deckcp.com/mcp).
 
-Then it shows you all of that and asks the two or three things your deck can't
-answer: who is this for *now*, what's the ask *now*, and what proof do you have
-that never made it onto a slide.
+`/deck`'s first question is the only one that changes the path: **new deck, or
+improve one you've already got?**
 
-The slide check runs on the derived outline, so you get a prioritised list of
-what's actually wrong rather than an opinion. In most real decks the top finding
-is the same one: headlines that name a topic instead of stating a conclusion.
+## How it goes
 
-## Starting something new — one document, six stages
-
-Both paths write the same thing. There is **one artifact**: a markdown document
-that lives on the deck itself. It starts as interview notes, gains a slide list, gains a visual line per slide, gets critiqued,
-and gets built. You edit it at every stage, and it *is* the state — so nothing asks you
-to repeat yourself, and it resumes days later in a different client.
+There is **one artifact**: a markdown document on the deck itself. It starts as
+interview notes, gains a slide list, gains a visual line per slide, gets critiqued,
+and gets built. You edit it at every stage, and it *is* the state — so nothing asks
+you to repeat yourself, and it resumes days later in a different client.
 
 ```
 /deck
@@ -64,16 +59,56 @@ to repeat yourself, and it resumes days later in a different client.
                 that makes it yours.
 ```
 
-**Nothing advances without you saying so.** Those three gates are the product. An agent
-told "don't rush to build" will still rush to build — so the sign-off is recorded in the
-document rather than trusted to the model's good intentions.
+### 1. The interview
 
-**No JSON anywhere.** The document is markdown, because every artifact a human touches
-should be in the human's words. Where a script genuinely needs to compute — the slide
-check, the design tokens — the machine-readable values ride in frontmatter inside the
-same file, exactly how DeckCP slides already work.
+Open whichever assistant already has your spreadsheets, your numbers and your
+logos, ask it to interview you, and do it out loud, walking around, on a phone.
 
-### What the outline looks like
+Talking gets you a wall of text nobody would ever type, and at this stage that's
+the useful thing to have. Five minutes of rambling contains more of your actual
+company than anything you'd compose at a keyboard. An agent that skips this step
+has to fill sixteen slides from one sentence, which is where generic decks come from.
+
+### 2. The interview becomes an outline
+
+![A raw interview transcript on the left, an arrow, and a structured session outline on the right.](https://deckcp.com/blog/deck-skill/step-2-outline.webp)
+
+That screenshot is our own workshop deck being made — the transcript on the left,
+the outline it shipped under on the right.
+
+Headlines state conclusions rather than naming topics. When it proposes a better
+headline it keeps your original on a `was:` line, so you can see exactly what
+changed and refuse any of it.
+
+Writing the slide list runs a deterministic check: one point per slide, a number
+budget (counted in the prose, never in a chart), a visual line on every slide. If
+most slides bust the budget it says the real diagnosis — this isn't a broken pitch
+deck, it's an email deck, and those have different rules.
+
+### 3. It's often in a rush to build
+
+![AI can add a lot of value, new ideas, and perspective. But it's often in a rush to build.](https://deckcp.com/blog/deck-skill/step-3-critique.webp)
+
+That slide predates this kit, and it turned out to describe us. While we were
+building `/deck`, with that exact slide open in the conversation and that exact
+failure as the subject, our own agent announced it was "writing it" and started
+generating slides. Mid-sentence.
+
+So the gates aren't instructions, because we've now watched an instruction fail
+while pointing directly at itself. Each stage ends with your sign-off, and the
+sign-off is recorded in the document rather than recalled from earlier in the
+conversation. The agent can't advance past you, and it can't decide on your behalf
+that a stage looks done.
+
+Critique is a mode it gets held in for the same reason. "Critique my outline, don't
+edit it" means findings only, no edits, until you let it out.
+
+### The part nobody has words for
+
+Somewhere between the outline and the deck, a decision gets made about what each
+slide looks like. Most tools make it silently, from their own defaults, which is how
+you end up with sixteen slides that share a template. `/deck` writes it down, one
+line per slide:
 
 ```markdown
 ### 4. We hit $40k MRR in five months
@@ -81,68 +116,71 @@ point: growth is real and recent, not a projection
 visual: one big number, the $40k, nothing else on it
 ```
 
-That `visual:` line is the whole visuals stage. Your agent proposes it in plain words;
-you edit the sentence. You never learn a layout vocabulary — it maps your phrasing onto
-the real archetype when it builds. And **every slide has a visual form**: "just the one
-line" is a design, not the absence of one.
+You read that and know immediately whether it's wrong. Then you fix the sentence.
 
-Writing the slide list runs a deterministic check — one point per slide, a number budget
-(counted in the prose, never in a chart), a visual line on every slide. If most slides
-bust the budget it says the real diagnosis: this isn't a broken pitch deck, it's an
-email deck, and those have different rules.
+There are nineteen named layout archetypes behind this and you will never see one of
+them; the agent maps your sentence to the right name when it builds. Nobody should
+have to learn what "split feature" means to say "picture on the left, points on the
+right." Text-only slides get a visual line too, because "just the one line, big" is a
+real decision about scale and whitespace, and having made no decision is what leaves
+you with the defaults.
 
-### You don't need an account to start, or a form to get one
+### 4. Hand it the outline
 
-Stages 1-3 are worth doing with nothing connected — the interview and the
-outline are the part that decides whether the deck works. When you want it
-built, there's no signup page: your agent creates the workspace itself (no
-browser, no password) and hands you a link to claim it with one sign-in. Until
-you open that link the workspace belongs to nobody, so there's nothing to
-cancel if you walk away.
+**One thing makes the deck yours.** Your website gives it your real colors, logo,
+company facts and imagery, though not fonts. Any deck you've used before gives it
+the fonts and the type scale someone already made decisions about. Both is best.
+Neither and it says so, then designs you a system on purpose instead of quietly
+inheriting one.
 
-**One thing makes it yours.** Give it your website and it takes your real
-colors, logo and imagery. Give it any deck you've used before and it takes your
-fonts too — the one thing a website can't tell it. Give it both and it uses
-both. Give it neither and it designs you a system rather than quietly falling
-back on a template.
+**You don't need an account to start, or a form to get one.** Everything up to the
+build runs with nothing connected — the interview and the outline are the part that
+decides whether the deck works. When you do want it built there's still no signup
+page: your agent creates the workspace itself, without a browser or a password, and
+hands you a link. Sign in once and it's yours; until somebody opens that link the
+workspace belongs to nobody, so walking away leaves nothing to cancel.
 
-### Then, once it's out the door
+### 5. Editing is yours
 
-`/deckcp-share` sets the gate (public link, email-gated so views become identified
-leads, or password). `/deckcp-analyze` reads the per-slide dwell curve like an editor —
-the slide where viewers drop off is your next edit. `/github-lookup` and `/deckcp-email`
-work the follow-up.
+![Editing AI writing by hand gives it a real human voice. Yours.](https://deckcp.com/blog/deck-skill/step-5-edit-by-hand.webp)
 
+Every line, by hand. This is the step the kit deliberately doesn't do for you: what's
+being assessed in the room is you. Its last useful act is to point at the slides most
+likely to read as machine-written, and then stop.
 
-## Install
+Two other things it won't do. It won't invent proof: a missing number comes back as a
+finding, never as a plausible-looking figure. And on an existing deck it won't replace
+all thirty slides, because that's a new deck with extra steps and you won't recognise
+it as yours. It fixes what the diagnosis names.
 
-**With the DeckCP MCP connected:** ask your agent to call
-**`install_deck_skills`** — it fetches these files into your `.claude/skills`.
+## Improving a deck you already have
 
-**Manually** (Node 18+):
+If you've got a deck — in DeckCP, or a PPTX/PDF you drop in — it **doesn't interview
+you.** Your deck already answers most of what an interview asks, and being asked to
+re-describe a deck you're holding is insufferable.
 
-```bash
-node - <<'JS'
-(async () => {
-  const fs = require('fs'), path = require('path'), os = require('os');
-  const rawBase = 'https://raw.githubusercontent.com/deckcp/deck-skills/main';
-  const treeApi = 'https://api.github.com/repos/deckcp/deck-skills/git/trees/main?recursive=1';
-  let dest = '.claude/skills'; // use '~/.claude/skills' to install globally
-  if (dest === '~' || dest.startsWith('~/')) dest = path.join(os.homedir(), dest.slice(1));
-  const tree = (await (await fetch(treeApi)).json()).tree || [];
-  for (const e of tree) {
-    if (e.type !== 'blob' || !e.path.startsWith('skills/')) continue;
-    const out = path.join(dest, e.path.replace(/^skills\//, ''));
-    fs.mkdirSync(path.dirname(out), { recursive: true });
-    fs.writeFileSync(out, Buffer.from(await (await fetch(rawBase + '/' + e.path)).arrayBuffer()));
-    if (out.endsWith('.sh')) fs.chmodSync(out, 0o755);
-    console.log('wrote', out);
-  }
-})();
-JS
-```
+Instead it reads the deck, renders every slide and looks at them, and writes the whole
+document up front: the outline as it stands, a better headline wherever yours is a
+topic label, what the deck currently claims, your real assets, and a diagnosis. It
+takes the brand **from your deck**, including the embedded fonts, which a website
+can't give it.
 
-Restart Claude Code so the new `SKILL.md` files are picked up, then run `/deck`.
+Then it shows you that and asks the two or three things your deck can't answer: who is
+this for *now*, what's the ask *now*, and what proof do you have that never made it
+onto a slide. In most real decks the top finding is the same one: headlines that name
+a topic instead of stating a conclusion.
+
+## After it's built
+
+The deck lives on DeckCP, so you send a link rather than a file. `/deckcp-share` sets
+the gate (public link, email-gated so views become identified leads, or password).
+`/deckcp-analyze` reads the per-slide dwell curve like an editor — the slide where
+viewers drop off is your next edit. `/github-lookup` and `/deckcp-email` work the
+follow-up, and sequences send it off that signal: wait two days, branch on whether
+they reached the ask, send from your own mailbox.
+
+The longer write-up of why it's built this way is on the blog:
+[Introducing the /deck skill kit](https://deckcp.com/blog/introducing-slash-deck-skill).
 
 ## The skills
 
@@ -186,11 +224,11 @@ Planned next (see [`manifest.json`](manifest.json) for the full inventory and st
 
 ## Evals
 
-[`evals/`](evals/) has a with/without-skill ablation harness for
-`deck-interview` / `deck-interview-workshop`: scripted founder replies,
-identical input to both arms, scored deterministically plus an LLM grader
-against a written rubric. `node skill-pack/evals/run.mjs --preflight` first —
-see [`evals/README.md`](evals/README.md).
+A with/without-skill ablation harness runs against `deck-interview` /
+`deck-interview-workshop`: scripted founder replies, identical input to both arms,
+scored deterministically plus an LLM grader against a written rubric. It lives in
+the authoring repo (`skill-pack/evals/`) rather than here, since it isn't part of
+what gets installed.
 
 ## Design principles
 
