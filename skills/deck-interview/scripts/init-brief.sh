@@ -4,14 +4,29 @@
 set -eu
 
 OUT="./deck-brief"
+TYPE=""
+
+usage() {
+  echo "usage: init-brief.sh [--out DIR] [--type investor|sales|partnership|internal]" >&2
+}
 
 while [ $# -gt 0 ]; do
   case "$1" in
-    --out) OUT="$2"; shift 2 ;;
-    --type) shift 2 ;;   # accepted for symmetry; brief.json carries deck_type
-    *) echo "unknown arg: $1" >&2; exit 2 ;;
+    --out)
+      if [ $# -lt 2 ]; then echo "--out needs a directory" >&2; usage; exit 2; fi
+      OUT="$2"; shift 2 ;;
+    --type)
+      if [ $# -lt 2 ]; then echo "--type needs a value" >&2; usage; exit 2; fi
+      TYPE="$2"; shift 2 ;;
+    -h|--help) usage; exit 0 ;;
+    *) echo "unknown arg: $1" >&2; usage; exit 2 ;;
   esac
 done
+
+case "$TYPE" in
+  ""|investor|sales|partnership|internal) ;;
+  *) echo "unknown --type: $TYPE (investor|sales|partnership|internal)" >&2; exit 2 ;;
+esac
 
 mkdir -p "$OUT"
 BRIEF="$OUT/brief.json"
@@ -21,9 +36,10 @@ if [ -f "$BRIEF" ]; then
   exit 0
 fi
 
-cat > "$BRIEF" <<'JSON'
+# Unquoted heredoc: $TYPE is the only expansion in the template.
+cat > "$BRIEF" <<JSON
 {
-  "deck_type": "",
+  "deck_type": "$TYPE",
   "setting": "",
   "audience": { "who": "", "believes": "", "skeptical_of": "" },
   "success_outcome": "",

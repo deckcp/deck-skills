@@ -8,76 +8,75 @@ Most AI deck tools skip straight to slides. This pack doesn't. It interrogates
 you first, fixes the story, establishes a real design system, and only then
 builds — because a deck fails at the narrative level long before it fails at
 the design level, and a generated deck fails at the design level the moment
-it's built on the generator's defaults instead of your brand. Nothing is
-called done until it passes a quality gate.
+it's built on the generator's defaults instead of your brand. Nothing is called
+done until it passes a quality gate.
+
+**v0.9 is one skill, not twenty.** `/deck` runs the whole process over a single
+markdown document that lives on your deck, with your sign-off required at every
+stage. The old multi-skill chain and its six JSON handoffs are gone; the craft
+they encoded is still here, just no longer wearing a schema.
 
 ## Start here
 
 1. **Install the pack** (two ways, below — takes a minute).
 2. **Connect the DeckCP MCP** — mint a token or use the OAuth connector at
-   [deckcp.com/mcp](https://deckcp.com/mcp). *Optional to start:* the Tier 1
-   skills (interview, outline, critique, GitHub lookup) work with no account at all.
-3. **Run `/deckcp-onboard`** — it checks your setup, orients on your decks and
-   brand, asks one question about what you're trying to make happen, and routes
-   you to the right skill. New user? It'll walk you into building your first
-   real deck end to end.
+   [deckcp.com/mcp](https://deckcp.com/mcp).
+3. **Run `/deck`** — that's the whole thing. It works out where you are and picks up
+   from there, whether that's "I have nothing" or "I have a deck and slide 7 is wrong."
 
-## The workflow
+## One document, six stages
+
+There is **one artifact**: a markdown document that lives on the deck itself. It starts
+as interview notes, gains a slide list, gains a visual line per slide, gets critiqued,
+and gets built. You edit it at every stage, and it *is* the state — so nothing asks you
+to repeat yourself, and it resumes days later in a different client.
 
 ```
-/deck-interview → /deck-outline → /deckcp-brand-kit → /deckcp-design-director → /deckcp-build-deck → /deckcp-share → /deckcp-analyze
-   brief.json       outline.json    brand-kit.json          design-direction.json      generate/author → QC     out the door   who viewed / follow-up
-                    ↓ /deck-critique  extract/synthesize     + slide-plan.json            ↓ /deckcp-quality-control
-                      pressure-test                                                         scored + fixed before "done"
+/deck
+ 1 framing    → present or email? who reads it? what has to happen?     ⟶ gate
+ 2 interview  → out loud, on your phone. pushback included.             ⟶ gate
+ 3 outline    → headlines that state conclusions, then a visual         ⟶ gate
+                line per slide, in plain words you can check
+ 4 brand      → extract from your logo/site/old deck, or synthesize
+ 5 build + QC → rendered, scored, fixed. you do nothing here.
+ 6 edit       → by hand, in the editor. every line. that's the part
+                that makes it yours.
 ```
 
-1. **`/deck-interview`** — gets grilled *by* your agent: who is this deck for,
-   what must it make happen, what's the ask, where's the proof. It pushes back
-   on weak positioning instead of politely transcribing it. Emits `brief.json`.
-2. **`/deck-outline`** — turns the brief into a story spine, picked for the
-   deck type (investor, sales, partnership; live vs. sent-as-link) — so every
-   slide earns its place and every headline states a conclusion, not a topic.
-3. **`/deckcp-brand-kit`** — decides what the deck is built *on*. Have a
-   logo, a brand guide, an old deck, or a website? It **extracts** your real
-   brand — literal hex from the SVG, real CSS variables and fonts from the
-   site, the PPTX theme slots — and cites every token. Have nothing? It
-   **synthesizes** a premium system benchmarked on
-   [deckcp.com/templates](https://deckcp.com/templates): one surface pair,
-   one accent, one type pairing, one signature device. Then writes it into
-   the DeckCP theme (and brand masters, when you own the brand).
-4. **`/deckcp-design-director`** — turns the outline + brand/reference into
-   the actual art direction for this deck: one visual thesis, build mode
-   (`fast` / `brand` / `reference-exact`), deck rhythm, and a binding
-   composition packet for every slide. This is the step that prevents the
-   generator from interpreting brand prose however it wants. It also decides
-   the **visual translation** of each idea — should this be a diagram, a
-   spatial plan, a map, a proportion graphic, a photo, or is typography the
-   strongest medium here? — and how *selectively* to use it: a per-deck
-   **visual strategy** picks the few slides that earn a visual peak and keeps
-   the rest as typographic pauses, so the deck communicates visually where it
-   helps and stays restrained everywhere else (never all-text, never
-   all-infographic). The full path: *brand system → design direction → visual
-   strategy → selective visual translation → per-slide art direction → build →
-   visual-opportunity + visual-restraint QC.*
-5. **`/deckcp-build-deck`** — drives the [DeckCP](https://deckcp.com)
-   pipeline from the brand kit + design plan. It uses constrained server
-   generation for fast/brand work and can route geometry-sensitive reference
-   matches to precise manual authoring. Then it runs **`/deckcp-quality-control`**:
-   every slide rendered and scored on brand accuracy, design/reference fidelity,
-   alignment, spacing, visual polish, intentional rhythm/repetition, and
-   "does this look AI-made", and fixed until it passes.
-6. **`/deckcp-share`** — invite people with roles, or set the gate: public
-   link, email-gated (views become identified leads), or password.
-7. **`/deckcp-analyze`** — read the per-slide dwell curve like an editor: the
-   slide where viewers drop off is your next edit. Then `/github-lookup` +
-   `/deckcp-email` to work the follow-up.
+**Nothing advances without you saying so.** Those three gates are the product. An agent
+told "don't rush to build" will still rush to build — so the sign-off is recorded in the
+document rather than trusted to the model's good intentions.
 
-And in between: `/deck-critique` to pressure-test the story at any point
-(an outline, a built deck, a PDF someone sent you), `/deckcp-read-deck` to
-orient on any existing deck, and `/deckcp-edit` to change it — theme, copy,
-order — without regenerating.
+**No JSON anywhere.** The document is markdown, because every artifact a human touches
+should be in the human's words. Where a script genuinely needs to compute — the slide
+check, the design tokens — the machine-readable values ride in frontmatter inside the
+same file, exactly how DeckCP slides already work.
 
-Steps 1–2 work with **no DeckCP account at all**. Use them with any deck tool.
+### What the outline looks like
+
+```markdown
+### 4. We hit $40k MRR in five months
+point: growth is real and recent, not a projection
+visual: one big number, the $40k, nothing else on it
+```
+
+That `visual:` line is the whole visuals stage. Your agent proposes it in plain words;
+you edit the sentence. You never learn a layout vocabulary — it maps your phrasing onto
+the real archetype when it builds. And **every slide has a visual form**: "just the one
+line" is a design, not the absence of one.
+
+Writing the slide list runs a deterministic check — one point per slide, a number budget
+(counted in the prose, never in a chart), a visual line on every slide. If most slides
+bust the budget it says the real diagnosis: this isn't a broken pitch deck, it's an
+email deck, and those have different rules.
+
+### Then, once it's out the door
+
+`/deckcp-share` sets the gate (public link, email-gated so views become identified
+leads, or password). `/deckcp-analyze` reads the per-slide dwell curve like an editor —
+the slide where viewers drop off is your next edit. `/github-lookup` and `/deckcp-email`
+work the follow-up.
+
 
 ## Install
 
@@ -107,21 +106,21 @@ node - <<'JS'
 JS
 ```
 
-Restart Claude Code so the new `SKILL.md` files are picked up, then invoke any
-skill by name: `/deck-interview`, `/deck-outline`, `/deckcp-build-deck`.
+Restart Claude Code so the new `SKILL.md` files are picked up, then run `/deck`.
 
 ## The skills
 
 Two tiers. **Tier 1** is provider-agnostic deck craft — useful with no DeckCP
 account. **Tier 2** drives the DeckCP MCP to build, edit, and share real decks —
-the full 34-tool surface is documented in [`MCP-TOOLS.md`](MCP-TOOLS.md).
+the full tool surface is documented in [`MCP-TOOLS.md`](MCP-TOOLS.md).
 
 | Skill | Tier | What it does |
 | --- | --- | --- |
+| **`deck`** | 2 | **Start here.** The whole process in one skill: framing → interview → outline → visuals → build → hand-edit, over one markdown doc that lives on the deck. A gate at every stage. |
 | `deckcp-onboard` | 1 | Start here: checks your setup, orients, and routes you to the right skill with one question. |
-| `deck-interview` | 1 | Interview you about audience, goal, ask, and proof — and push back on weak positioning. Emits `brief.json`. |
-| `deck-outline` | 1 | Build the story spine from the brief before any slides exist. Emits `outline.json` + `outline.md`. |
-| `deck-critique` | 1 | Pressure-test the story: headline-only read, the skeptic, the 5-second test, proof audit, the ask. Seven findings max, prioritized, with the fix and the skill that makes it. |
+| `deck-interview` | 1 | Interview you about audience, goal, ask, and proof — and push back on weak positioning. Emits `brief.json`. Superseded by `deck` stage 2. |
+| `deck-outline` | 1 | Build the story spine from the brief before any slides exist. Emits `outline.json` + `outline.md`. Superseded by `deck` stage 3. |
+| `deck-critique` | 1 | Pressure-test the story: headline-only read, the skeptic, the 5-second test, proof audit, the ask. Seven findings max, prioritized, with the fix and the skill that makes it. Superseded by `deck`'s critique mode. |
 | `github-lookup` | 1 | Resolve a person from GitHub — username, commit SHA, or email — to a name, profile, and contact. Zero tokens (`gh` CLI). |
 | `deckcp-gather-assets` | 2 | Find your own images/videos on disk, dedupe by hash, upload to DeckCP — so slides use your real photos, not stock art. |
 | `deckcp-brand-kit` | 2 | The design system the deck is built on: extract the real brand/reference or synthesize one; now records a structured `design_system` (geometry, type scale, imagery, containers, color jobs, chrome, measured fidelity rules) in addition to legacy prose. |
@@ -149,6 +148,14 @@ Planned next (see [`manifest.json`](manifest.json) for the full inventory and st
   brand masters today; the brand record itself (palette/logos/guidelines) is
   still pasted into the web UI until the MCP grows a brand-write tool.
 
+## Evals
+
+[`evals/`](evals/) has a with/without-skill ablation harness for
+`deck-interview` / `deck-interview-workshop`: scripted founder replies,
+identical input to both arms, scored deterministically plus an LLM grader
+against a written rubric. `node skill-pack/evals/run.mjs --preflight` first —
+see [`evals/README.md`](evals/README.md).
+
 ## Design principles
 
 - **Scripts over tokens.** Deterministic bash/node does the heavy lifting for
@@ -165,7 +172,10 @@ Planned next (see [`manifest.json`](manifest.json) for the full inventory and st
 
 ## Requirements
 
-- [Claude Code](https://claude.com/claude-code) (skills runtime)
+- Any MCP client for `/deck` itself — claude.ai (web **and** mobile), Claude Desktop,
+  ChatGPT, VS Code, Claude Code. The document lives on the deck, not on disk, so the
+  process works on a phone: *talk, don't type.*
+- [Claude Code](https://claude.com/claude-code) to install the skill files locally
 - Node 18+ for the script-backed skills
 - Tier 2 only: the [DeckCP](https://deckcp.com) MCP connected
 - `github-lookup`: an authenticated [`gh`](https://cli.github.com) CLI

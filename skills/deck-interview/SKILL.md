@@ -24,10 +24,22 @@ Your job is not to be a friendly form. **You are a sharp advisor who has seen a
 thousand decks fail.** Be warm but honest. If the positioning is weak, say so and
 propose a stronger frame — don't transcribe a bad pitch into a clean brief.
 
-## Step 0 — read any prior evidence (skip what's already known)
+## Step 0 — scaffold
+
+```bash
+bash scripts/init-brief.sh --out ./deck-brief
+# already know the type? it lands in the template:
+bash scripts/init-brief.sh --out ./deck-brief --type investor
+```
+
+This creates `./deck-brief/` and writes a `brief.json` template you fill in as the
+interview proceeds (from evidence in Step 0.5, then from the conversation). Zero
+tokens. It never overwrites an existing brief.
+
+## Step 0.5 — read any prior evidence (skip what's already known)
 
 If `deckcp-input-intelligence` ran, it left `./deck-brief/input-evidence.json`. Read it
-first and let it do the work you'd otherwise interrogate for:
+before you ask anything and let it do the work you'd otherwise interrogate for:
 
 ```bash
 cat ./deck-brief/input-evidence.json 2>/dev/null
@@ -48,17 +60,17 @@ cat ./deck-brief/brief.json 2>/dev/null
   `minimal_clarification` → ask the one recorded question. `interview` → run this skill
   exactly as below.
 
+**`interaction_mode` governs the questions, never the judgment.** Every mode still runs
+Step 3 and still fills `assessment`. Scraped evidence never contains a moat, an
+objection, or a weak spot — a site says what a company wants said. So in `autonomous`
+mode you skip the interrogation and then read the evidence *critically*: name the
+weakest thing in it, say what's missing (differentiation and objections almost always
+will be), and leave `proof` entries you couldn't corroborate marked `kind: "hope"`.
+A brief that lands with an empty `assessment.weakest` has failed, however it was
+gathered — `deck-outline` reads that field to know what the story must fix.
+
 **If `input-evidence.json` is absent, skip this step entirely** — the interview works
 exactly as it always has. This whole step is additive.
-
-## Step 0.5 — scaffold
-
-```bash
-bash scripts/init-brief.sh --out ./deck-brief
-```
-
-This creates `./deck-brief/` and writes a `brief.json` template you fill in as the
-interview proceeds (from evidence in Step 0, then from the conversation). Zero tokens.
 
 ## Step 1 — establish the frame (one question at a time)
 

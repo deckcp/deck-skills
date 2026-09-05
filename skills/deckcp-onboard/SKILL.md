@@ -21,8 +21,9 @@ whoami        # the DeckCP user this session acts as
 - **Works** → note the email; every "not authorized" error later resolves to
   "share the deck with this address".
 - **No DeckCP MCP connected** → say so, and split the road honestly:
-  - The **Tier 1 skills work right now, no account**: `deck-interview`,
-    `deck-outline`, `github-lookup`. A founder can get a full brief + story
+  - **`deck` stages 1-3 work with no DeckCP account** if you keep the doc in the
+    conversation instead of on a deck (you lose resume-anywhere), and
+    `github-lookup` needs nothing. A founder can get a full brief + story
     spine today and take it to any deck tool.
   - To build/edit/share real decks, connect the MCP: **deckcp.com/mcp** (mint
     a token, or use the OAuth connector), then come back.
@@ -78,11 +79,12 @@ and route to exactly one skill:
 
 | The user wants… | Route |
 | --- | --- |
-| A new deck (pitch, sales, partnership) | `deckcp-input-intelligence` (detect inputs + route) → `deck-interview` → `deck-outline` → `deckcp-brand-kit` → `deckcp-design-director` → `deckcp-build-deck` (which ends in `deckcp-quality-control`) |
+| A new deck (pitch, sales, partnership) | **`deck`** — it runs the whole process (framing → interview → outline → visuals → build → hand-edit) over one markdown doc on the deck, gating each stage on the user. It delegates to `deckcp-brand-kit` / `deckcp-build-deck` / `deckcp-quality-control` itself |
+| A new deck, in a live workshop / cohort / office hours — a room on a clock | **`deck`**, saying up front that you're batching for the clock: same gates, fewer turns. The doc lives on the deck, so a participant on a phone can talk instead of type |
 | To improve / polish an existing deck they supply | `deckcp-input-intelligence` (classifies it as edit-target) → `deckcp-read-deck` → `deckcp-edit` |
 | To set up their brand — logo, colours, fonts, "match our website" — or they have none and want it to look designed | `deckcp-brand-kit` |
 | To understand a deck that already exists | `deckcp-read-deck` |
-| To know if the deck is any good — the story | `deck-critique` |
+| To know if the deck is any good — the story | **`deck --critique`** — findings only, changes nothing |
 | To know if the deck looks right — brand, alignment, "does it look AI-made" | `deckcp-quality-control` |
 | To change something — copy, theme, order | `deckcp-edit` |
 | To write/place slides by hand, precisely | `deckcp-author-slides` |

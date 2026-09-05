@@ -1,6 +1,6 @@
 {
   "name": "deckcp-deck-making-skills",
-  "version": "0.8.5",
+  "version": "0.9.0",
   "title": "DeckCP deck-making skill pack",
   "description": "Interview, outline, critique, extract/synthesize a brand system, art-direct the deck, build, quality-check, edit, analyze, and share decks from Claude Code. The workflow separates brand identity from deck-specific design direction so slide generation receives binding composition instructions rather than generic brand prose; v0.8.1 adds a visual-storytelling layer so ideas are translated into the strongest medium (diagram, spatial plan, map, proportion graphic, photo) instead of defaulting to text; v0.8.2 adds visual restraint and deck rhythm — a per-deck visual_strategy (peaks vs pauses), per-slide visual_intensity and visual_translation.confidence, and a QC visual_restraint_check — so visuals are used selectively and typography-led slides are preserved when they are stronger. v0.8.3 adds a smart-onboarding input-intelligence layer that runs BEFORE the pipeline: it detects and classifies whatever the user supplies (logo, website, social, brand guide, PDF/PPTX, existing deck, data, existing DeckCP brand), records evidence with per-dimension source authority and observed/inferred/unknown confidence in an additive input-evidence.json, resolves conflicts, classifies reference intent, and asks only questions that genuinely cannot be discovered — so a website + a goal can reach a finished deck with zero unnecessary questions. Avoids both failure modes: all-text and all-infographic. v0.8.5 adds a template-first visual-quality fallback: the design source ('what should it look like') is separated from the content source ('what should it say'), and when no strong company design system exists (only colors + a logo is weak), deckcp-design-director picks build_mode 'template-fallback' and adopts a DeckCP template as a DESIGN VOCABULARY — matched multi-dimensionally, applied via the new list_deck_templates / get_deck_template / apply_deck_template MCP tools, then recomposed to the approved outline (never the template's content). Also adds an asset decision tree (authentic → mood stock via search_stock_images → non-image visual → labeled placeholder) with hard rules — never pass off stock UI as the product, never label a stock person as a real identity — a mandatory intentional closing slide, and deck-level visual QC (designed deck vs formatted documents) that still honors visual restraint.",
   "target_runtime": "claude-code",
@@ -25,6 +25,13 @@
   },
   "skills": [
     {
+      "name": "deck",
+      "tier": 2,
+      "status": "ready",
+      "model_step": "main-loop",
+      "summary": "THE ENTRY POINT. One markdown doc on the deck itself carries the whole process — framing, interview, outline, visuals, build, hand-edit — with a founder gate at every stage. Replaces the six-JSON handoff."
+    },
+    {
       "name": "deckcp-onboard",
       "tier": 1,
       "status": "ready",
@@ -48,23 +55,34 @@
     {
       "name": "deck-interview",
       "tier": 1,
-      "status": "ready",
+      "status": "superseded",
       "model_step": "main-loop",
-      "summary": "Interrogate a founder/salesperson/BD: audience, goal, the ask, proof, narrative. Willing to push back on weak positioning. Emits brief.json."
+      "summary": "Interrogate a founder/salesperson/BD: audience, goal, the ask, proof, narrative. Willing to push back on weak positioning. Superseded by `deck` (stages 1-3); kept for existing installs.",
+      "superseded_by": "deck"
+    },
+    {
+      "name": "deck-interview-workshop",
+      "tier": 1,
+      "status": "superseded",
+      "model_step": "main-loop",
+      "summary": "The deck interview on a workshop clock — identical standards and identical brief.json, fewer turns. Batches Round 1 (type/setting, the one decision-maker, the one outcome, the ask) and Round 2 (problem/insight/solution/proof/differentiation) instead of asking one question at a time, and delivers each pushback IN the same message as the next question rather than stopping to revise: judgment lands, conversation moves on. Explicitly NOT a softened register — 'do not soften, just say it faster, once, and keep going'; flattery-to-save-time is its named failure mode. Top 2 weaknesses, one line each; closes in two lines. assessment.weakest stays mandatory, and reframes the participant never agreed to are stamped assessment.confirmed_by_user: false (additive; existing consumers read only weakest). Reuses deck-interview's scripts/init-brief.sh rather than shipping its own. Use in live workshops, cohorts, and office hours; hand off to deck-interview when a participant wants the full session. Superseded by `deck` (stages 1-3); kept for existing installs.",
+      "superseded_by": "deck"
     },
     {
       "name": "deck-outline",
       "tier": 1,
-      "status": "ready",
+      "status": "superseded",
       "model_step": "main-loop",
-      "summary": "Outline-first: turn the brief into a story spine (problem→insight→solution→proof→ask) before any slides. Emits outline.json + outline.md with only a coarse per-slide visual role (chart/diagram/photo/product/table/none) plus an optional one-line visual_intent (the communication need, not styling); exact composition and visual translation are deferred to deckcp-design-director. scripts/scaffold-outline.sh writes the empty structure."
+      "summary": "Outline-first: turn the brief into a story spine (problem→insight→solution→proof→ask) before any slides. Emits outline.json + outline.md with only a coarse per-slide visual role (chart/diagram/photo/product/table/none) plus an optional one-line visual_intent (the communication need, not styling); exact composition and visual translation are deferred to deckcp-design-director. scripts/scaffold-outline.sh writes the empty structure. Superseded by `deck` (stages 1-3); kept for existing installs.",
+      "superseded_by": "deck"
     },
     {
       "name": "deck-critique",
       "tier": 1,
-      "status": "ready",
+      "status": "superseded",
       "model_step": "main-loop",
-      "summary": "Pressure-test the story: headline-only read, the skeptic, the 5-second test, proof audit (evidence vs hope), the ask, audience + setting fit. Seven prioritized findings max (blocker/weak/polish) with the fix and the skill that makes it. scripts/spine.js prints the headline spine from outline.json / a saved get_deck / markdown."
+      "summary": "Pressure-test the story: headline-only read, the skeptic, the 5-second test, proof audit (evidence vs hope), the ask, audience + setting fit. Seven prioritized findings max (blocker/weak/polish) with the fix and the skill that makes it. scripts/spine.js prints the headline spine from outline.json / a saved get_deck / markdown. Superseded by `deck` (stages 1-3); kept for existing installs.",
+      "superseded_by": "deck"
     },
     {
       "name": "deck-analyze-consistency",
@@ -192,5 +210,11 @@
       "model_step": "none",
       "summary": "Meta skill: fetch the pack from the public repo into the user's .claude/skills via the MCP install tool's fetch-and-write instructions."
     }
-  ]
+  ],
+  "statuses": {
+    "ready": "installed and working",
+    "superseded": "replaced by another skill; still on disk for existing installs",
+    "absorbed": "folded into another skill",
+    "planned": "not built yet"
+  }
 }

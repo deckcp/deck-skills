@@ -198,9 +198,16 @@ brand-discovery` is valid and common (a website gives the company, so no questio
 but the brand still needs building).
 
 ### `handoff`
-Flags downstream skills read: `prefill_brief` (deck-interview pre-fills from
-`company`/`content`/`intent`), `brand_evidence_ready` (brand-kit consumes `brand[]`
-before synthesizing).
+Advisory flags — a fast "there is something here for you" signal, not a control
+channel. `prefill_brief` (there is enough in `company`/`content`/`intent` for
+deck-interview to pre-fill from), `brand_evidence_ready` (brand-kit can consume
+`brand[]` before synthesizing).
+
+**A flag never decides how a downstream skill behaves.** deck-interview branches on
+`interaction_mode` and asks from `questions_required`; it pre-fills from the evidence
+whenever the evidence is there, flag or no flag. Set the flags honestly, but keep the
+real contract in the fields above — a consumer that only reads `handoff` is reading
+the wrong thing.
 
 ## Acquired evidence (Phase 4a — extend this store, don't fork it)
 
